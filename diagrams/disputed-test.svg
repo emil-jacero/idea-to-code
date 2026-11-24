@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" class="dg" viewBox="0 0 336 704" width="420" height="880" role="img" aria-labelledby="disputed-test-title disputed-test-desc">
+<title id="disputed-test-title">A disputed test</title>
+<desc id="disputed-test-desc">A fresh test writer rules on a disputed test by the spec, the owner answers when the spec cannot settle it or the test is disputed a second time, and the work then comes back.</desc>
+<style>
+:root {
+  --bg: #f3f5f7; --surface: #ffffff; --ink: #15202b; --ink-soft: #364250;
+  --muted: #5a6673; --owner: #a23468; --owner-tint: #f8e4ed;
+  --font-sans: "IBM Plex Sans", "Noto Sans", system-ui, -apple-system, "Segoe UI", Roboto,
+    sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f151b; --surface: #17202a; --ink: #e4eaf0; --ink-soft: #c3cdd7;
+    --muted: #97a4b1; --owner: #e687b5; --owner-tint: #3b1c2c;
+  }
+}
+.dg { font-family: var(--font-sans); font-size: 13px; }
+.d-bg { fill: var(--bg); }
+.d-flow { fill: none; stroke: var(--ink); stroke-width: 1.6; stroke-linejoin: round; }
+.d-arrowhead, .d-start, .d-end-dot, .d-junction, .d-session { fill: var(--ink); }
+.d-end, .d-step, .d-decision, .d-subagent {
+  fill: var(--surface); stroke: var(--ink); stroke-width: 1.6;
+}
+.d-owner-mark { fill: var(--owner-tint); stroke: var(--owner); stroke-width: 1.2; }
+.d-owner-bar { fill: var(--owner); }
+.d-box { fill: var(--surface); stroke: var(--muted); stroke-width: 1; }
+.d-box-owner { fill: var(--owner-tint); stroke: var(--owner); stroke-width: 1.2; }
+.d-chip-agent { fill: var(--surface); stroke: var(--muted); stroke-width: 1; }
+.d-chip-owner { fill: var(--owner-tint); stroke: var(--owner); stroke-width: 1; }
+.d-name { font-size: 14px; font-weight: 600; fill: var(--ink); }
+.d-label { font-weight: 600; fill: var(--ink); }
+.d-text { font-weight: 400; fill: var(--ink-soft); }
+.d-pass { font-style: italic; font-weight: 400; fill: var(--ink-soft); }
+.d-num { font-weight: 700; fill: var(--ink); }
+.d-cond, .d-cond-owner, .d-chip-agent-text, .d-chip-owner-text {
+  font-weight: 700; letter-spacing: 0.06em;
+}
+.d-cond { fill: var(--muted); }
+.d-cond-owner, .d-chip-owner-text { fill: var(--owner); }
+.d-chip-agent-text { fill: var(--ink-soft); }
+</style>
+<defs><marker id="disputed-test-arrow" viewBox="0 0 8 6" refX="5" refY="3" markerWidth="8" markerHeight="6" markerUnits="userSpaceOnUse" orient="auto"><path class="d-arrowhead" d="M0 0L8 3L0 6z"/></marker></defs>
+<rect class="d-bg" x="0" y="0" width="336" height="704" rx="8"/>
+
+<!-- Flow lines: the spine to the question, the three exits, the rail that merges them. -->
+<path class="d-flow" d="M 36 30 V 59" marker-end="url(#disputed-test-arrow)"/>
+<path class="d-flow" d="M 36 74 V 102" marker-end="url(#disputed-test-arrow)"/>
+<path class="d-flow" d="M 36 119 V 200" marker-end="url(#disputed-test-arrow)"/>
+<path class="d-flow" d="M 36 221 V 485 Q 36 491 42 491 H 57" marker-end="url(#disputed-test-arrow)"/>
+<path class="d-flow" d="M 36 282 H 57" marker-end="url(#disputed-test-arrow)"/>
+<path class="d-flow" d="M 36 364 H 57" marker-end="url(#disputed-test-arrow)"/>
+<path class="d-flow" d="M 296 282 H 306 Q 312 282 312 288 V 598 Q 312 604 306 604 H 42 Q 36 604 36 610 V 624" marker-end="url(#disputed-test-arrow)"/>
+<path class="d-flow" d="M 296 364 H 312"/>
+<path class="d-flow" d="M 296 491 H 312"/>
+
+<!-- Boxes: two outcomes by the spec, one by the owner. -->
+<rect class="d-box" x="60" y="240" width="236" height="84" rx="6"/>
+<rect class="d-box" x="60" y="340" width="236" height="48" rx="6"/>
+<rect class="d-box-owner" x="60" y="404" width="236" height="174" rx="6"/>
+<rect class="d-owner-mark" x="270" y="411" width="18" height="18" rx="4"/>
+<rect class="d-owner-bar" x="275" y="415.5" width="2.5" height="9"/>
+<rect class="d-owner-bar" x="280.5" y="415.5" width="2.5" height="9"/>
+
+<!-- Marks on the spine and the merge dots on the rail. -->
+<circle class="d-start" cx="36" cy="24" r="6"/>
+<rect class="d-session" x="30" y="62" width="12" height="12" rx="2"/>
+<rect class="d-subagent" x="29" y="105" width="14" height="14" rx="3"/>
+<polygon class="d-decision" points="36 203 45 212 36 221 27 212"/>
+<circle class="d-junction" cx="36" cy="282" r="3"/>
+<circle class="d-junction" cx="36" cy="364" r="3"/>
+<circle class="d-junction" cx="312" cy="364" r="3"/>
+<circle class="d-junction" cx="312" cy="491" r="3"/>
+<circle class="d-end" cx="36" cy="634" r="7"/>
+<circle class="d-end-dot" cx="36" cy="634" r="3"/>
+
+<!-- Text. -->
+<text class="d-label" x="52" y="29">The code writer disputes a test</text>
+<text class="d-label" x="52" y="73">The session sets the work aside</text>
+<text class="d-label" x="52" y="117">A fresh test writer</text>
+<text class="d-text" x="52" y="135">It has never seen the code</text>
+<text class="d-text" x="52" y="153">It reads the test, the spec and</text>
+<text class="d-text" x="52" y="171">the evidence</text>
+<text class="d-label" x="52" y="217">Which side does the spec back?</text>
+
+<text class="d-cond" x="72" y="259">THE CODE WRITER</text>
+<text class="d-label" x="72" y="277">The test writer corrects it</text>
+<text class="d-text" x="72" y="295">Red check, then one more</text>
+<text class="d-text" x="72" y="313">tests commit</text>
+
+<text class="d-cond" x="72" y="359">THE TEST</text>
+<text class="d-label" x="72" y="377">It stays as committed</text>
+
+<text class="d-cond-owner" x="72" y="423">SILENT OR UNCLEAR,</text>
+<text class="d-cond-owner" x="72" y="441">OR A SECOND DISPUTE</text>
+<text class="d-label" x="72" y="459">The owner answers it</text>
+<text class="d-text" x="72" y="477">The answer takes the place</text>
+<text class="d-text" x="72" y="495">of the ruling</text>
+<text class="d-text" x="72" y="513">A fresh test writer makes</text>
+<text class="d-text" x="72" y="531">a correction it asks for</text>
+<text class="d-text" x="72" y="549">Red check, then one more</text>
+<text class="d-text" x="72" y="567">tests commit</text>
+
+<text class="d-label" x="52" y="639">The work comes back</text>
+<text class="d-text" x="52" y="657">A fresh code writer runs part (e)</text>
+<text class="d-text" x="52" y="675">again, with the rulings</text>
+</svg>

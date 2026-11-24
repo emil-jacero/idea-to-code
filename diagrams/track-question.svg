@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" class="dg" viewBox="0 0 336 520" width="420" height="650" role="img" aria-labelledby="track-question-title track-question-desc">
+<title id="track-question-title">The track question</title>
+<desc id="track-question-desc">The track question, which the owner answers: its three questions in their order, the optional part that adds each, the track that each yes leads to, and one change in one repo when all are no.</desc>
+<style>
+:root {
+  --bg: #f3f5f7; --surface: #ffffff; --ink: #15202b; --ink-soft: #364250;
+  --muted: #5a6673; --owner: #a23468; --owner-tint: #f8e4ed;
+  --font-sans: "IBM Plex Sans", "Noto Sans", system-ui, -apple-system, "Segoe UI", Roboto,
+    sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f151b; --surface: #17202a; --ink: #e4eaf0; --ink-soft: #c3cdd7;
+    --muted: #97a4b1; --owner: #e687b5; --owner-tint: #3b1c2c;
+  }
+}
+.dg { font-family: var(--font-sans); font-size: 13px; }
+.d-bg { fill: var(--bg); }
+.d-flow { fill: none; stroke: var(--ink); stroke-width: 1.6; stroke-linejoin: round; }
+.d-arrowhead, .d-start, .d-end-dot, .d-junction, .d-session { fill: var(--ink); }
+.d-end, .d-step, .d-decision, .d-subagent {
+  fill: var(--surface); stroke: var(--ink); stroke-width: 1.6;
+}
+.d-owner-mark { fill: var(--owner-tint); stroke: var(--owner); stroke-width: 1.2; }
+.d-owner-bar { fill: var(--owner); }
+.d-box { fill: var(--surface); stroke: var(--muted); stroke-width: 1; }
+.d-box-owner { fill: var(--owner-tint); stroke: var(--owner); stroke-width: 1.2; }
+.d-chip-agent { fill: var(--surface); stroke: var(--muted); stroke-width: 1; }
+.d-chip-owner { fill: var(--owner-tint); stroke: var(--owner); stroke-width: 1; }
+.d-name { font-size: 14px; font-weight: 600; fill: var(--ink); }
+.d-label { font-weight: 600; fill: var(--ink); }
+.d-text { font-weight: 400; fill: var(--ink-soft); }
+.d-pass { font-style: italic; font-weight: 400; fill: var(--ink-soft); }
+.d-num { font-weight: 700; fill: var(--ink); }
+.d-cond, .d-cond-owner, .d-chip-agent-text, .d-chip-owner-text {
+  font-weight: 700; letter-spacing: 0.06em;
+}
+.d-cond { fill: var(--muted); }
+.d-cond-owner, .d-chip-owner-text { fill: var(--owner); }
+.d-chip-agent-text { fill: var(--ink-soft); }
+</style>
+<defs><marker id="track-question-arrow" viewBox="0 0 8 6" refX="5" refY="3" markerWidth="8" markerHeight="6" markerUnits="userSpaceOnUse" orient="auto"><path class="d-arrowhead" d="M0 0L8 3L0 6z"/></marker></defs>
+<rect class="d-bg" x="0" y="0" width="336" height="520" rx="8"/>
+
+<!-- The owner's moment: a band across the start row, painted before the flow lines. -->
+<rect class="d-box-owner" x="16" y="10" width="304" height="48" rx="6"/>
+
+<!-- Flow lines: the spine carries each no to the next question; each yes taps into its box. -->
+<path class="d-flow" d="M 36 30 V 102" marker-end="url(#track-question-arrow)"/>
+<path class="d-flow" d="M 36 123 V 218" marker-end="url(#track-question-arrow)"/>
+<path class="d-flow" d="M 36 178 H 57" marker-end="url(#track-question-arrow)"/>
+<path class="d-flow" d="M 36 239 V 364" marker-end="url(#track-question-arrow)"/>
+<path class="d-flow" d="M 36 285 H 57" marker-end="url(#track-question-arrow)"/>
+<path class="d-flow" d="M 36 385 V 482" marker-end="url(#track-question-arrow)"/>
+<path class="d-flow" d="M 36 431 H 57" marker-end="url(#track-question-arrow)"/>
+
+<!-- Boxes: each yes ends its branch in the track it names; the owner mark sits in the band. -->
+<rect class="d-box" x="60" y="154" width="260" height="48" rx="6"/>
+<rect class="d-box" x="60" y="252" width="260" height="66" rx="6"/>
+<rect class="d-box" x="60" y="398" width="260" height="66" rx="6"/>
+<rect class="d-owner-mark" x="290" y="17" width="18" height="18" rx="4"/>
+<rect class="d-owner-bar" x="295" y="21.5" width="2.5" height="9"/>
+<rect class="d-owner-bar" x="300.5" y="21.5" width="2.5" height="9"/>
+
+<!-- Marks on the spine. -->
+<circle class="d-start" cx="36" cy="24" r="6"/>
+<polygon class="d-decision" points="36 105 45 114 36 123 27 114"/>
+<circle class="d-junction" cx="36" cy="178" r="3"/>
+<polygon class="d-decision" points="36 221 45 230 36 239 27 230"/>
+<circle class="d-junction" cx="36" cy="285" r="3"/>
+<polygon class="d-decision" points="36 367 45 376 36 385 27 376"/>
+<circle class="d-junction" cx="36" cy="431" r="3"/>
+<circle class="d-end" cx="36" cy="492" r="7"/>
+<circle class="d-end-dot" cx="36" cy="492" r="3"/>
+
+<!-- Text. Who answers sits under the start. A condition beside the spine names the part that
+     adds the questions below it. -->
+<text class="d-label" x="52" y="29">At the end of explore</text>
+<text class="d-text" x="52" y="47">the owner answers</text>
+
+<text class="d-cond" x="52" y="84">WITH AN ENHANCEMENT STORE</text>
+<text class="d-label" x="52" y="119">Does the work deliver a line</text>
+<text class="d-label" x="52" y="137">of a live entry?</text>
+
+<text class="d-cond" x="72" y="173">YES</text>
+<text class="d-label" x="72" y="191">It goes through that entry</text>
+
+<text class="d-label" x="52" y="235">Is it a major feature?</text>
+
+<text class="d-cond" x="72" y="271">YES</text>
+<text class="d-label" x="72" y="289">It becomes an enhancement</text>
+<text class="d-label" x="72" y="307">in the store</text>
+
+<text class="d-cond" x="52" y="346">WITH TRACKER ISSUES</text>
+<text class="d-label" x="52" y="381">Does it touch several repos?</text>
+
+<text class="d-cond" x="72" y="417">YES</text>
+<text class="d-label" x="72" y="435">One tracker issue ties</text>
+<text class="d-label" x="72" y="453">one change per repo</text>
+
+<text class="d-label" x="52" y="497">All no: <tspan class="d-text">one change in one repo</tspan></text>
+</svg>

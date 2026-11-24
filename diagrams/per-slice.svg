@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" class="dg" viewBox="0 0 336 568" width="420" height="710" role="img" aria-labelledby="per-slice-title per-slice-desc">
+<title id="per-slice-title">The seven parts of a slice</title>
+<desc id="per-slice-desc">The seven parts of a slice, (a) to (g), each marked as the session, a sub-agent or a check, and the two commits that close it: tests, then code.</desc>
+<style>
+:root {
+  --bg: #f3f5f7; --surface: #ffffff; --ink: #15202b; --ink-soft: #364250;
+  --muted: #5a6673; --owner: #a23468; --owner-tint: #f8e4ed;
+  --font-sans: "IBM Plex Sans", "Noto Sans", system-ui, -apple-system, "Segoe UI", Roboto,
+    sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f151b; --surface: #17202a; --ink: #e4eaf0; --ink-soft: #c3cdd7;
+    --muted: #97a4b1; --owner: #e687b5; --owner-tint: #3b1c2c;
+  }
+}
+.dg { font-family: var(--font-sans); font-size: 13px; }
+.d-bg { fill: var(--bg); }
+.d-flow { fill: none; stroke: var(--ink); stroke-width: 1.6; stroke-linejoin: round; }
+.d-arrowhead, .d-start, .d-end-dot, .d-junction, .d-session { fill: var(--ink); }
+.d-end, .d-step, .d-decision, .d-subagent {
+  fill: var(--surface); stroke: var(--ink); stroke-width: 1.6;
+}
+.d-owner-mark { fill: var(--owner-tint); stroke: var(--owner); stroke-width: 1.2; }
+.d-owner-bar { fill: var(--owner); }
+.d-box { fill: var(--surface); stroke: var(--muted); stroke-width: 1; }
+.d-box-owner { fill: var(--owner-tint); stroke: var(--owner); stroke-width: 1.2; }
+.d-chip-agent { fill: var(--surface); stroke: var(--muted); stroke-width: 1; }
+.d-chip-owner { fill: var(--owner-tint); stroke: var(--owner); stroke-width: 1; }
+.d-name { font-size: 14px; font-weight: 600; fill: var(--ink); }
+.d-label { font-weight: 600; fill: var(--ink); }
+.d-text { font-weight: 400; fill: var(--ink-soft); }
+.d-pass { font-style: italic; font-weight: 400; fill: var(--ink-soft); }
+.d-num { font-weight: 700; fill: var(--ink); }
+.d-cond, .d-cond-owner, .d-chip-agent-text, .d-chip-owner-text {
+  font-weight: 700; letter-spacing: 0.06em;
+}
+.d-cond { fill: var(--muted); }
+.d-cond-owner, .d-chip-owner-text { fill: var(--owner); }
+.d-chip-agent-text { fill: var(--ink-soft); }
+</style>
+<defs><marker id="per-slice-arrow" viewBox="0 0 8 6" refX="5" refY="3" markerWidth="8" markerHeight="6" markerUnits="userSpaceOnUse" orient="auto"><path class="d-arrowhead" d="M0 0L8 3L0 6z"/></marker></defs>
+<rect class="d-bg" x="0" y="0" width="336" height="568" rx="8"/>
+
+<!-- Flow lines: one segment from each mark to the next, the loop back to (a), the end. -->
+<path class="d-flow" d="M 36 30 V 56" marker-end="url(#per-slice-arrow)"/>
+<path class="d-flow" d="M 36 77 V 102" marker-end="url(#per-slice-arrow)"/>
+<path class="d-flow" d="M 36 119 V 144" marker-end="url(#per-slice-arrow)"/>
+<path class="d-flow" d="M 36 165 V 191" marker-end="url(#per-slice-arrow)"/>
+<path class="d-flow" d="M 36 206 V 234" marker-end="url(#per-slice-arrow)"/>
+<path class="d-flow" d="M 36 251 V 276" marker-end="url(#per-slice-arrow)"/>
+<path class="d-flow" d="M 36 297 V 323" marker-end="url(#per-slice-arrow)"/>
+<path class="d-flow" d="M 36 338 V 384"/>
+<path class="d-flow" d="M 36 384 H 16 Q 10 384 10 378 V 74 Q 10 68 16 68 H 24" marker-end="url(#per-slice-arrow)"/>
+<path class="d-flow" d="M 36 384 V 418" marker-end="url(#per-slice-arrow)"/>
+
+<!-- Marks: decision (a) (c) (f), sub-agent (b) (e), session (d) (g). -->
+<circle class="d-start" cx="36" cy="24" r="6"/>
+<polygon class="d-decision" points="36 59 45 68 36 77 27 68"/>
+<rect class="d-subagent" x="29" y="105" width="14" height="14" rx="3"/>
+<polygon class="d-decision" points="36 147 45 156 36 165 27 156"/>
+<rect class="d-session" x="30" y="194" width="12" height="12" rx="2"/>
+<rect class="d-subagent" x="29" y="237" width="14" height="14" rx="3"/>
+<polygon class="d-decision" points="36 279 45 288 36 297 27 288"/>
+<rect class="d-session" x="30" y="326" width="12" height="12" rx="2"/>
+<circle class="d-junction" cx="36" cy="384" r="3"/>
+<circle class="d-end" cx="36" cy="428" r="7"/>
+<circle class="d-end-dot" cx="36" cy="428" r="3"/>
+
+<!-- Text. -->
+<text class="d-label" x="52" y="29">The set-up is done</text>
+<text class="d-label" x="52" y="73">(a) Gate</text>
+<text class="d-label" x="52" y="117">(b) Test writer</text>
+<text class="d-label" x="52" y="161">(c) Red check</text>
+<text class="d-label" x="52" y="205">(d) Tests commit</text>
+<text class="d-label" x="52" y="249">(e) Code writer</text>
+<text class="d-label" x="52" y="293">(f) Test-lock check</text>
+<text class="d-label" x="52" y="337">(g) Code commit</text>
+<text class="d-text" x="52" y="355">after the test command passes</text>
+<text class="d-label" x="52" y="389">Slices left</text>
+<text class="d-label" x="52" y="433">Every slice closed</text>
+
+<!-- Legend: the two actor marks and the decision. -->
+<rect class="d-session" x="30" y="482" width="12" height="12" rx="2"/>
+<rect class="d-subagent" x="29" y="505" width="14" height="14" rx="3"/>
+<polygon class="d-decision" points="36 527 45 536 36 545 27 536"/>
+<text class="d-text" x="52" y="493">the session</text>
+<text class="d-text" x="52" y="517">a sub-agent</text>
+<text class="d-text" x="52" y="541">a check or a ruling</text>
+</svg>

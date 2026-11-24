@@ -1,0 +1,2128 @@
+<title>Idea to Code</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap">
+<style>
+/* Layout: one reading column of 1120px, cut by rules: 1px for a section, 3px ink for a chapter.
+   The bar at the top holds the five views and, under them, the sections of the view in use.
+   With the script one view shows at a time; without it all show, in one scroll.
+   Each step hangs its actions on a 2px ink
+   spine, with the text on the left and the running example on the right. The marks on the spine
+   are the marks of the figures in diagrams/. Plum marks the owner's
+   moments, and nothing else. Inside a view nothing folds: everything is visible at rest. */
+:root {
+  --bg: #f3f5f7; --surface: #ffffff; --panel: #e8edf1;
+  --ink: #15202b; --ink-soft: #364250; --muted: #5a6673;
+  --line: #d4dbe2; --line-strong: #98a4b0;
+  --agent: #17698a;
+  --owner: #a23468; --owner-tint: #f8e4ed;
+  --pass: #2b7547; --fail: #9a5b00;
+  --req: #34509f; --req-tint: #e1e7f7;
+  --font-sans: "IBM Plex Sans", "Noto Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-display: "IBM Plex Sans Condensed", "IBM Plex Sans", "Noto Sans", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", "Noto Sans Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --row-h: 40px;
+  --bar-h: 80px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f151b; --surface: #17202a; --panel: #1c2731;
+    --ink: #e4eaf0; --ink-soft: #c3cdd7; --muted: #97a4b1;
+    --line: #2a3643; --line-strong: #56656f;
+    --agent: #66b9d9;
+    --owner: #e687b5; --owner-tint: #3b1c2c;
+    --pass: #6cc48d; --fail: #e4a33d;
+    --req: #a3b5f2; --req-tint: #1e2849;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f151b; --surface: #17202a; --panel: #1c2731;
+  --ink: #e4eaf0; --ink-soft: #c3cdd7; --muted: #97a4b1;
+  --line: #2a3643; --line-strong: #56656f;
+  --agent: #66b9d9;
+  --owner: #e687b5; --owner-tint: #3b1c2c;
+  --pass: #6cc48d; --fail: #e4a33d;
+  --req: #a3b5f2; --req-tint: #1e2849;
+  color-scheme: dark;
+}
+body { background: var(--bg); color: var(--ink); font-family: var(--font-sans); font-size: 15px; line-height: 1.55; }
+
+/* page frame */
+.wrap {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 40px 72px;
+  display: grid;
+}
+/* the blocks of the wrap stand 56px apart (margins, not a grid gap, so the bar can take less) */
+.wrap > * + * { margin-top: 56px; }
+h1, h2, h3 { text-wrap: balance; margin: 0; }
+h1 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(2.1rem, 6vw, 3.1rem);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+}
+h2 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.55rem;
+  line-height: 1.2;
+}
+h3 { font-size: 1.02rem; font-weight: 600; line-height: 1.3; }
+p { margin: 0; }
+code {
+  font-family: var(--font-mono);
+  font-size: 0.86em;
+  background: var(--panel);
+  border-radius: 4px;
+  padding: 1px 4px;
+  overflow-wrap: anywhere;
+}
+/* the font link loads IBM Plex Mono at 400 and 500 only: code in a bold context takes 500, never a faked bold */
+:is(h1, h2, h3, b, strong, dt, .mname, .band-name, .cond) code { font-weight: 500; }
+a { color: inherit; }
+a:focus-visible { outline: 2px solid var(--agent); outline-offset: 3px; border-radius: 4px; }
+/* a link target stops 16px under the bar */
+html { scroll-padding-top: calc(var(--bar-h) + 16px + env(safe-area-inset-top, 0px)); }
+@media (prefers-reduced-motion: reduce) {
+  * { scroll-behavior: auto; }
+}
+
+/* marks: one set for the figures and the page; the shapes take the figure classes (end of sheet) */
+.mk { display: block; flex: none; overflow: visible; font-family: var(--font-sans); font-size: 12px; }
+/* a mark in running text, or at the head of a list item, sits on the line, one line high */
+:where(p, li, dt, dd, h3) > .mk:where(:not(.tmk)) { display: inline-block; width: 17px; height: 17px; vertical-align: -4px; }
+.p-file { fill: var(--surface); stroke: var(--ink); stroke-width: 1.4; stroke-linejoin: round; }
+.p-slash { fill: none; stroke: var(--ink); stroke-width: 1.6; }
+
+/* header */
+.top { display: grid; gap: 14px; max-width: 72ch; }
+.eyebrow {
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.lead { font-size: 1.08rem; color: var(--ink-soft); max-width: 62ch; }
+.callout { font-size: 0.94rem; color: var(--ink-soft); max-width: 70ch; }
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  padding: 2px 10px;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+  text-decoration: none;
+}
+
+/* state marks: open, default, optional */
+.state {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-sans);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 1.2;
+  border-radius: 999px;
+  padding: 3px 9px 3px 7px;
+  vertical-align: 0.3em;
+  margin-left: 8px;
+  white-space: nowrap;
+}
+.state.open { color: var(--ink); border: 1.5px dashed var(--ink-soft); background: var(--surface); }
+.state.def { color: var(--ink-soft); background: var(--surface); border: 1px solid var(--muted); }
+.state.opt { color: var(--ink); background: var(--panel); border: 1px solid var(--ink-soft); }
+h3 .state { margin-left: 6px; vertical-align: 0.12em; }
+p .state, li .state { margin-left: 6px; vertical-align: 0.08em; }
+.state.solo { margin-left: 0; margin-right: 2px; vertical-align: 0.08em; }
+.state svg { display: block; flex: none; }
+
+/* sections */
+section { display: grid; gap: 18px; min-width: 0; }
+.wrap > section { border-top: 1px solid var(--line-strong); padding-top: 16px; }
+.wrap > section.chapter { border-top: 3px solid var(--ink); padding-top: 20px; }
+.chapter > .sec-head h2 { font-size: clamp(1.7rem, 4.4vw, 2.05rem); line-height: 1.12; }
+.sec-head { display: grid; gap: 8px; max-width: 70ch; }
+.sec-head p { color: var(--muted); }
+.head-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.hnum { display: inline-block; width: 1.6rem; height: 1.6rem; vertical-align: -0.3em; margin-right: 9px; }
+.rail ol { list-style: none; margin: 0; padding: 0; display: flex; align-items: center; }
+.rail li { display: flex; align-items: center; min-width: 0; }
+.rail li + li::before { content: ""; width: 12px; height: 1.6px; background: var(--ink); margin-inline: 3px; flex: none; }
+.rail a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 1.5px 8.5px 1.5px 2.5px;
+  border: 1.5px solid transparent;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  text-decoration: none;
+}
+.rail a:hover span { text-decoration: underline; }
+.rail svg { width: 22px; height: 22px; display: block; flex: none; }
+.rail .here a { background: var(--panel); color: var(--ink); font-weight: 600; }
+.rail .here .d-step { stroke-width: 3.2; }
+.rail.plain a { padding: 1.5px 9px; }
+@media (max-width: 560px) {
+  .rail ol { column-gap: 8px; }
+  .rail li + li::before { display: none; }
+}
+
+/* layout grids */
+.pair {
+  display: grid;
+  grid-template-columns: minmax(0, 336px) minmax(0, 1fr);
+  gap: 28px 44px;
+  align-items: start;
+}
+.cards-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  align-items: start;
+}
+.cards-row.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (max-width: 880px) {
+  .pair, .cards-row, .cards-row.two { grid-template-columns: minmax(0, 1fr); }
+}
+.side { display: grid; gap: 18px; min-width: 0; }
+
+/* the owner stop mark in running text and in a step's stop count; on the spine the same shapes take .tmk */
+.os { display: inline-block; width: 18px; height: 18px; vertical-align: -4px; margin-right: 1px; }
+/* a line led by the owner stop mark: its wrapped lines start under the words, not under the mark */
+p:has(> .os:first-child) { padding-left: 23px; text-indent: -23px; }
+p:has(> .os:first-child) > * { text-indent: 0; }
+
+/* cards, labels, small text */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 16px 18px;
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+  align-content: start;
+}
+.card p { font-size: 0.9rem; color: var(--ink-soft); }
+.card ul, .card ol { margin: 0; padding-left: 1.25em; display: grid; gap: 5px; font-size: 0.9rem; }
+.card li { min-width: 0; }
+/* a card list whose items are led by a sign (a mark or a chip): the sign stands in for the bullet.
+   Put the words after the sign in one span: <li><svg class="mk">...</svg> <span><b>Name</b>: ...</span></li>.
+   The signs then share one column and the words hang beside them; an item without the span flows as text. */
+.card ul:has(> li > :is(.mk, .hchip):first-child) { list-style: none; padding-left: 0; gap: 7px;
+  grid-template-columns: max-content minmax(0, 1fr); column-gap: 8px; }
+.card ul:has(> li > :is(.mk, .hchip):first-child) > li { grid-column: 1 / -1; }
+.card ul:has(> li > :is(.mk, .hchip):first-child) > li:has(> :is(.mk, .hchip):first-child + span:last-child) {
+  display: grid; grid-template-columns: subgrid; align-items: start; }
+.card ul:has(> li > :is(.mk, .hchip):first-child) > li > .mk:first-child { justify-self: center; margin-top: 3px; }
+.card ul:has(> li > :is(.mk, .hchip):first-child) > li > .hchip:first-child { justify-self: start; margin-top: 1px; vertical-align: 0; }
+.form-list li::marker { color: var(--owner); font-weight: 700; }
+.label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.card .label { font-size: 0.7rem; color: var(--muted); }
+.small { font-size: 0.86rem; color: var(--muted); }
+.card.narrow { max-width: 76ch; }
+
+/* the owner chip: plum, as in the figures */
+.hchip {
+  display: inline-block;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  line-height: 1;
+  padding: 4px 9px;
+  border-radius: 999px;
+  border: 1px solid;
+  vertical-align: 0.14em;
+}
+.hchip.owner { color: var(--owner); background: var(--owner-tint); border-color: var(--owner); }
+
+/* legend: the page's one key, for the marks on a step's line */
+.legend {
+  margin: 0;
+  padding: 14px 16px;
+  display: grid;
+  grid-template-columns: 7rem minmax(0, 1fr);
+  align-items: start;
+  gap: 8px 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  font-size: 0.84rem;
+  color: var(--ink-soft);
+  max-width: 940px;
+  box-sizing: border-box;
+}
+.legend ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px 22px; }
+.legend li { display: flex; align-items: center; gap: 8px; min-width: 0; }
+/* the row keeps its label on the left; its marks wrap beside it */
+.legend .label { min-width: 0; }
+.legend > .label { line-height: 22px; }
+@media (max-width: 560px) { .legend { grid-template-columns: minmax(0, 1fr); } }
+.legend svg { flex: none; display: block; color: var(--ink); }
+.rail .mk, .mrail .mk { width: 22px; height: 22px; }
+
+/* the trace: the main line of a step, with the example beside it */
+.tr-head {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) minmax(0, 1.1fr);
+  column-gap: 14px;
+  align-items: end;
+}
+.tr-head > :first-child { grid-column: 2; }
+.tr-head { margin-bottom: -8px; }
+.trace { list-style: none; margin: 0; padding: 0; display: grid; }
+.band { display: grid; min-width: 0; }
+.band-label {
+  margin-left: 46px;
+  padding: 22px 0 8px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  border-top: 1px solid var(--line);
+  position: relative;
+}
+.band-label::before {
+  content: "";
+  position: absolute;
+  left: -31px;
+  top: -1px;
+  bottom: 0;
+  width: 2px;
+  background: var(--ink);
+}
+/* a band without a label, after the first, opens with the same rule and space as a labelled band */
+.band:not(:first-child):not(:has(> .band-label)) { position: relative; }
+.band:not(:first-child):not(:has(> .band-label))::before { content: ""; position: absolute; top: 0; left: 46px; right: 0;
+  border-top: 1px solid var(--line); }
+.band:not(:first-child):not(:has(> .band-label)) > .rows > .tr:first-child { padding-top: 22px; }
+.tr::before {
+  content: "";
+  position: absolute;
+  left: 15px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--ink);
+}
+.band:first-child .tr:first-child::before { top: 22px; }
+.band:last-child .tr:last-child::before { bottom: auto; height: 22px; }
+.band-step {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.band-name { font-family: var(--font-display); font-weight: 600; font-size: 1.1rem; }
+.rows { list-style: none; margin: 0; padding: 0; display: grid; }
+.tr {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) minmax(0, 1.1fr);
+  column-gap: 14px;
+  row-gap: 8px;
+  padding-block: 10px;
+  align-items: start;
+  position: relative;
+}
+.trace.solo .tr { grid-template-columns: 32px minmax(0, 1fr); }
+.trace.solo { max-width: 76ch; }
+.tmk { width: 24px; height: 24px; display: block; justify-self: center; position: relative; z-index: 1; }
+.tr > .if, .tr > .pair { grid-column: 2 / -1; position: relative; z-index: 1; }
+.tr > .tr-text { grid-column: 2; }
+.tr-text { display: grid; gap: 4px; min-width: 0; }
+.tr-text h3 { font-size: 0.98rem; }
+.tr-text p { font-size: 0.9rem; color: var(--ink-soft); }
+.tr-text ul { margin: 0; padding-left: 1.25em; display: grid; gap: 4px; font-size: 0.9rem; color: var(--ink-soft); }
+.tr-text .label { font-size: 0.7rem; color: var(--muted); }
+.tr-side { display: grid; gap: 6px; min-width: 0; align-content: start; }
+.where {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  color: var(--muted);
+}
+.snip {
+  margin: 0;
+  min-width: 0;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  line-height: 1.55;
+  color: var(--ink-soft);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 9px 12px;
+  overflow-x: auto;
+  white-space: pre;
+}
+.snip b { color: var(--ink); font-weight: 500; }
+.snip.prose { white-space: pre-wrap; overflow-wrap: anywhere; }
+.snip .li { display: block; padding-left: 2ch; text-indent: -2ch; }
+.qmsg .li { padding-left: 2ch; text-indent: -2ch; }
+.snip.cols { display: grid; grid-template-columns: fit-content(45%) minmax(0, 1fr); gap: 0 2ch; white-space: normal; overflow-wrap: anywhere; }
+.snip.cols.tail { grid-template-columns: minmax(0, max-content) max-content; }
+.snip { white-space: pre-wrap; overflow-wrap: anywhere; }
+mark.req {
+  background: var(--req-tint);
+  color: var(--req);
+  border-radius: 3px;
+  padding: 0 2px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.snip mark.req { white-space: normal; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+.pass { color: var(--pass); font-weight: 500; }
+.fail { color: var(--fail); font-weight: 500; }
+@media (max-width: 720px) {
+  .tr, .tr-head { grid-template-columns: 32px minmax(0, 1fr); }
+  .tr-head > :nth-child(2) { display: none; }
+  .tr > .snip, .tr > .tr-side { grid-column: 2; }
+  /* the example moves under its text, still headed "In the example" */
+  .tr > .tr-side::before, .tr > .pair > .side:has(> .snip)::before, .tr > .tr-text:has(+ .snip)::after {
+    content: "In the example";
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .tr > .tr-text:has(+ .snip)::after { margin-top: 6px; }
+}
+
+/* table: one stacked block per row below 640px */
+.table-wrap { overflow-x: auto; min-width: 0; max-width: 940px; }
+table.tbl {
+  width: 100%;
+  min-width: 600px;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+.tbl th, .tbl td {
+  text-align: left;
+  vertical-align: top;
+  padding: 10px 14px;
+  border-top: 1px solid var(--line);
+}
+.tbl thead th {
+  border-top: 0;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.tbl tbody th { font-weight: 400; width: 27%; }
+.tbl td { color: var(--ink-soft); }
+.tbl code { overflow-wrap: normal; word-break: keep-all; }
+@media (max-width: 640px) {
+  table.tbl { display: block; min-width: 0; overflow: hidden; }
+  .tbl thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .tbl tbody, .tbl tr, .tbl th, .tbl td { display: block; }
+  .tbl tbody tr { display: grid; gap: 5px; padding: 11px 14px; border-top: 1px solid var(--line); }
+  .tbl tbody:first-of-type > tr:first-child { border-top: 0; }
+  .tbl tbody th, .tbl td { border-top: 0; padding: 0; width: auto; }
+  .tbl tbody th[scope="row"] { font-weight: 600; color: var(--ink); }
+  .tbl td { display: grid; grid-template-columns: minmax(0, 7.5rem) minmax(0, 1fr); column-gap: 10px; align-items: baseline; }
+  .tbl td::before { content: attr(data-label); font-size: 0.7rem; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); }
+}
+
+/* twin pointer: the WORKFLOW.md chapters of a view, at the foot of its first section */
+.twin { margin: 0; max-width: none; font-family: var(--font-mono); font-size: 0.74rem; color: var(--muted); }
+.twin cite { font-style: normal; }
+.twin .label { margin-right: 6px; font-family: var(--font-sans); }
+
+/* a name the project fills in, such as the build command */
+.cmd { display: inline-block; font-size: 0.8rem; color: var(--ink-soft); background: var(--panel);
+  border-radius: 4px; padding: 2px 8px; }
+
+/* words: term and meaning */
+.terms { margin: 0; display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 6px 14px; max-width: 76ch; font-size: 0.9rem; }
+.terms dt { min-width: 0; font-weight: 600; color: var(--ink); }
+.terms dd { margin: 0; min-width: 0; color: var(--ink-soft); }
+@media (max-width: 560px) { .terms { grid-template-columns: minmax(0, 1fr); gap: 2px; } .terms dd { margin-bottom: 6px; } }
+
+/* the question form, drawn once: one column at every width; each part opens with its own plum label */
+.qform { display: grid; gap: 10px; min-width: 0; max-width: 76ch; }
+.qform > * { min-width: 0; }
+.qmsg { display: grid; gap: 10px; min-width: 0; background: var(--surface);
+  border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px;
+  font-family: var(--font-mono); font-size: 0.78rem; line-height: 1.55; color: var(--ink-soft); overflow-wrap: anywhere; }
+.qmsg p { margin: 0; }
+.qmsg b { color: var(--ink); font-weight: 500; }
+.qmsg .part { display: grid; gap: 4px; min-width: 0; }
+.qmsg .part > .label { font-family: var(--font-sans); color: var(--owner); }
+
+/* the squash: the branch's commits become one commit on main */
+.squash { display: grid; grid-template-columns: minmax(0, 1fr) 26px minmax(0, 1fr); align-items: center; gap: 0 12px; min-width: 0; }
+.squash ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; min-width: 0;
+  font-family: var(--font-mono); font-size: 0.74rem; color: var(--ink-soft); }
+.squash li { position: relative; padding-left: 20px; overflow-wrap: anywhere; }
+.squash li::before { content: ""; position: absolute; left: 1px; top: calc(0.775em - 5px); width: 10px; height: 10px; border-radius: 2px; background: var(--ink); }
+.squash .into { align-self: stretch; position: relative; border: 2px solid var(--ink); border-left: 0; border-radius: 0 6px 6px 0; }
+.squash .into::after { content: ""; position: absolute; top: 50%; right: -13px; transform: translateY(-50%);
+  border: 6px solid transparent; border-left: 8px solid var(--ink); }
+@media (max-width: 720px) {
+  .squash { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .squash .into { height: 14px; border: 2px solid var(--ink); border-top: 0; border-radius: 0 0 6px 6px; }
+  .squash .into::after { top: auto; right: 50%; bottom: -15px; transform: translateX(50%);
+    border: 6px solid transparent; border-top: 8px solid var(--ink); }
+}
+
+/* a set-up checklist: drawn boxes, nothing to tick */
+.checklist { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 28px; max-width: 940px; }
+.cl-group { display: grid; gap: 8px; align-content: start; min-width: 0; }
+.cl-group ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.cl-group li > ul { margin-top: 6px; }
+.cl-group li { position: relative; padding-left: 26px; min-width: 0; font-size: 0.9rem; color: var(--ink-soft); }
+.cl-group li::before { content: ""; position: absolute; left: 0; top: calc(0.775em - 7.1px); width: 11px; height: 11px; background: var(--surface);
+  border: 1.6px solid var(--ink); border-radius: 2px; }
+@media (max-width: 760px) { .checklist { grid-template-columns: minmax(0, 1fr); } }
+
+/* the mini rail: one row per road, part or skill, five steps (or seven positions) each */
+/* the rows share the columns of .mtab (subgrid), so a row with words in place of a rail still lines up */
+.mtab { display: grid; grid-template-columns: minmax(0, 15rem) max-content minmax(0, 1fr); column-gap: 18px;
+  max-width: 940px; border-top: 1px solid var(--line); }
+.mtab > * { grid-column: 1 / -1; }
+.mtab > .label { padding: 16px 0 7px; border-bottom: 1px solid var(--line); }
+.mrow { display: grid; grid-template-columns: minmax(0, 15rem) max-content minmax(0, 1fr); grid-template-columns: subgrid;
+  align-items: center; gap: 6px 18px; padding: 9px 0; border-bottom: 1px solid var(--line); }
+.mrow > .pill { justify-self: start; }
+.mname { font-size: 0.92rem; font-weight: 600; min-width: 0; }
+ol.mrail { list-style: none; margin: 0; padding: 0; display: flex; align-items: center; }
+.mrail li { display: flex; align-items: center; }
+.mrail li + li::before { content: ""; width: 10px; height: 2px; margin-inline: 4px; background: var(--muted); }
+.mrail .bent .mk { outline: 1.5px dashed var(--ink-soft); outline-offset: 2px; border-radius: 50%; }
+/* on: an unchanged step, the plain mark */
+.mrail .on .d-step { stroke: var(--ink); }
+.mrail .on .d-num { fill: var(--ink); }
+.mrail .join .d-step { fill: var(--ink); }
+.mrail .join .d-num { fill: var(--surface); }
+/* skipped and off: the muted colour, not opacity, so the mark and its words stay readable */
+:is(.mrail .skip, .mrail .off) :is(.d-step, .d-end, .p-slash) { stroke: var(--muted); }
+:is(.mrail .skip, .mrail .off) :is(.d-num, .d-start, .d-end-dot) { fill: var(--muted); }
+.mtail { min-width: 0; font-size: 0.86rem; color: var(--ink-soft); }
+/* below 721px the third column is too narrow for its longest word, so the rows stack */
+@media (max-width: 720px) { .mtab, .mrow { grid-template-columns: minmax(0, 1fr); } }
+
+/* the static If block: a side route, always open, in its own row of the trace */
+.if { display: grid; gap: 10px; min-width: 0; max-width: 940px; box-sizing: border-box; background: var(--surface);
+  border: 1px solid var(--line); border-radius: 10px; padding: 14px 18px 16px; }
+.if-head { display: grid; gap: 3px; min-width: 0; }
+.if-head h3 { font-size: 0.98rem; }
+.if-head h3 .label { margin-right: 6px; color: var(--ink-soft); }
+.if > p:not([class]) { font-size: 0.9rem; color: var(--ink-soft); }
+.back { font-size: 0.9rem; color: var(--ink-soft); }
+.back b { color: var(--ink); }
+@media (max-width: 720px) {
+  .tr > .if, .tr > .pair { grid-column: 1 / -1; }
+  /* a pair spans the spine here: the spine stops at it and starts again under it, as at an If block */
+  .tr > .pair { background: var(--bg); }
+  .if { padding-inline: 10px; }
+}
+
+/* hooks and open lines: one line led by an OPTIONAL or OPEN chip */
+.hook, .openl { font-size: 0.88rem; color: var(--ink-soft); max-width: 76ch; }
+.hook .state, .openl .state { margin: 0 6px 0 0; vertical-align: 0.08em; }
+
+/* lists drawn as marks; element-qualified so they win over the list rules of cards, rows and If blocks */
+ul.checks { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.checks li { position: relative; padding-left: 20px; min-width: 0; }
+.checks li::before { content: ""; position: absolute; left: 2px; top: calc(0.775em - 5px); width: 7px; height: 7px; background: var(--surface);
+  border: 1.5px solid var(--ink); transform: rotate(45deg); }
+/* neutral tags; never-tags; held-tags (plum: waits for the owner) */
+ul.tags, ul.nevers, ul.held { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; max-width: 76ch; }
+.tags li, .nevers li, .held li { min-width: 0; overflow-wrap: anywhere; }
+/* code in a tag keeps its face but not its box: the tag is the box */
+:is(.tags, .nevers, .held) code { background: none; padding: 0; }
+.tags li, .nevers li { font-size: 0.8rem; color: var(--ink-soft); background: var(--surface);
+  border: 1px solid var(--line-strong); border-radius: 999px; padding: 2px 10px; }
+.nevers li::before { content: "\00d7"; margin-right: 5px; font-weight: 700; color: var(--fail); }
+.held li { font-size: 0.8rem; font-weight: 600; color: var(--owner); background: var(--surface);
+  border: 1px solid var(--owner); border-radius: 999px; padding: 2px 10px; }
+/* routes: a stem with a junction and a tap into each box, as the figures draw a branch.
+   Each box draws its own piece of the stem, so the stem ends at the last tap. */
+ul.routes { list-style: none; margin: 0; padding: 0 0 0 26px; display: grid; gap: 8px; max-width: 940px; }
+.routes > li { position: relative; min-width: 0; background: var(--surface);
+  border: 1px solid var(--line); border-radius: 9px; padding: 10px 13px; font-size: 0.9rem; color: var(--ink-soft); }
+.routes > li::before { content: ""; position: absolute; left: -23px; top: 16px; width: 22px; height: 8px;
+  background: radial-gradient(circle at 4px 4px, var(--ink) 4px, transparent 4.5px),
+    linear-gradient(var(--ink), var(--ink)) 4px 3px / 18px 2px no-repeat; }
+.routes > li::after { content: ""; position: absolute; left: -20px; top: -9px; bottom: -1px; width: 2px; background: var(--ink); }
+.routes > li:first-child::after { top: -1px; }
+.routes > li:last-child::after { bottom: auto; height: 29px; }
+.routes .cond { display: block; margin-bottom: 3px; }
+/* routes placed directly in a section keep the measure of a list */
+section > ul.routes { max-width: 76ch; }
+.cond { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.cond code { text-transform: none; letter-spacing: 0; font-size: 1em; }
+/* a tree: what holds or loads what; each item draws its own piece of the stem */
+ul.tree, .tree ul { list-style: none; margin: 0; padding: 0; }
+ul.tree { display: grid; gap: 4px; max-width: 76ch; font-size: 0.9rem; color: var(--ink-soft); }
+.tree ul { display: grid; gap: 4px; margin: 4px 0 0 8px; padding-left: 20px; }
+.tree ul > li { position: relative; min-width: 0; }
+/* lines drawn in HTML are 2px, the spine's width: a fractional width snaps to 1 or 2 pixels by position */
+.tree ul > li::before { content: ""; position: absolute; left: -20px; top: 0.8em; width: 14px; height: 2px; background: var(--ink); }
+.tree ul > li::after { content: ""; position: absolute; left: -20px; top: -4px; bottom: 0; width: 2px; background: var(--ink); }
+.tree ul > li:first-child::after { top: 0; }
+.tree ul > li:last-child::after { bottom: auto; height: calc(0.8em + 6px); }
+.tree ul > li:first-child:last-child::after { height: calc(0.8em + 2px); }
+.tree b { color: var(--ink); font-weight: 600; }
+
+/* measure: running text directly in a section keeps 76ch; a plain div there stacks its blocks */
+section > p, section > div > p:not([class]) { max-width: 76ch; }
+section > div:not([class]) { display: grid; gap: 8px; min-width: 0; }
+section > div:not([class]) > ul:not([class]) { margin: 0; padding-left: 1.25em; display: grid; gap: 6px; }
+
+/* figures: the frame, then the classes of the inline copies of diagrams/*.svg (their style
+   element is deleted on copy; the page's tokens serve) */
+.figure { margin: 0; display: grid; gap: 10px; align-content: start; min-width: 0; }
+.figure > svg { display: block; width: 100%; max-width: 336px; height: auto; }
+.figure figcaption { max-width: 60ch; font-size: 0.86rem; color: var(--muted); }
+.figure > * { min-width: 0; }
+.dg { font-family: var(--font-sans); font-size: 13px; }
+.d-bg { fill: var(--bg); }
+.d-flow { fill: none; stroke: var(--ink); stroke-width: 1.6; stroke-linejoin: round; }
+.d-arrowhead, .d-start, .d-end-dot, .d-junction, .d-session { fill: var(--ink); }
+.d-end, .d-step, .d-decision, .d-subagent {
+  fill: var(--surface); stroke: var(--ink); stroke-width: 1.6;
+}
+.d-owner-mark { fill: var(--owner-tint); stroke: var(--owner); stroke-width: 1.2; }
+.d-owner-bar { fill: var(--owner); }
+.d-box { fill: var(--surface); stroke: var(--muted); stroke-width: 1; }
+.d-box-owner { fill: var(--owner-tint); stroke: var(--owner); stroke-width: 1.2; }
+.d-chip-agent { fill: var(--surface); stroke: var(--muted); stroke-width: 1; }
+.d-chip-owner { fill: var(--owner-tint); stroke: var(--owner); stroke-width: 1; }
+.d-name { font-size: 14px; font-weight: 600; fill: var(--ink); }
+.d-label { font-weight: 600; fill: var(--ink); }
+.d-text { font-weight: 400; fill: var(--ink-soft); }
+.d-pass { font-style: italic; font-weight: 400; fill: var(--ink-soft); }
+.d-num { font-weight: 700; fill: var(--ink); }
+.d-cond, .d-cond-owner, .d-chip-agent-text, .d-chip-owner-text {
+  font-weight: 700; letter-spacing: 0.06em;
+}
+.d-cond { fill: var(--muted); }
+.d-cond-owner, .d-chip-owner-text { fill: var(--owner); }
+.d-chip-agent-text { fill: var(--ink-soft); }
+
+/* a pair in a trace row takes the row's own two columns, so its example starts where every example starts */
+@media (min-width: 881px) { .tr > .pair { grid-template-columns: subgrid; column-gap: 14px; } }
+@media (max-width: 720px) { .tr > .pair { border-top: 1px solid var(--line); padding-top: 14px; } }
+/* routes in a trace row tap straight off the main spine, as the figures draw a branch */
+.tr-text > .routes { padding-left: 0; }
+.tr-text > .routes > li::before { left: -34px; width: 33px;
+  background: radial-gradient(circle at 4px 4px, var(--ink) 4px, transparent 4.5px),
+    linear-gradient(var(--ink), var(--ink)) 4px 3px / 29px 2px no-repeat; }
+.tr-text > .routes > li::after { display: none; }
+/* routes placed in a section or a section head stand on the spine's x */
+:is(section, .sec-head) > ul.routes { padding-left: 35px; }
+/* a figure in a white If card: its background is the card's */
+.if .d-bg { fill: var(--surface); }
+@media (max-width: 360px) { .if .figure { margin-inline: -10px; } .if .figure figcaption { padding-inline: 10px; } }
+/* a sign column that mixes a chip and marks: every sign starts at the column's left edge */
+.card ul:has(> li > .hchip:first-child) > li > .mk:first-child { justify-self: start; margin-left: 4px; }
+/* a ring in running text is a rail ring, so its number stays legible; the legend's marks take the same size */
+.legend .mk { width: 22px; height: 22px; }
+/* a join at the start or the end reads as heavy, like a join ring */
+.mrail .join .d-start { stroke: var(--ink); stroke-width: 5; }
+.mrail .join .d-end { fill: var(--ink); }
+.mrail .join .d-end-dot { fill: var(--surface); }
+/* the "until then" part of an Open line */
+.openl > .label { margin-right: 2px; white-space: nowrap; }
+/* a plain block in a side column stacks its label and its content */
+.side > div:not([class]) { display: grid; gap: 8px; min-width: 0; }
+/* a flex or grid child that holds text may shrink */
+:is(.wrap, .top, .sec-head, .head-meta, .rows, .tr-head, .tr-text, .if, .side, .mrow, .squash, section, .snip.cols, .card, .band, .part, .if-head, .mtab, .legend) > * { min-width: 0; }
+
+/* text floor: no text under 12px on screen (chips, labels, eyebrows, the numbers in rings, code in tags) */
+.label, .band-step, .cond, .tbl thead th, .twin, .eyebrow, .where, .squash ol { font-size: 0.75rem; }
+.card .label, .tr-text .label { font-size: 0.75rem; }
+.hchip { font-size: 0.75rem; letter-spacing: 0.05em; padding: 3px 8px; }
+.state { font-size: 0.75rem; letter-spacing: 0.05em; padding: 2px 8px 2px 6px; }
+:is(.tags, .nevers, .held) code { font-size: 0.94em; }
+.mk { font-size: 13.2px; }
+@media (max-width: 720px) { .tr > .tr-side::before, .tr > .pair > .side:has(> .snip)::before, .tr > .tr-text:has(+ .snip)::after { font-size: 0.75rem; } }
+@media (max-width: 640px) { .tbl td::before { font-size: 0.75rem; } }
+/* the question form: each part opens with its own keyword in plum */
+.qmsg .part > p:first-child > b:first-child { color: var(--owner); }
+/* a skill's job hangs beside its origin chip */
+.mtail { display: flex; align-items: baseline; gap: 6px; }
+.mtail > .pill { flex: none; }
+.mjob { min-width: 0; text-wrap: pretty; }
+/* the squash bracket spans the branch's commits, not the label above them */
+@media (min-width: 721px) { .squash .into { margin-top: calc(0.75rem * 1.55); } }
+
+/* the bar: two rows at the top of the window while the page scrolls. The first row holds the
+   five views; the second holds the sections of the view in use: in the flow, the five steps.
+   The script at the end of the file shows one view at a time and marks where you read. Without
+   it no tab is marked, and the second row holds the five steps.
+   The bar reaches 6px into each gutter, so a focus ring fits; its rule spans the column only. */
+.bar {
+  position: sticky;
+  top: env(safe-area-inset-top, 0px);
+  z-index: 10;
+  margin-inline: -6px;
+  padding: 0 6px;
+  background: linear-gradient(var(--line-strong), var(--line-strong)) 6px 100% / calc(100% - 12px) 1px no-repeat, var(--bg);
+  box-shadow: 0 0 0 100vmax var(--bg);
+  clip-path: inset(0 -100vmax);
+}
+.wrap > .bar { margin-top: 16px; }
+.bar > nav {
+  height: var(--row-h);
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+}
+.bar ol { flex: none; }
+.bar li, .bar a { flex: none; white-space: nowrap; }
+/* the views and the sections of a view are tabs, not a path: no line joins them */
+.views li + li::before, .subbar li + li::before { display: none; }
+.views { border-bottom: 1px solid var(--line); }
+.views ol { column-gap: 6px; }
+.subbar ol { column-gap: 4px; }
+.views a { padding: 4px 11px; border-radius: 6px; font-size: 0.86rem; font-weight: 500; }
+.views .here a { background: var(--ink); color: var(--bg); font-weight: 600; }
+/* the step row: the step rail on one line; the marked step gives way when the row is short */
+.stepbar ol { flex: 0 1 auto; min-width: 0; }
+.stepbar li.here, .stepbar li.here a { flex: 0 1 auto; min-width: 0; }
+.stepbar li.here span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 640px) {
+  .views ol { column-gap: 2px; }
+  .views a { padding: 4px 8px; }
+  /* five labels need about 575px: below that, five rings and the label of the step you read */
+  .stepbar li:not(.here) a { padding: 1.5px 2.5px; }
+  .stepbar li:not(.here) span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+}
+/* the step mark: in a wide window the ring and the name of the step leave the title and stand in
+   the left gutter, beside the title; they stay under the bar until the step ends. The mark's box is
+   as tall as the step from its title down to 40px above its end (16px: the section's top padding),
+   and the mark sticks inside it. In a narrower window the title keeps the ring and the name. */
+.stepmark { display: none; }
+@media (min-width: 1400px) {
+  section:has(> .stepmark) { position: relative; }
+  .stepmark { display: block; position: absolute; top: 16px; bottom: 40px; left: -128px; width: 108px; pointer-events: none; }
+  .stepmark > span {
+    position: sticky;
+    top: calc(var(--bar-h) + 16px + env(safe-area-inset-top, 0px));
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+    text-align: right;
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    line-height: 1.15;
+  }
+  .stepmark b { font-weight: 600; }
+  .stepmark .mk { width: 34px; height: 34px; }
+  .stepmark + .sec-head :is(.hnum, .hstep) { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .stepmark + .sec-head .hrest { display: inline-block; }
+  .stepmark + .sec-head .hrest::first-letter { text-transform: uppercase; }
+}
+/* views: the script hides the blocks of the other views. Where the browser can search hidden
+   text (hidden="until-found"), a search still finds a word there, and the script opens its view. */
+[hidden]:not([hidden="until-found"]) { display: none !important; }
+@media screen { .wrap > [data-view][hidden] { margin: 0; padding: 0; border: 0; } }
+@media print {
+  .bar { position: static; }
+  [hidden="until-found"] { content-visibility: visible; }
+}
+</style>
+
+<main class="wrap">
+  <header class="top" id="idea-to-code" data-view="flow" data-src="idea-to-code">
+    <p class="eyebrow">Development workflow</p>
+    <h1>Idea to Code</h1>
+    <p class="callout">As of 2026-11-24, a toy trial ran the flow from explore to verify, end to end. No real change has gone through the flow yet.</p>
+    <p class="lead">The idea becomes an OpenSpec change, built in thin slices, one at a time; where a repo has specs, the tests are written from the spec first, and the code may not change them.</p>
+    <p class="small"><a href="#credit-and-licence-duties">Built on OpenSpec and on skills adapted from Matt Pocock's AI Hero skills.</a></p>
+  </header>
+  <div class="bar">
+    <nav class="rail plain views" aria-label="The five views"><ol><li data-view="flow"><a href="#idea-to-code"><span>Flow</span></a></li><li data-view="who"><a href="#p-who"><span>Who and how</span></a></li><li data-view="roads"><a href="#3-other-roads"><span>Roads</span></a></li><li data-view="parts"><a href="#4-optional-parts"><span>Parts</span></a></li><li data-view="setup"><a href="#5-setting-up-a-project"><span>Set up</span></a></li></ol></nav>
+    <nav class="rail stepbar" data-view="flow" aria-label="The five steps"><ol><li><a href="#step-1-explore"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">1</text></svg><span>Explore</span></a></li><li><a href="#step-2-propose"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">2</text></svg><span>Propose</span></a></li><li><a href="#step-3-build"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">3</text></svg><span>Build</span></a></li><li><a href="#step-4-verify"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">4</text></svg><span>Verify</span></a></li><li><a href="#step-5-pull-request-and-archive"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">5</text></svg><span>Pull request and archive</span></a></li></ol></nav>
+    <nav class="rail plain subbar" data-view="who" aria-label="The two sections of this view" hidden><ol><li><a href="#p-who"><span>Who does what</span></a></li><li><a href="#p-question-form"><span>How the agent asks</span></a></li></ol></nav>
+    <nav class="rail plain subbar" data-view="roads" aria-label="The sections of this view" hidden><ol><li><a href="#3-other-roads"><span>Overview</span></a></li><li><a href="#a-small-change"><span>A small change</span></a></li><li><a href="#a-bug"><span>A bug</span></a></li><li><a href="#work-outside-a-change"><span>Outside a change</span></a></li></ol></nav>
+    <nav class="rail plain subbar" data-view="parts" aria-label="The sections of this view" hidden><ol><li><a href="#4-optional-parts"><span>Overview</span></a></li><li><a href="#an-enhancement-store"><span>Enhancement store</span></a></li><li><a href="#a-tracker-issue-for-several-repos"><span>Tracker issue</span></a></li><li><a href="#many-repos-in-one-workspace"><span>Many repos</span></a></li><li><a href="#release-rules-tied-to-commit-types"><span>Release rules</span></a></li><li><a href="#a-repo-without-specs"><span>Without specs</span></a></li><li><a href="#owner-gates"><span>Owner gates</span></a></li></ol></nav>
+    <nav class="rail plain subbar" data-view="setup" aria-label="The three sections of this view" hidden><ol><li><a href="#5-setting-up-a-project"><span>What a repo needs</span></a></li><li><a href="#the-skills"><span>The skills</span></a></li><li><a href="#the-projects-profile"><span>The profile</span></a></li></ol></nav>
+  </div>
+  <section class="chapter" id="1-start-here" data-view="flow" aria-labelledby="h-1-start-here" data-src="1-start-here">
+    <div class="sec-head">
+      <h2 id="h-1-start-here">Start here: one change, from an idea to main in five steps</h2>
+    </div>
+    <div class="pair">
+      <figure class="figure" id="2-the-path-five-steps-from-an-idea-to-main" data-src="1-start-here">
+<svg xmlns="http://www.w3.org/2000/svg" class="dg" viewBox="0 0 336 720" width="420" height="900" role="img" aria-labelledby="the-path-title the-path-desc">
+<title id="the-path-title">The path from an idea to main</title>
+<desc id="the-path-desc">The five steps of the path from an idea to main, who acts at each, the side step that explore may pause for, and the loops of build and verify.</desc>
+
+<defs><marker id="the-path-arrow" viewBox="0 0 8 6" refX="5" refY="3" markerWidth="8" markerHeight="6" markerUnits="userSpaceOnUse" orient="auto"><path class="d-arrowhead" d="M0 0L8 3L0 6z"/></marker></defs>
+<rect class="d-bg" x="0" y="0" width="336" height="720" rx="8"/>
+
+<!-- Flow lines: the spine, the side step, the two loops. Each ends 3 short of its target. -->
+<path class="d-flow" d="M 36 30 V 51" marker-end="url(#the-path-arrow)"/>
+<path class="d-flow" d="M 36 78 V 247" marker-end="url(#the-path-arrow)"/>
+<path class="d-flow" d="M 100 112 V 145" marker-end="url(#the-path-arrow)"/>
+<path class="d-flow" d="M 292 148 V 115" marker-end="url(#the-path-arrow)"/>
+<path class="d-flow" d="M 36 274 V 347" marker-end="url(#the-path-arrow)"/>
+<path class="d-flow" d="M 36 374 V 428"/>
+<path class="d-flow" d="M 36 428 H 12 Q 6 428 6 422 V 368 Q 6 362 12 362 H 21" marker-end="url(#the-path-arrow)"/>
+<path class="d-flow" d="M 36 428 V 475" marker-end="url(#the-path-arrow)"/>
+<path class="d-flow" d="M 36 502 V 556"/>
+<path class="d-flow" d="M 36 556 H 12 Q 6 556 6 550 V 496 Q 6 490 12 490 H 21" marker-end="url(#the-path-arrow)"/>
+<path class="d-flow" d="M 36 556 V 603" marker-end="url(#the-path-arrow)"/>
+<path class="d-flow" d="M 36 630 V 682" marker-end="url(#the-path-arrow)"/>
+
+<!-- Boxes and chips. Step boxes are 64 tall: name at top + 23, chips at top + 33. -->
+<rect class="d-box" x="60" y="48" width="260" height="64" rx="6"/>
+<rect class="d-chip-agent" x="72" y="81" width="76" height="20" rx="10"/>
+<rect class="d-chip-owner" x="154" y="81" width="76" height="20" rx="10"/>
+<rect class="d-box" x="84" y="148" width="236" height="60" rx="6"/>
+<rect class="d-chip-agent" x="232" y="158" width="76" height="20" rx="10"/>
+<rect class="d-box" x="60" y="244" width="260" height="64" rx="6"/>
+<rect class="d-chip-agent" x="72" y="277" width="76" height="20" rx="10"/>
+<rect class="d-box" x="60" y="344" width="260" height="64" rx="6"/>
+<rect class="d-chip-agent" x="72" y="377" width="76" height="20" rx="10"/>
+<rect class="d-chip-owner" x="154" y="377" width="76" height="20" rx="10"/>
+<rect class="d-box" x="60" y="472" width="260" height="64" rx="6"/>
+<rect class="d-chip-agent" x="72" y="505" width="76" height="20" rx="10"/>
+<rect class="d-box" x="60" y="600" width="260" height="64" rx="6"/>
+<rect class="d-chip-agent" x="72" y="633" width="76" height="20" rx="10"/>
+<rect class="d-chip-owner" x="154" y="633" width="76" height="20" rx="10"/>
+
+<!-- Marks on the spine. -->
+<circle class="d-start" cx="36" cy="24" r="6"/>
+<circle class="d-step" cx="36" cy="66" r="12"/>
+<circle class="d-step" cx="36" cy="262" r="12"/>
+<circle class="d-step" cx="36" cy="362" r="12"/>
+<circle class="d-junction" cx="36" cy="428" r="3"/>
+<circle class="d-step" cx="36" cy="490" r="12"/>
+<circle class="d-junction" cx="36" cy="556" r="3"/>
+<circle class="d-step" cx="36" cy="618" r="12"/>
+<circle class="d-end" cx="36" cy="692" r="7"/>
+<circle class="d-end-dot" cx="36" cy="692" r="3"/>
+
+<!-- Text. -->
+<text class="d-label" x="52" y="29">An idea, in the owner's words</text>
+
+<text class="d-num" x="36" y="70.5" text-anchor="middle">1</text>
+<text class="d-name" x="72" y="71">Explore</text>
+<text class="d-chip-agent-text" x="110" y="95.5" text-anchor="middle">AGENT</text>
+<text class="d-chip-owner-text" x="192" y="95.5" text-anchor="middle">OWNER</text>
+
+<text class="d-pass" x="112" y="135">may pause</text>
+<text class="d-pass" x="280" y="135" text-anchor="end">the finding</text>
+
+<text class="d-name" x="96" y="172">Side step</text>
+<text class="d-chip-agent-text" x="270" y="172.5" text-anchor="middle">AGENT</text>
+<text class="d-text" x="96" y="196">Settles an open assumption</text>
+
+<text class="d-pass" x="52" y="231">decisions</text>
+
+<text class="d-num" x="36" y="266.5" text-anchor="middle">2</text>
+<text class="d-name" x="72" y="267">Propose</text>
+<text class="d-chip-agent-text" x="110" y="291.5" text-anchor="middle">AGENT</text>
+
+<text class="d-pass" x="52" y="331">a change folder</text>
+
+<text class="d-num" x="36" y="366.5" text-anchor="middle">3</text>
+<text class="d-name" x="72" y="367">Build</text>
+<text class="d-chip-agent-text" x="110" y="391.5" text-anchor="middle">AGENT</text>
+<text class="d-chip-owner-text" x="192" y="391.5" text-anchor="middle">OWNER</text>
+
+<text class="d-label" x="52" y="433">Slices left</text>
+<text class="d-pass" x="52" y="457">every slice closed, nothing pushed</text>
+
+<text class="d-num" x="36" y="494.5" text-anchor="middle">4</text>
+<text class="d-name" x="72" y="495">Verify</text>
+<text class="d-chip-agent-text" x="110" y="519.5" text-anchor="middle">AGENT</text>
+
+<text class="d-label" x="52" y="561">Findings: <tspan class="d-text">one fix round</tspan></text>
+<text class="d-pass" x="52" y="585">a verified change</text>
+
+<text class="d-num" x="36" y="622.5" text-anchor="middle">5</text>
+<text class="d-name" x="72" y="623">Pull request and archive</text>
+<text class="d-chip-agent-text" x="110" y="647.5" text-anchor="middle">AGENT</text>
+<text class="d-chip-owner-text" x="192" y="647.5" text-anchor="middle">OWNER</text>
+
+<text class="d-label" x="52" y="697">Squash-merged to main</text>
+</svg>
+        <figcaption>The path from an idea to main: five steps, the side step that explore may pause for, and the two loops.</figcaption>
+      </figure>
+      <div class="side">
+        <article class="card" data-src="1-start-here">
+          <p class="label">Words on this page</p>
+          <dl class="terms">
+            <dt>change</dt><dd>one piece of work in one repo, kept as an OpenSpec change</dd>
+            <dt>slice</dt><dd>a thin, working piece of a change, built and closed on its own</dd>
+            <dt>path</dt><dd>five steps for one change in one repo with specs</dd>
+            <dt>example</dt><dd>a made-up change in a small web service that stores uploaded files</dd>
+            <dt>default</dt><dd>a rule that holds until the owner sets another</dd>
+            <dt>open</dt><dd>a point that is not decided</dd>
+          </dl>
+          <p class="hook">In a repo with OpenSpec, feature work is always delivered as a change: never as a plan alone, and never as direct code.</p>
+        </article>
+        <div data-src="1-start-here">
+          <p class="label">What the flow assumes</p>
+          <ul class="tags"><li>git</li><li>pull requests that squash-merge</li><li>OpenSpec 2.x in each repo</li><li>a coding agent with skills and fresh sub-agents</li><li>a test command in each repo</li></ul>
+        </div>
+      <div class="legend" role="group" aria-label="How to read the marks on a line" data-src="1-start-here">
+          <span class="label">On a line</span>
+          <ul>
+            <li><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-start" cx="12" cy="12" r="6"/></svg> where it starts</li>
+            <li><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><polygon class="d-decision" points="12 3 21 12 12 21 3 12"/></svg> a check, a ruling or a question</li>
+            <li><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-end" cx="12" cy="12" r="7"/><circle class="d-end-dot" cx="12" cy="12" r="3"/></svg> what the step hands on</li>
+          </ul>
+      </div>
+      <p class="twin"><span class="label">In WORKFLOW.md</span> <cite>§ 1. Start here; § 2. The path: five steps from an idea to main</cite></p>
+      </div>
+    </div>
+  </section>
+
+  <section id="step-1-explore" data-view="flow" aria-labelledby="h-step-1-explore" data-src="step-1-explore">
+    <p class="stepmark" aria-hidden="true"><span><svg class="mk" viewBox="0 0 24 24"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">1</text></svg><b>Explore</b></span></p>
+    <div class="sec-head">
+      <h2 id="h-step-1-explore"><svg class="hnum mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">1</text></svg><span class="hstep">Explore: </span><span class="hrest">an idea becomes decisions</span></h2>
+      <div class="head-meta" id="the-explore-command" data-src="the-explore-command step-1-explore"><span class="cmd">the explore command</span><span class="pill">read-only</span><span class="pill"><svg class="os mk" viewBox="0 0 24 24" aria-hidden="true"><rect class="d-owner-mark" x="3" y="3" width="18" height="18" rx="4"/><rect class="d-owner-bar" x="8" y="7.5" width="2.5" height="9"/><rect class="d-owner-bar" x="13.5" y="7.5" width="2.5" height="9"/></svg>4 stops for the owner</span></div>
+    </div>
+    <div class="tr-head"><p class="label">What happens</p><p class="label">In the example</p></div>
+    <ol class="trace">
+      <li class="band">
+        <ol class="rows">
+          <li class="tr" data-src="step-1-explore">
+            <svg class="tmk mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-start" cx="12" cy="12" r="6"/></svg>
+            <div class="tr-text"><h3>An idea, in the owner's words</h3><p class="hook" data-src="the-explore-command"><span class="state opt"><svg width="10" height="10" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.8" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6 3.6v4.8M3.6 6h4.8" stroke="currentColor" stroke-width="1.4"/></svg>Optional</span> <a href="#a-tracker-issue-for-several-repos">Tracker issues</a>, <a href="#many-repos-in-one-workspace">many repos</a></p><p class="hook" data-src="the-explore-command">Another way in: <code>improve-codebase-architecture</code>, an upstream skill (<a href="https://github.com/mattpocock/skills">Matt Pocock's skills</a>, <code>skills/engineering/</code>) that the plugin does not ship; install it from upstream</p></div>
+            <pre class="snip prose" data-src="the-track-question">"An upload with an <mark class="req">empty file name</mark> should be refused&hellip;"</pre>
+          </li>
+          <li class="tr" data-src="step-1-explore">
+            <svg class="tmk mk" viewBox="0 0 24 24" aria-hidden="true"><rect class="d-session" x="6" y="6" width="12" height="12" rx="2"/></svg>
+            <div class="tr-text"><h3>The agent looks up the facts itself</h3></div>
+            <div class="snip cols" data-src="the-track-question"><span>the handler</span><span>stores such a file and answers 201</span><span>other errors</span><span>name their field</span></div>
+          </li>
+          <li class="tr" id="the-grill" data-src="the-grill">
+            <svg class="tmk mk" viewBox="0 0 24 24" role="img" aria-label="Stop for the owner"><rect class="d-owner-mark" x="3" y="3" width="18" height="18" rx="4"/><rect class="d-owner-bar" x="8" y="7.5" width="2.5" height="9"/><rect class="d-owner-bar" x="13.5" y="7.5" width="2.5" height="9"/></svg>
+            <div class="tr-text"><h3>The grill: one question per message</h3><p>One decision per question. It stops when no open decision that the work needs is left.</p><p data-src="the-grill"><svg class="os mk" viewBox="0 0 24 24" role="img" aria-label="Stop for the owner"><rect class="d-owner-mark" x="3" y="3" width="18" height="18" rx="4"/><rect class="d-owner-bar" x="8" y="7.5" width="2.5" height="9"/><rect class="d-owner-bar" x="13.5" y="7.5" width="2.5" height="9"/></svg> The seams, after the decisions that fix what is built: one question per distinct seam, each option saying what the seam catches and what it misses.</p></div>
+            <div class="snip cols" data-src="the-track-question"><span>Q1</span><span>What does the refusal tell the uploader?</span><span></span><span><b>A: name the field</b></span><span>Q2</span><span>Does a name of only spaces count as empty?</span><span></span><span><b>A: yes</b></span></div>
+          </li>
+          <li class="tr" data-src="the-grill">
+            <svg class="tmk mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-junction" cx="12" cy="12" r="3"/></svg>
+            <div class="tr-text"><h3>Nothing settles in two exchanges: the grill stops</h3>
+              <ul class="routes">
+                <li><span class="cond">Missing fact</span><span>the agent finds it</span></li>
+                <li><span class="cond">An option nobody likes</span><span>the agent finds new ones</span></li>
+                <li><span class="cond">Not ready</span><span>the agent offers "decide later"</span></li>
+              </ul>
+            </div>
+          </li>
+          <li class="tr">
+            <div class="if" id="p-side-step" data-src="the-grill">
+              <div class="if-head"><h3><span class="label">If</span> an assumption is open: the side step settles it <span class="state opt"><svg width="10" height="10" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.8" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6 3.6v4.8M3.6 6h4.8" stroke="currentColor" stroke-width="1.4"/></svg>Optional</span></h3></div>
+              <ul class="tags"><li><code>prototype</code></li><li><code>research</code></li></ul>
+              <p class="back"><b>Back to:</b> explore, with the finding.</p>
+            </div>
+          </li>
+          <li class="tr">
+            <div class="if" id="p-records" data-src="the-grill">
+              <div class="if-head"><h3><span class="label">If</span> the grill settles a new term, or a decision that may need a record <span class="state opt"><svg width="10" height="10" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.8" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6 3.6v4.8M3.6 6h4.8" stroke="currentColor" stroke-width="1.4"/></svg>Optional</span></h3></div>
+              <p>On the owner's yes, <code>domain-modeling</code> writes the term or the record at once, in a pause of explore.</p>
+              <p class="label">A record only when all three hold</p>
+              <ul class="tags"><li>hard to reverse</li><li>surprising without context</li><li>a real trade-off</li></ul>
+            </div>
+          </li>
+          <li class="tr" id="the-track-question" data-src="the-track-question">
+            <svg class="tmk mk" viewBox="0 0 24 24" aria-hidden="true"><polygon class="d-decision" points="12 3 21 12 12 21 3 12"/></svg>
+            <div class="tr-text"><h3>The track question</h3><p>Only where an optional part adds tracks.</p><p><svg class="os mk" viewBox="0 0 24 24" role="img" aria-label="Stop for the owner"><rect class="d-owner-mark" x="3" y="3" width="18" height="18" rx="4"/><rect class="d-owner-bar" x="8" y="7.5" width="2.5" height="9"/><rect class="d-owner-bar" x="13.5" y="7.5" width="2.5" height="9"/></svg> The owner answers it.</p><p class="hook"><span class="state opt"><svg width="10" height="10" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.8" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6 3.6v4.8M3.6 6h4.8" stroke="currentColor" stroke-width="1.4"/></svg>Optional</span> <a href="#an-enhancement-store">Enhancement store</a>, <a href="#a-tracker-issue-for-several-repos">tracker issues</a></p></div>
+          </li>
+          <li class="tr" data-src="the-track-question">
+            <svg class="tmk mk" viewBox="0 0 24 24" role="img" aria-label="Stop for the owner"><rect class="d-owner-mark" x="3" y="3" width="18" height="18" rx="4"/><rect class="d-owner-bar" x="8" y="7.5" width="2.5" height="9"/><rect class="d-owner-bar" x="13.5" y="7.5" width="2.5" height="9"/></svg>
+            <div class="tr-text"><h3>A design question: the agent presents and stops</h3><p>An idea of the form "how do we make X possible".</p><p class="label">Nothing before the owner approves</p><ul class="held"><li>change folder</li><li>enhancement entry</li><li>branch</li><li>pull request</li></ul></div>
+          </li>
+          <li class="tr" data-src="step-1-explore">
+            <svg class="tmk mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-end" cx="12" cy="12" r="7"/><circle class="d-end-dot" cx="12" cy="12" r="3"/></svg>
+            <div class="tr-text"><h3>Decisions, and the work on a track</h3></div>
+            <pre class="snip prose" data-src="the-track-question">Explore writes no file.</pre>
+          </li>
+        </ol>
+      </li>
+    </ol>
+  </section>
+
+  <section id="step-2-propose" data-view="flow" aria-labelledby="h-step-2-propose" data-src="step-2-propose">
+    <p class="stepmark" aria-hidden="true"><span><svg class="mk" viewBox="0 0 24 24"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">2</text></svg><b>Propose</b></span></p>
+    <div class="sec-head">
+      <h2 id="h-step-2-propose"><svg class="hnum mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">2</text></svg><span class="hstep">Propose: </span><span class="hrest">the decisions become a change folder</span></h2>
+      <div class="head-meta" data-src="step-2-propose"><span class="cmd">the propose command</span><span class="pill">plans only, writes no code</span><span class="pill"><svg class="os mk" viewBox="0 0 24 24" aria-hidden="true"><rect class="d-owner-mark" x="3" y="3" width="18" height="18" rx="4"/><rect class="d-owner-bar" x="8" y="7.5" width="2.5" height="9"/><rect class="d-owner-bar" x="13.5" y="7.5" width="2.5" height="9"/></svg>4 stops for the owner</span></div>
+    </div>
+    <div class="tr-head"><p class="label">What happens</p><p class="label">In the example</p></div>
+    <ol class="trace">
+      <li class="band">
+        <ol class="rows">
+          <li class="tr" data-src="step-2-propose">
+            <svg class="tmk mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-start" cx="12" cy="12" r="6"/></svg>
+            <div class="tr-text"><h3>The decisions from step 1</h3><p data-src="step-2-propose the-fast-path"><svg class="os mk" viewBox="0 0 24 24" role="img" aria-label="Stop for the owner"><rect class="d-owner-mark" x="3" y="3" width="18" height="18" rx="4"/><rect class="d-owner-bar" x="8" y="7.5" width="2.5" height="9"/><rect class="d-owner-bar" x="13.5" y="7.5" width="2.5" height="9"/></svg> <a href="#the-fast-path">A failed fast-path check.</a></p><p><svg class="os mk" viewBox="0 0 24 24" role="img" aria-label="Stop for the owner"><rect class="d-owner-mark" x="3" y="3" width="18" height="18" rx="4"/><rect class="d-owner-bar" x="8" y="7.5" width="2.5" height="9"/><rect class="d-owner-bar" x="13.5" y="7.5" width="2.5" height="9"/></svg> A change name that exists.</p><p><svg class="os mk" viewBox="0 0 24 24" role="img" aria-label="Stop for the owner"><rect class="d-owner-mark" x="3" y="3" width="18" height="18" rx="4"/><rect class="d-owner-bar" x="8" y="7.5" width="2.5" height="9"/><rect class="d-owner-bar" x="13.5" y="7.5" width="2.5" height="9"/></svg> One open owner decision.</p><p data-src="step-2-propose"><svg class="os mk" viewBox="0 0 24 24" role="img" aria-label="Stop for the owner"><rect class="d-owner-mark" x="3" y="3" width="18" height="18" rx="4"/><rect class="d-owner-bar" x="8" y="7.5" width="2.5" height="9"/><rect class="d-owner-bar" x="13.5" y="7.5" width="2.5" height="9"/></svg> A seam still open: one question per distinct seam.</p></div>
+          </li>
+        </ol>
+      </li>
+      <li class="band" id="the-change-folder" data-src="the-change-folder">
+        <p class="band-label"><span class="band-name">The change folder</span><span class="where">openspec/changes/&lt;name&gt;/</span></p>
+        <ol class="rows">
+          <li class="tr" data-src="the-change-folder">
+            <svg class="tmk mk" viewBox="0 0 24 24" aria-hidden="true"><path class="p-file" d="M6 2.5h8l4.5 4.5v14.5H6z"/><path class="p-file" d="M14 2.5V7h4.5"/></svg>
+            <div class="tr-text"><h3><code>proposal.md</code></h3><p>why the change exists, and what it changes</p><p class="hook" data-src="the-change-folder"><span class="state opt"><svg width="10" height="10" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.8" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6 3.6v4.8M3.6 6h4.8" stroke="currentColor" stroke-width="1.4"/></svg>Optional</span> User stories: <code>proposal.md</code> lists them; verify checks that a requirement covers each.</p><p class="hook" data-src="the-change-folder"><span class="state opt"><svg width="10" height="10" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.8" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6 3.6v4.8M3.6 6h4.8" stroke="currentColor" stroke-width="1.4"/></svg>Optional</span> <a href="#an-enhancement-store">Enhancement store</a></p></div>
+          </li>
+          <li class="tr" data-src="the-change-folder">
+            <svg class="tmk mk" viewBox="0 0 24 24" aria-hidden="true"><path class="p-file" d="M6 2.5h8l4.5 4.5v14.5H6z"/><path class="p-file" d="M14 2.5V7h4.5"/></svg>
+            <div class="tr-text"><h3><code>specs/&lt;capability&gt;/spec.md</code></h3><p>ADDED, MODIFIED or REMOVED requirements, with scenarios</p></div>
+            <pre class="snip" data-src="the-task-sections">The service <b>SHALL</b> refuse an upload whose <mark class="req">file name is empty</mark> or holds only spaces.
+<span class="li">- <b>WHEN</b> a client uploads a file with the file name ""</span><span class="li">- <b>THEN</b> the service answers 400 with an error that names filename</span></pre>
+          </li>
+          <li class="tr" id="the-slices-section" data-src="the-change-folder the-slices-section">
+            <svg class="tmk mk" viewBox="0 0 24 24" aria-hidden="true"><path class="p-file" d="M6 2.5h8l4.5 4.5v14.5H6z"/><path class="p-file" d="M14 2.5V7h4.5"/></svg>
+            <div class="tr-text"><h3><code>design.md</code></h3><p>the design, with <code>## Slices</code></p><p class="label">one block per slice</p><ul class="tags"><li>Delivers</li><li>Seam</li><li>Depends on</li><li>Done when</li></ul></div>
+            <pre class="snip" data-src="the-task-sections"><b>### S1: Refuse an <mark class="req">empty file name</mark></b>
+Depends on: none
+
+<b>### S2: Refuse a file name of only spaces</b>
+Depends on: S1</pre>
+          </li>
+          <li class="tr" id="the-task-sections" data-src="the-change-folder the-task-sections">
+            <svg class="tmk mk" viewBox="0 0 24 24" aria-hidden="true"><path class="p-file" d="M6 2.5h8l4.5 4.5v14.5H6z"/><path class="p-file" d="M14 2.5V7h4.5"/></svg>
+            <div class="tr-text"><h3><code>tasks.md</code></h3><p>one <code>## N.</code> section per slice; <a href="#per-slice">the code commit</a> ticks its boxes</p></div>
+          </li>
+          <li class="tr" data-src="the-change-folder">
+            <svg class="tmk mk" viewBox="0 0 24 24" aria-hidden="true"><path class="p-file" d="M6 2.5h8l4.5 4.5v14.5H6z"/><path class="p-file" d="M14 2.5V7h4.5"/></svg>
+            <div class="tr-text"><h3><code>evidence/&lt;nn&gt;-&lt;name&gt;/</code></h3><p>only when <a href="#p-side-step">a side step</a> ran</p></div>
+            <pre class="snip prose" data-src="the-task-sections">None: no side step ran.</pre>
+          </li>
+          <li class="tr" data-src="the-change-folder">
+            <div class="tr-text"><p class="openl" data-src="the-change-folder"><span class="state open"><svg width="10" height="10" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-dasharray="2.2 1.6"/></svg>Open</span> Tentative: generated skills write the change files; <a href="#the-kit">kit skills</a> give input and check them. <span class="label">until then</span> a project works with that split.</p></div>
+          </li>
+        </ol>
+      </li>
+      <li class="band">
+        <ol class="rows">
+          <li class="tr" data-src="step-2-propose per-slice">
+            <svg class="tmk mk" viewBox="0 0 24 24" aria-hidden="true"><polygon class="d-decision" points="12 3 21 12 12 21 3 12"/></svg>
+            <div class="tr-text"><h3>With <a href="#per-slice">check scripts</a>: the slice check <span class="state opt"><svg width="10" height="10" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.8" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6 3.6v4.8M3.6 6h4.8" stroke="currentColor" stroke-width="1.4"/></svg>Optional</span></h3><p data-src="step-2-propose">Without check scripts, no form check runs in this step.</p></div>
+            <pre class="snip prose" data-src="the-task-sections"><span class="pass">Passes:</span> S2 names S1, which exists.</pre>
+          </li>
+          <li class="tr" data-src="step-2-propose">
+            <svg class="tmk mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-end" cx="12" cy="12" r="7"/><circle class="d-end-dot" cx="12" cy="12" r="3"/></svg>
+            <div class="tr-text"><h3>A change folder that says what must be true, slice by slice</h3><p class="hook" data-src="step-2-propose owner-gates"><span class="state opt"><svg width="10" height="10" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.8" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6 3.6v4.8M3.6 6h4.8" stroke="currentColor" stroke-width="1.4"/></svg>Optional</span> <a href="#owner-gates">Owner gates</a></p></div>
+          </li>
+        </ol>
+      </li>
+    </ol>
+  </section>
+  <section id="step-3-build" data-view="flow" aria-labelledby="h-step-3-build" data-src="step-3-build">
+    <p class="stepmark" aria-hidden="true"><span><svg class="mk" viewBox="0 0 24 24"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">3</text></svg><b>Build</b></span></p>
+    <div class="sec-head">
+      <h2 id="h-step-3-build"><svg class="hnum mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">3</text></svg><span class="hstep">Build: </span><span class="hrest">each slice becomes tests, then code</span></h2>
+      <div class="head-meta" data-src="step-3-build"><span class="cmd">the build command</span><span class="pill"><svg class="os mk" viewBox="0 0 24 24" aria-hidden="true"><rect class="d-owner-mark" x="3" y="3" width="18" height="18" rx="4"/><rect class="d-owner-bar" x="8" y="7.5" width="2.5" height="9"/><rect class="d-owner-bar" x="13.5" y="7.5" width="2.5" height="9"/></svg>13 stops for the owner</span></div>
+      <p>The owner types the build command; words do not build. Then the agent works alone.</p>
+    </div>
+      <article class="card narrow" data-src="step-3-build per-slice">
+        <h3>Who is who</h3>
+        <ul>
+          <li><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><rect class="d-session" x="6" y="6" width="12" height="12" rx="2"/></svg> <span><b>The session:</b> writes no test and no code.</span></li>
+          <li><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><rect class="d-subagent" x="5" y="5" width="14" height="14" rx="3"/></svg> <span><b>The test writer:</b> tests at the Seam; expected values from the spec, never from running code.</span></li>
+          <li><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><rect class="d-subagent" x="5" y="5" width="14" height="14" rx="3"/></svg> <span><b>The code writer:</b> code until the tests pass.</span></li>
+        </ul>
+        <p class="label">The code writer never</p>
+        <ul class="nevers"><li>edits, adds, deletes or renames a test file or fixture</li><li>special-cases a test input as the fix</li></ul>
+      </article>
+    <div class="tr-head"><p class="label">What happens</p><p class="label">In the example</p></div>
+    <ol class="trace">
+      <li class="band">
+        <ol class="rows">
+          <li class="tr" data-src="step-3-build">
+            <svg class="tmk mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-start" cx="12" cy="12" r="6"/></svg>
+            <div class="tr-text"><h3>The change folder</h3><p data-src="step-3-build"><svg class="os mk" viewBox="0 0 24 24" role="img" aria-label="Stop for the owner"><rect class="d-owner-mark" x="3" y="3" width="18" height="18" rx="4"/><rect class="d-owner-bar" x="8" y="7.5" width="2.5" height="9"/><rect class="d-owner-bar" x="13.5" y="7.5" width="2.5" height="9"/></svg> No change named, and several changes active: which change to build.</p></div>
+          </li>
+        </ol>
+      </li>
+      <li class="band" id="before-the-first-slice" data-src="before-the-first-slice">
+        <p class="band-label"><span class="band-name">Before the first slice</span></p>
+        <ol class="rows">
+          <li class="tr" data-src="before-the-first-slice">
+            <svg class="tmk mk" viewBox="0 0 24 24" aria-hidden="true"><rect class="d-session" x="6" y="6" width="12" height="12" rx="2"/></svg>
+            <div class="tr-text"><h3>Sets up once</h3><ul><li>from the repo root</li><li><code>git status</code></li><li>the working branch</li><li>the apply guidance</li></ul><p class="hook" data-src="before-the-first-slice many-repos-in-one-workspace owner-gates"><span class="state opt"><svg width="10" height="10" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.8" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6 3.6v4.8M3.6 6h4.8" stroke="currentColor" stroke-width="1.4"/></svg>Optional</span> <a href="#many-repos-in-one-workspace">Many repos</a>, <a href="#owner-gates">owner gates</a></p></div>
+            <div class="snip cols"><span>branch</span><span><mark class="req">refuse-empty-file-name</mark></span></div>
+          </li>
+          <li class="tr" data-src="before-the-first-slice">
+            <svg class="tmk mk" viewBox="0 0 24 24" role="img" aria-label="Stop for the owner"><rect class="d-owner-mark" x="3" y="3" width="18" height="18" rx="4"/><rect class="d-owner-bar" x="8" y="7.5" width="2.5" height="9"/><rect class="d-owner-bar" x="13.5" y="7.5" width="2.5" height="9"/></svg>
+            <div class="tr-text"><h3>The set-up questions go to the owner</h3><ul><li>an unrelated change in the tree</li><li>whether the first commit carries a term or decision record from explore</li><li>a clash with the apply guidance</li><li>a command the config does not name</li></ul><p data-src="per-slice">The OpenSpec config names the test command, after <code>Tests:</code>.</p></div>
+            <pre class="snip prose">No question: the first tests commit carries the change folder.</pre>
+          </li>
+        </ol>
+      </li>
+      <li class="band" id="per-slice" data-src="per-slice">
+        <p class="band-label"><span class="band-name">Per slice</span></p>
+        <ol class="rows">
+          <li class="tr" data-src="per-slice">
+            <div class="pair">
+              <figure class="figure" data-src="per-slice">
+<svg xmlns="http://www.w3.org/2000/svg" class="dg" viewBox="0 0 336 568" width="420" height="710" role="img" aria-labelledby="per-slice-title per-slice-desc">
+<title id="per-slice-title">The seven parts of a slice</title>
+<desc id="per-slice-desc">The seven parts of a slice, (a) to (g), each marked as the session, a sub-agent or a check, and the two commits that close it: tests, then code.</desc>
+
+<defs><marker id="per-slice-arrow" viewBox="0 0 8 6" refX="5" refY="3" markerWidth="8" markerHeight="6" markerUnits="userSpaceOnUse" orient="auto"><path class="d-arrowhead" d="M0 0L8 3L0 6z"/></marker></defs>
+<rect class="d-bg" x="0" y="0" width="336" height="568" rx="8"/>
+
+<!-- Flow lines: one segment from each mark to the next, the loop back to (a), the end. -->
+<path class="d-flow" d="M 36 30 V 56" marker-end="url(#per-slice-arrow)"/>
+<path class="d-flow" d="M 36 77 V 102" marker-end="url(#per-slice-arrow)"/>
+<path class="d-flow" d="M 36 119 V 144" marker-end="url(#per-slice-arrow)"/>
+<path class="d-flow" d="M 36 165 V 191" marker-end="url(#per-slice-arrow)"/>
+<path class="d-flow" d="M 36 206 V 234" marker-end="url(#per-slice-arrow)"/>
+<path class="d-flow" d="M 36 251 V 276" marker-end="url(#per-slice-arrow)"/>
+<path class="d-flow" d="M 36 297 V 323" marker-end="url(#per-slice-arrow)"/>
+<path class="d-flow" d="M 36 338 V 384"/>
+<path class="d-flow" d="M 36 384 H 16 Q 10 384 10 378 V 74 Q 10 68 16 68 H 24" marker-end="url(#per-slice-arrow)"/>
+<path class="d-flow" d="M 36 384 V 418" marker-end="url(#per-slice-arrow)"/>
+
+<!-- Marks: decision (a) (c) (f), sub-agent (b) (e), session (d) (g). -->
+<circle class="d-start" cx="36" cy="24" r="6"/>
+<polygon class="d-decision" points="36 59 45 68 36 77 27 68"/>
+<rect class="d-subagent" x="29" y="105" width="14" height="14" rx="3"/>
+<polygon class="d-decision" points="36 147 45 156 36 165 27 156"/>
+<rect class="d-session" x="30" y="194" width="12" height="12" rx="2"/>
+<rect class="d-subagent" x="29" y="237" width="14" height="14" rx="3"/>
+<polygon class="d-decision" points="36 279 45 288 36 297 27 288"/>
+<rect class="d-session" x="30" y="326" width="12" height="12" rx="2"/>
+<circle class="d-junction" cx="36" cy="384" r="3"/>
+<circle class="d-end" cx="36" cy="428" r="7"/>
+<circle class="d-end-dot" cx="36" cy="428" r="3"/>
+
+<!-- Text. -->
+<text class="d-label" x="52" y="29">The set-up is done</text>
+<text class="d-label" x="52" y="73">(a) Gate</text>
+<text class="d-label" x="52" y="117">(b) Test writer</text>
+<text class="d-label" x="52" y="161">(c) Red check</text>
+<text class="d-label" x="52" y="205">(d) Tests commit</text>
+<text class="d-label" x="52" y="249">(e) Code writer</text>
+<text class="d-label" x="52" y="293">(f) Test-lock check</text>
+<text class="d-label" x="52" y="337">(g) Code commit</text>
+<text class="d-text" x="52" y="355">after the test command passes</text>
+<text class="d-label" x="52" y="389">Slices left</text>
+<text class="d-label" x="52" y="433">Every slice closed</text>
+
+<!-- Legend: the two actor marks and the decision. -->
+<rect class="d-session" x="30" y="482" width="12" height="12" rx="2"/>
+<rect class="d-subagent" x="29" y="505" width="14" height="14" rx="3"/>
+<polygon class="d-decision" points="36 527 45 536 36 545 27 536"/>
+<text class="d-text" x="52" y="493">the session</text>
+<text class="d-text" x="52" y="517">a sub-agent</text>
+<text class="d-text" x="52" y="541">a check or a ruling</text>
+</svg>
+                <figcaption>The seven parts of a slice, which closes with two commits: tests first, then code.</figcaption>
+              </figure>
+              <div class="side">
+                <div class="snip cols"><span>(a)</span><span>gate passes</span><span>(b)</span><span><mark class="req">test_empty_file_name_is_refused</mark></span><span>(c)</span><span><span class="fail">FAILED: expected 400, got 201</span> right reason</span><span>(d)</span><span>tests commit 1, Tests-For: S1</span><span>(e)</span><span>check in upload/handler.py</span><span>(f)</span><span>no changed test file</span><span>(g)</span><span>pytest passes; code commit 2</span></div>
+              </div>
+            </div>
+          </li>
+          <li class="tr" data-src="step-3-build per-slice">
+            <svg class="tmk mk" viewBox="0 0 24 24" role="img" aria-label="Stop for the owner"><rect class="d-owner-mark" x="3" y="3" width="18" height="18" rx="4"/><rect class="d-owner-bar" x="8" y="7.5" width="2.5" height="9"/><rect class="d-owner-bar" x="13.5" y="7.5" width="2.5" height="9"/></svg>
+            <div class="tr-text"><h3>The gate stops the build</h3></div>
+          </li>
+          <li class="tr" data-src="per-slice">
+            <svg class="tmk mk" viewBox="0 0 24 24" aria-hidden="true"><polygon class="d-decision" points="12 3 21 12 12 21 3 12"/></svg>
+            <div class="tr-text"><h3>The red check</h3><p>Before any code for the slice exists, every new test must fail for the right reason. Without check scripts, the session runs it by hand, as <a href="#the-skills"><code>slice-build</code></a> describes.</p><p class="hook" data-src="per-slice"><span class="state opt"><svg width="10" height="10" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.8" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6 3.6v4.8M3.6 6h4.8" stroke="currentColor" stroke-width="1.4"/></svg>Optional</span> Check scripts: scripts run the slice check, the gate, the red check and the test-lock check.</p></div>
+          </li>
+          <li class="tr" data-src="step-3-build per-slice">
+            <svg class="tmk mk" viewBox="0 0 24 24" role="img" aria-label="Stop for the owner"><rect class="d-owner-mark" x="3" y="3" width="18" height="18" rx="4"/><rect class="d-owner-bar" x="8" y="7.5" width="2.5" height="9"/><rect class="d-owner-bar" x="13.5" y="7.5" width="2.5" height="9"/></svg>
+            <div class="tr-text"><h3>The trailers of a tests commit stop the build</h3><ul><li>the trailer block fails its check, or git cannot write it</li><li>a resumed build cannot tell from the <code>Tests-For</code> trailers which slice resumes</li></ul></div>
+          </li>
+          <li class="tr" data-src="step-3-build 1-start-here">
+            <svg class="tmk mk" viewBox="0 0 24 24" role="img" aria-label="Stop for the owner"><rect class="d-owner-mark" x="3" y="3" width="18" height="18" rx="4"/><rect class="d-owner-bar" x="8" y="7.5" width="2.5" height="9"/><rect class="d-owner-bar" x="13.5" y="7.5" width="2.5" height="9"/></svg>
+            <div class="tr-text"><h3>A writer hands back an owner decision</h3><p><a href="#p-who">The session asks the owner.</a></p></div>
+          </li>
+        </ol>
+      </li>
+      <li class="band">
+        <p class="band-label"><span class="band-name">When something goes wrong</span></p>
+        <ol class="rows">
+          <li class="tr" id="when-a-part-fails" data-src="when-a-part-fails">
+            <svg class="tmk mk" viewBox="0 0 24 24" aria-hidden="true"><polygon class="d-decision" points="12 3 21 12 12 21 3 12"/></svg>
+            <div class="tr-text"><h3>A part fails: fresh writers retry <span class="state def"><svg width="12" height="10" viewBox="0 0 12 10" aria-hidden="true"><rect x="0.8" y="1.8" width="10.4" height="6.4" rx="3.2" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="7.8" cy="5" r="1.9" fill="currentColor"/></svg>Default</span></h3><p><a href="#the-skills"><code>slice-build</code></a> holds the exact rule.</p></div>
+          </li>
+          <li class="tr" data-src="when-a-part-fails">
+            <svg class="tmk mk" viewBox="0 0 24 24" role="img" aria-label="Stop for the owner"><rect class="d-owner-mark" x="3" y="3" width="18" height="18" rx="4"/><rect class="d-owner-bar" x="8" y="7.5" width="2.5" height="9"/><rect class="d-owner-bar" x="13.5" y="7.5" width="2.5" height="9"/></svg>
+            <div class="tr-text"><h3>The last retry fails: the build stops</h3><p>One question to the owner, with the evidence.</p></div>
+          </li>
+          <li class="tr">
+            <div class="if" id="a-disputed-test" data-src="a-disputed-test">
+              <div class="if-head"><h3><span class="label">If</span> the code writer says a committed test is wrong: the spec rules, never the code writer</h3></div>
+              <div class="pair">
+              <figure class="figure" data-src="a-disputed-test">
+<svg xmlns="http://www.w3.org/2000/svg" class="dg" viewBox="0 0 336 704" width="420" height="880" role="img" aria-labelledby="disputed-test-title disputed-test-desc">
+<title id="disputed-test-title">A disputed test</title>
+<desc id="disputed-test-desc">A fresh test writer rules on a disputed test by the spec, the owner answers when the spec cannot settle it or the test is disputed a second time, and the work then comes back.</desc>
+
+<defs><marker id="disputed-test-arrow" viewBox="0 0 8 6" refX="5" refY="3" markerWidth="8" markerHeight="6" markerUnits="userSpaceOnUse" orient="auto"><path class="d-arrowhead" d="M0 0L8 3L0 6z"/></marker></defs>
+<rect class="d-bg" x="0" y="0" width="336" height="704" rx="8"/>
+
+<!-- Flow lines: the spine to the question, the three exits, the rail that merges them. -->
+<path class="d-flow" d="M 36 30 V 59" marker-end="url(#disputed-test-arrow)"/>
+<path class="d-flow" d="M 36 74 V 102" marker-end="url(#disputed-test-arrow)"/>
+<path class="d-flow" d="M 36 119 V 200" marker-end="url(#disputed-test-arrow)"/>
+<path class="d-flow" d="M 36 221 V 485 Q 36 491 42 491 H 57" marker-end="url(#disputed-test-arrow)"/>
+<path class="d-flow" d="M 36 282 H 57" marker-end="url(#disputed-test-arrow)"/>
+<path class="d-flow" d="M 36 364 H 57" marker-end="url(#disputed-test-arrow)"/>
+<path class="d-flow" d="M 296 282 H 306 Q 312 282 312 288 V 598 Q 312 604 306 604 H 42 Q 36 604 36 610 V 624" marker-end="url(#disputed-test-arrow)"/>
+<path class="d-flow" d="M 296 364 H 312"/>
+<path class="d-flow" d="M 296 491 H 312"/>
+
+<!-- Boxes: two outcomes by the spec, one by the owner. -->
+<rect class="d-box" x="60" y="240" width="236" height="84" rx="6"/>
+<rect class="d-box" x="60" y="340" width="236" height="48" rx="6"/>
+<rect class="d-box-owner" x="60" y="404" width="236" height="174" rx="6"/>
+<rect class="d-owner-mark" x="270" y="411" width="18" height="18" rx="4"/>
+<rect class="d-owner-bar" x="275" y="415.5" width="2.5" height="9"/>
+<rect class="d-owner-bar" x="280.5" y="415.5" width="2.5" height="9"/>
+
+<!-- Marks on the spine and the merge dots on the rail. -->
+<circle class="d-start" cx="36" cy="24" r="6"/>
+<rect class="d-session" x="30" y="62" width="12" height="12" rx="2"/>
+<rect class="d-subagent" x="29" y="105" width="14" height="14" rx="3"/>
+<polygon class="d-decision" points="36 203 45 212 36 221 27 212"/>
+<circle class="d-junction" cx="36" cy="282" r="3"/>
+<circle class="d-junction" cx="36" cy="364" r="3"/>
+<circle class="d-junction" cx="312" cy="364" r="3"/>
+<circle class="d-junction" cx="312" cy="491" r="3"/>
+<circle class="d-end" cx="36" cy="634" r="7"/>
+<circle class="d-end-dot" cx="36" cy="634" r="3"/>
+
+<!-- Text. -->
+<text class="d-label" x="52" y="29">The code writer disputes a test</text>
+<text class="d-label" x="52" y="73">The session sets the work aside</text>
+<text class="d-label" x="52" y="117">A fresh test writer</text>
+<text class="d-text" x="52" y="135">It has never seen the code</text>
+<text class="d-text" x="52" y="153">It reads the test, the spec and</text>
+<text class="d-text" x="52" y="171">the evidence</text>
+<text class="d-label" x="52" y="217">Which side does the spec back?</text>
+
+<text class="d-cond" x="72" y="259">THE CODE WRITER</text>
+<text class="d-label" x="72" y="277">The test writer corrects it</text>
+<text class="d-text" x="72" y="295">Red check, then one more</text>
+<text class="d-text" x="72" y="313">tests commit</text>
+
+<text class="d-cond" x="72" y="359">THE TEST</text>
+<text class="d-label" x="72" y="377">It stays as committed</text>
+
+<text class="d-cond-owner" x="72" y="423">SILENT OR UNCLEAR,</text>
+<text class="d-cond-owner" x="72" y="441">OR A SECOND DISPUTE</text>
+<text class="d-label" x="72" y="459">The owner answers it</text>
+<text class="d-text" x="72" y="477">The answer takes the place</text>
+<text class="d-text" x="72" y="495">of the ruling</text>
+<text class="d-text" x="72" y="513">A fresh test writer makes</text>
+<text class="d-text" x="72" y="531">a correction it asks for</text>
+<text class="d-text" x="72" y="549">Red check, then one more</text>
+<text class="d-text" x="72" y="567">tests commit</text>
+
+<text class="d-label" x="52" y="639">The work comes back</text>
+<text class="d-text" x="52" y="657">A fresh code writer runs part (e)</text>
+<text class="d-text" x="52" y="675">again, with the rulings</text>
+</svg>
+                <figcaption>A disputed test, from the dispute to the work coming back: two rulings by the spec, and one answer by the owner.</figcaption>
+              </figure>
+              <div class="side">
+              <p><span class="state def solo"><svg width="12" height="10" viewBox="0 0 12 10" aria-hidden="true"><rect x="0.8" y="1.8" width="10.4" height="6.4" rx="3.2" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="7.8" cy="5" r="1.9" fill="currentColor"/></svg>Default</span> The steps are defaults; that the spec rules is the owner's decision.</p>
+              <p class="hook" data-src="a-disputed-test a-repo-without-specs"><span class="state opt"><svg width="10" height="10" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.8" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6 3.6v4.8M3.6 6h4.8" stroke="currentColor" stroke-width="1.4"/></svg>Optional</span> <a href="#a-repo-without-specs">A repo without specs</a></p>
+              </div>
+              </div>
+            </div>
+          </li>
+          <li class="tr" id="a-bug-found-during-the-build" data-src="a-bug-found-during-the-build">
+            <svg class="tmk mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-junction" cx="12" cy="12" r="3"/></svg>
+            <div class="tr-text"><h3>The code writer finds a bug: where it sits decides <span class="state def"><svg width="12" height="10" viewBox="0 0 12 10" aria-hidden="true"><rect x="0.8" y="1.8" width="10.4" height="6.4" rx="3.2" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="7.8" cy="5" r="1.9" fill="currentColor"/></svg>Default</span></h3>
+              <ul class="routes">
+                <li><span class="cond">A test reaches it, or the code is new</span><span>Fixed in the slice.</span></li>
+                <li><span class="cond">No test reaches it, in this change's code</span><span>A fix slice, built next.</span></li>
+                <li><span class="cond">Older than the change</span><span>A lead in the final report.</span><p class="hook"><svg class="os mk" viewBox="0 0 24 24" role="img" aria-label="Stop for the owner"><rect class="d-owner-mark" x="3" y="3" width="18" height="18" rx="4"/><rect class="d-owner-bar" x="8" y="7.5" width="2.5" height="9"/><rect class="d-owner-bar" x="13.5" y="7.5" width="2.5" height="9"/></svg> Goes to the owner as a scope question only when the slice cannot be done without the fix.</p></li>
+              </ul>
+            </div>
+          </li>
+          <li class="tr" id="the-final-report" data-src="step-3-build the-final-report">
+            <svg class="tmk mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-end" cx="12" cy="12" r="7"/><circle class="d-end-dot" cx="12" cy="12" r="3"/></svg>
+            <div class="tr-text"><h3>Every slice closed on the working branch; nothing pushed</h3><p>The owner gets the final report. The session writes it to <code>build-report.md</code> and commits that file alone.</p><p data-src="step-3-build the-final-report"><svg class="os mk" viewBox="0 0 24 24" role="img" aria-label="Stop for the owner"><rect class="d-owner-mark" x="3" y="3" width="18" height="18" rx="4"/><rect class="d-owner-bar" x="8" y="7.5" width="2.5" height="9"/><rect class="d-owner-bar" x="13.5" y="7.5" width="2.5" height="9"/></svg> The check command fails at that commit: correct the report, or stop.</p></div>
+            <div class="snip cols tail"><span>slices with commits</span><span>four commits</span><span>assumptions</span><span>one</span><span>bugs, disputed tests, failed checks</span><span>none</span></div>
+          </li>
+        </ol>
+      </li>
+    </ol>
+  </section>
+  <section id="step-4-verify" data-view="flow" aria-labelledby="h-step-4-verify" data-src="step-4-verify">
+    <p class="stepmark" aria-hidden="true"><span><svg class="mk" viewBox="0 0 24 24"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">4</text></svg><b>Verify</b></span></p>
+    <div class="sec-head">
+      <h2 id="h-step-4-verify"><svg class="hnum mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">4</text></svg><span class="hstep">Verify: </span><span class="hrest">the built change becomes a verified change</span></h2>
+      <div class="head-meta" data-src="step-4-verify"><span class="cmd">the verify command</span><span class="pill"><svg class="os mk" viewBox="0 0 24 24" aria-hidden="true"><rect class="d-owner-mark" x="3" y="3" width="18" height="18" rx="4"/><rect class="d-owner-bar" x="8" y="7.5" width="2.5" height="9"/><rect class="d-owner-bar" x="13.5" y="7.5" width="2.5" height="9"/></svg>11 stops for the owner</span></div>
+    </div>
+    <div class="tr-head"><p class="label">What happens</p><p class="label">In the example</p></div>
+    <ol class="trace">
+      <li class="band">
+        <ol class="rows">
+          <li class="tr" data-src="step-4-verify">
+            <svg class="tmk mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-start" cx="12" cy="12" r="6"/></svg>
+            <div class="tr-text"><h3>Every slice closed, nothing pushed, the final report in <code>build-report.md</code></h3></div>
+          </li>
+          <li class="tr" data-src="step-4-verify">
+            <svg class="tmk mk" viewBox="0 0 24 24" aria-hidden="true"><rect class="d-session" x="6" y="6" width="12" height="12" rx="2"/></svg>
+            <div class="tr-text"><h3>The verify command starts verify</h3><p data-src="step-4-verify"><svg class="os mk" viewBox="0 0 24 24" role="img" aria-label="Stop for the owner"><rect class="d-owner-mark" x="3" y="3" width="18" height="18" rx="4"/><rect class="d-owner-bar" x="8" y="7.5" width="2.5" height="9"/><rect class="d-owner-bar" x="13.5" y="7.5" width="2.5" height="9"/></svg> No change named, and several changes active: which change to verify.</p><p data-src="step-4-verify"><svg class="os mk" viewBox="0 0 24 24" role="img" aria-label="Stop for the owner"><rect class="d-owner-mark" x="3" y="3" width="18" height="18" rx="4"/><rect class="d-owner-bar" x="8" y="7.5" width="2.5" height="9"/><rect class="d-owner-bar" x="13.5" y="7.5" width="2.5" height="9"/></svg> A repo with specs whose config names no test command.</p><p data-src="step-4-verify a-repo-without-specs"><svg class="os mk" viewBox="0 0 24 24" role="img" aria-label="Stop for the owner"><rect class="d-owner-mark" x="3" y="3" width="18" height="18" rx="4"/><rect class="d-owner-bar" x="8" y="7.5" width="2.5" height="9"/><rect class="d-owner-bar" x="13.5" y="7.5" width="2.5" height="9"/></svg> A <a href="#a-repo-without-specs">repo without specs</a> whose config names no check command.</p></div>
+          </li>
+          <li class="tr" data-src="step-4-verify per-slice">
+            <svg class="tmk mk" viewBox="0 0 24 24" aria-hidden="true"><polygon class="d-decision" points="12 3 21 12 12 21 3 12"/></svg>
+            <div class="tr-text"><h3>The test command and the check command run once</h3><p data-src="step-4-verify">In a repo with specs, one test-lock check then runs over the working branch, with or without check scripts.</p><p class="hook" data-src="step-4-verify per-slice"><span class="state opt"><svg width="10" height="10" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.8" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6 3.6v4.8M3.6 6h4.8" stroke="currentColor" stroke-width="1.4"/></svg>Optional</span> With <a href="#per-slice">check scripts</a>, the slice check runs again.</p></div>
+            <div class="snip cols tail" data-src="the-fix-round"><span>test command, check command, slice check</span><span class="pass">pass</span><span>test lock</span><span class="pass">holds</span></div>
+          </li>
+          <li class="tr" id="the-verify-rules-file" data-src="the-verify-rules-file">
+            <svg class="tmk mk" viewBox="0 0 24 24" aria-hidden="true"><polygon class="d-decision" points="12 3 21 12 12 21 3 12"/></svg>
+            <div class="tr-text"><h3>The verify rules file: the repo's own rules, and two checks</h3><ul class="checks"><li>the code review, once per verify run</li><li>the check for unasked work: each added behaviour must be asked for</li></ul><p class="hook" data-src="the-verify-rules-file the-change-folder"><span class="state opt"><svg width="10" height="10" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.8" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6 3.6v4.8M3.6 6h4.8" stroke="currentColor" stroke-width="1.4"/></svg>Optional</span> <a href="#the-change-folder">User stories</a></p><p class="openl" data-src="the-verify-rules-file"><span class="state open"><svg width="10" height="10" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-dasharray="2.2 1.6"/></svg>Open</span> A verify rules file without the code review gives no code review. <span class="label">until then</span> the profile records which repos have such a file.</p></div>
+            <div class="snip cols tail" data-src="the-fix-round"><span>code review (the message is inline)</span><span class="fail">one breach</span><span>smell: Primitive Obsession</span><span>a lead</span><span>unasked work</span><span>none</span></div>
+          </li>
+          <li class="tr" data-src="step-4-verify">
+            <svg class="tmk mk" viewBox="0 0 24 24" aria-hidden="true"><polygon class="d-decision" points="12 3 21 12 12 21 3 12"/></svg>
+            <div class="tr-text"><h3>OpenSpec's comparison: code against specs, design and tasks</h3></div>
+            <div class="snip cols tail" data-src="the-fix-round"><span>comparison</span><span>none</span></div>
+          </li>
+          <li class="tr" data-src="step-4-verify the-fix-round">
+            <svg class="tmk mk" viewBox="0 0 24 24" aria-hidden="true"><polygon class="d-decision" points="12 3 21 12 12 21 3 12"/></svg>
+            <div class="tr-text"><h3>No finding: verify has passed</h3><p class="hook" data-src="step-4-verify owner-gates"><span class="state opt"><svg width="10" height="10" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.8" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6 3.6v4.8M3.6 6h4.8" stroke="currentColor" stroke-width="1.4"/></svg>Optional</span> <a href="#owner-gates">Owner gates</a></p></div>
+          </li>
+          <li class="tr">
+            <div class="if" id="the-fix-round" data-src="the-fix-round">
+              <div class="if-head"><h3><span class="label">If</span> verify has findings: one fix round, then verify once more</h3></div>
+              <div class="pair">
+                <figure class="figure" data-src="the-fix-round">
+<svg xmlns="http://www.w3.org/2000/svg" class="dg" viewBox="0 0 336 656" width="420" height="820" role="img" aria-labelledby="fix-round-title fix-round-desc">
+<title id="fix-round-title">The fix round</title>
+<desc id="fix-round-desc">The fix round sorts each finding into one route, puts each Owner finding to the owner, and runs the Fix and Test first findings in five parts.</desc>
+
+<defs><marker id="fix-round-arrow" viewBox="0 0 8 6" refX="5" refY="3" markerWidth="8" markerHeight="6" markerUnits="userSpaceOnUse" orient="auto"><path class="d-arrowhead" d="M0 0L8 3L0 6z"/></marker></defs>
+<rect class="d-bg" x="0" y="0" width="336" height="656" rx="8"/>
+
+<!-- Flow lines: the spine, the two taps, the return from the owner, the five parts. -->
+<path class="d-flow" d="M 36 30 V 59" marker-end="url(#fix-round-arrow)"/>
+<path class="d-flow" d="M 36 74 V 354" marker-end="url(#fix-round-arrow)"/>
+<path class="d-flow" d="M 36 132 H 57" marker-end="url(#fix-round-arrow)"/>
+<path class="d-flow" d="M 36 224 H 57" marker-end="url(#fix-round-arrow)"/>
+<path class="d-flow" d="M 84 276 V 300 Q 84 306 78 306 H 42" marker-end="url(#fix-round-arrow)"/>
+<path class="d-flow" d="M 36 371 V 450" marker-end="url(#fix-round-arrow)"/>
+<path class="d-flow" d="M 36 467 V 508" marker-end="url(#fix-round-arrow)"/>
+<path class="d-flow" d="M 36 529 V 555" marker-end="url(#fix-round-arrow)"/>
+<path class="d-flow" d="M 36 570 V 614" marker-end="url(#fix-round-arrow)"/>
+
+<!-- Boxes: a lead ends its branch; an Owner finding comes back. -->
+<rect class="d-box" x="60" y="108" width="260" height="48" rx="6"/>
+<rect class="d-box-owner" x="60" y="172" width="260" height="104" rx="6"/>
+<rect class="d-owner-mark" x="290" y="179" width="18" height="18" rx="4"/>
+<rect class="d-owner-bar" x="295" y="183.5" width="2.5" height="9"/>
+<rect class="d-owner-bar" x="300.5" y="183.5" width="2.5" height="9"/>
+
+<!-- Marks on the spine. -->
+<circle class="d-start" cx="36" cy="24" r="6"/>
+<rect class="d-session" x="30" y="62" width="12" height="12" rx="2"/>
+<circle class="d-junction" cx="36" cy="132" r="3"/>
+<circle class="d-junction" cx="36" cy="224" r="3"/>
+<circle class="d-junction" cx="36" cy="306" r="3"/>
+<rect class="d-subagent" x="29" y="357" width="14" height="14" rx="3"/>
+<rect class="d-subagent" x="29" y="453" width="14" height="14" rx="3"/>
+<polygon class="d-decision" points="36 511 45 520 36 529 27 520"/>
+<rect class="d-session" x="30" y="558" width="12" height="12" rx="2"/>
+<circle class="d-end" cx="36" cy="624" r="7"/>
+<circle class="d-end-dot" cx="36" cy="624" r="3"/>
+
+<!-- Text. -->
+<text class="d-label" x="52" y="29">Verify has findings</text>
+<text class="d-label" x="52" y="73">The session sorts each finding</text>
+<text class="d-text" x="52" y="91">into one route</text>
+
+<text class="d-cond" x="72" y="127">LEAD</text>
+<text class="d-label" x="72" y="145">The report only lists it</text>
+
+<text class="d-cond-owner" x="72" y="191">OWNER</text>
+<text class="d-label" x="72" y="209">The session asks the owner</text>
+<text class="d-text" x="72" y="227">before the code writer starts</text>
+<text class="d-text" x="72" y="245">The answer moves it to Fix or</text>
+<text class="d-text" x="72" y="263">Test first, or closes it</text>
+
+<text class="d-cond" x="52" y="334">FIX AND TEST FIRST</text>
+
+<text class="d-label" x="52" y="369">(1) One fresh test writer</text>
+<text class="d-text" x="52" y="387">tests for the Test first findings</text>
+<text class="d-text" x="52" y="405">then the red check, and the</text>
+<text class="d-text" x="52" y="423">session makes a tests commit</text>
+<text class="d-label" x="52" y="465">(2) One fresh code writer</text>
+<text class="d-text" x="52" y="483">every Fix and Test first finding</text>
+<text class="d-label" x="52" y="525">(3) Test-lock check</text>
+<text class="d-label" x="52" y="569">(4) The session commits the fix</text>
+<text class="d-text" x="52" y="587">after the test command passes</text>
+<text class="d-label" x="52" y="629">(5) Verify runs once more</text>
+</svg>
+                  <figcaption>The fix round sorts each finding into one route, and runs the Fix and Test first findings in its five parts.</figcaption>
+                </figure>
+                <div class="side">
+                  <p data-src="step-4-verify the-fix-round"><svg class="os mk" viewBox="0 0 24 24" role="img" aria-label="Stop for the owner"><rect class="d-owner-mark" x="3" y="3" width="18" height="18" rx="4"/><rect class="d-owner-bar" x="8" y="7.5" width="2.5" height="9"/><rect class="d-owner-bar" x="13.5" y="7.5" width="2.5" height="9"/></svg> One question each: a tests commit of an earlier fix round at the end of the working branch; each test-lock offence that no answer in <code>build-report.md</code> covers (keep the edit, or restore the test); every bug on a Bugs left line; a finding still open after the second verify; every stop of a <a href="#when-a-part-fails">failure default</a>; a failed check command at the commit of <code>build-report.md</code>; every hand-back of an <a href="#p-who">owner decision</a>.</p>
+                  <ul class="tags"><li>no bug becomes a fix slice</li><li>inside a change, refactoring only as a Fix finding that cites a written standard</li></ul>
+                  <p class="hook"><span class="state opt"><svg width="10" height="10" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.8" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6 3.6v4.8M3.6 6h4.8" stroke="currentColor" stroke-width="1.4"/></svg>Optional</span> <a href="#a-repo-without-specs">A repo without specs</a></p>
+                  <p class="hook"><span class="state def"><svg width="12" height="10" viewBox="0 0 12 10" aria-hidden="true"><rect x="0.8" y="1.8" width="10.4" height="6.4" rx="3.2" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="7.8" cy="5" r="1.9" fill="currentColor"/></svg>Default</span> A listed lead does not keep verify from passing.</p>
+                  <div class="snip cols"><span>commit 6</span><span>refactor(upload)</span><span>verify again</span><span>only the lead, which does not block: <span class="pass">passed</span></span></div>
+                </div>
+              </div>
+            </div>
+          </li>
+          <li class="tr" data-src="step-4-verify">
+            <svg class="tmk mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-end" cx="12" cy="12" r="7"/><circle class="d-end-dot" cx="12" cy="12" r="3"/></svg>
+            <div class="tr-text"><h3>A verified change, or a finding still open, with the owner</h3></div>
+          </li>
+        </ol>
+      </li>
+    </ol>
+  </section>
+
+  <section id="step-5-pull-request-and-archive" data-view="flow" aria-labelledby="h-step-5-pull-request-and-archive" data-src="step-5-pull-request-and-archive">
+    <p class="stepmark" aria-hidden="true"><span><svg class="mk" viewBox="0 0 24 24"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">5</text></svg><b>Pull request and archive</b></span></p>
+    <div class="sec-head">
+      <h2 id="h-step-5-pull-request-and-archive"><svg class="hnum mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">5</text></svg><span class="hstep">Pull request and archive: </span><span class="hrest">the verified change reaches main</span></h2>
+      <div class="head-meta" data-src="step-5-pull-request-and-archive"><span class="pill"><svg class="os mk" viewBox="0 0 24 24" aria-hidden="true"><rect class="d-owner-mark" x="3" y="3" width="18" height="18" rx="4"/><rect class="d-owner-bar" x="8" y="7.5" width="2.5" height="9"/><rect class="d-owner-bar" x="13.5" y="7.5" width="2.5" height="9"/></svg>3 stops for the owner</span></div>
+    </div>
+    <div class="tr-head"><p class="label">What happens</p><p class="label">In the example</p></div>
+    <ol class="trace">
+      <li class="band">
+        <ol class="rows">
+          <li class="tr" data-src="step-5-pull-request-and-archive">
+            <svg class="tmk mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-start" cx="12" cy="12" r="6"/></svg>
+            <div class="tr-text"><h3>A verified change</h3></div>
+          </li>
+        </ol>
+      </li>
+      <li class="band" data-src="step-5-pull-request-and-archive">
+        <p class="band-label"><span class="band-step">Not a time order</span><span class="band-name">Three parts</span></p>
+        <ol class="rows">
+          <li class="tr" id="the-pull-request" data-src="the-pull-request step-5-pull-request-and-archive">
+            <svg class="tmk mk" viewBox="0 0 24 24" aria-hidden="true"><rect class="d-session" x="6" y="6" width="12" height="12" rx="2"/></svg>
+            <div class="tr-text"><h3>The pull request</h3><ul class="tags"><li>after a passed verify</li><li>pushes on its own, with a lease push</li><li>opens the pull request</li></ul><p class="label">Never</p><ul class="nevers"><li>to main</li><li><code>--force</code> or <code>-f</code></li></ul><ul class="held"><li>any other push: only on the owner's ask</li></ul><p>The <a href="#the-skills"><code>pr</code></a> skill checks the body before the pull request opens.</p><p class="hook" data-src="the-pull-request"><span class="state opt"><svg width="10" height="10" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.8" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6 3.6v4.8M3.6 6h4.8" stroke="currentColor" stroke-width="1.4"/></svg>Optional</span> <a href="#while-the-changes-run">Tracker issues</a>, <a href="#from-draft-to-delivered">enhancement store</a>, <a href="#owner-gates">owner gates</a></p><p data-src="the-pull-request">A labelled line in a repo's pull request or text rules replaces that label's default.</p></div>
+            <div class="snip cols" data-src="the-merge"><span>branch</span><span><mark class="req">refuse-empty-file-name</mark></span><span>body</span><span>links the archived change folder</span></div>
+          </li>
+          <li class="tr" id="the-archive" data-src="the-archive">
+            <svg class="tmk mk" viewBox="0 0 24 24" aria-hidden="true"><path class="p-file" d="M6 2.5h8l4.5 4.5v14.5H6z"/><path class="p-file" d="M14 2.5V7h4.5"/></svg>
+            <div class="tr-text"><h3>The archive</h3><ul class="tags"><li>moves the change folder into the archive</li><li>its commit goes into the change's own pull request</li></ul><p class="openl"><span class="state open"><svg width="10" height="10" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-dasharray="2.2 1.6"/></svg>Open</span> Who starts it, and when. <span class="label">until then</span> the profile names both.</p><p class="hook"><span class="state opt"><svg width="10" height="10" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.8" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6 3.6v4.8M3.6 6h4.8" stroke="currentColor" stroke-width="1.4"/></svg>Optional</span> <a href="#a-repo-without-specs">A repo without specs</a></p></div>
+            <div class="snip cols" data-src="the-merge"><span>the profile</span><span>archive before the push</span></div>
+          </li>
+          <li class="tr" id="the-merge" data-src="the-merge">
+            <svg class="tmk mk" viewBox="0 0 24 24" aria-hidden="true"><polygon class="d-decision" points="12 3 21 12 12 21 3 12"/></svg>
+            <div class="tr-text"><h3>The merge: the owner merges <span class="state def"><svg width="12" height="10" viewBox="0 0 12 10" aria-hidden="true"><rect x="0.8" y="1.8" width="10.4" height="6.4" rx="3.2" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="7.8" cy="5" r="1.9" fill="currentColor"/></svg>Default</span></h3><p>A repo's <code>## Merge rule</code> section sets another rule.</p><p><svg class="os mk" viewBox="0 0 24 24" role="img" aria-label="Stop for the owner"><rect class="d-owner-mark" x="3" y="3" width="18" height="18" rx="4"/><rect class="d-owner-bar" x="8" y="7.5" width="2.5" height="9"/><rect class="d-owner-bar" x="13.5" y="7.5" width="2.5" height="9"/></svg> A breaking pull request waits for the owner's approval.</p><p data-src="the-merge"><svg class="os mk" viewBox="0 0 24 24" role="img" aria-label="Stop for the owner"><rect class="d-owner-mark" x="3" y="3" width="18" height="18" rx="4"/><rect class="d-owner-bar" x="8" y="7.5" width="2.5" height="9"/><rect class="d-owner-bar" x="13.5" y="7.5" width="2.5" height="9"/></svg> The merge rule makes the merge wait.</p><p data-src="the-merge"><svg class="os mk" viewBox="0 0 24 24" role="img" aria-label="Stop for the owner"><rect class="d-owner-mark" x="3" y="3" width="18" height="18" rx="4"/><rect class="d-owner-bar" x="8" y="7.5" width="2.5" height="9"/><rect class="d-owner-bar" x="13.5" y="7.5" width="2.5" height="9"/></svg> A review finding on the pull request is still open.</p><p>An agent merge has its own conditions; the <a href="#the-skills"><code>pr</code></a> skill applies the merge rule as its last step.</p></div>
+            <div class="snip cols" data-src="the-merge"><span>merge rule</span><span>no section: the owner merges</span></div>
+          </li>
+        </ol>
+      </li>
+      <li class="band">
+        <ol class="rows">
+          <li class="tr" data-src="step-5-pull-request-and-archive the-merge">
+            <svg class="tmk mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-end" cx="12" cy="12" r="7"/><circle class="d-end-dot" cx="12" cy="12" r="3"/></svg>
+            <div class="tr-text"><h3>Squash-merged to main</h3><p>Its requirements in the main specs.</p></div>
+            <div class="tr-side">
+              <div class="squash">
+                <div><p class="label">working branch</p><ol><li>test</li><li>feat</li><li>test</li><li>feat</li><li>the build report</li><li>refactor</li><li>the round's report</li><li>the archive commit</li></ol></div>
+                <span class="into" aria-hidden="true"></span>
+                <div><p class="label">main</p><ol><li>feat(upload): refuse an upload with an <mark class="req">empty file name</mark></li></ol></div>
+              </div>
+            </div>
+          </li>
+        </ol>
+      </li>
+    </ol>
+    <div id="after-main" data-src="after-main">
+      <p class="label">After main</p>
+      <p>Where a release tool cuts releases, nobody tags or publishes by hand.</p>
+      <p class="hook"><span class="state opt"><svg width="10" height="10" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.8" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6 3.6v4.8M3.6 6h4.8" stroke="currentColor" stroke-width="1.4"/></svg>Optional</span> <a href="#release-rules-tied-to-commit-types">Release rules</a></p>
+    </div>
+  </section>
+  <section id="p-who" data-view="who" aria-labelledby="h-p-who" data-src="1-start-here">
+    <div class="sec-head">
+      <h2 id="h-p-who">Who does what: the owner decides, the agent does the work</h2>
+    </div>
+    <article class="card narrow" data-src="1-start-here">
+      <h3>Who is who</h3>
+      <ul>
+        <li><span class="hchip owner">owner</span> <span><b>The owner:</b> answers every question; approves what the flow leaves to the owner.</span></li>
+        <li><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><rect class="d-session" x="6" y="6" width="12" height="12" rx="2"/></svg> <span><b>The session:</b> the agent conversation the owner talks to; makes every commit.</span></li>
+        <li><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><rect class="d-subagent" x="5" y="5" width="14" height="14" rx="3"/></svg> <span><b>A sub-agent:</b> fresh, one job; commits nothing, ticks no task box, starts no other agent.</span></li>
+      </ul>
+    </article>
+    <p data-src="1-start-here">The agent looks up every fact, and checks it at its source or by running it. A code comment is not a source. It never asks the owner for a fact it can look up.</p>
+    <div class="pair">
+      <figure class="figure" data-src="1-start-here">
+<svg xmlns="http://www.w3.org/2000/svg" class="dg" viewBox="0 0 336 408" width="420" height="510" role="img" aria-labelledby="owner-decision-title owner-decision-desc">
+<title id="owner-decision-title">An owner decision or a sub-agent's choice</title>
+<desc id="owner-decision-desc">An owner decision goes from the sub-agent back to the session, which asks the owner, and every other choice the sub-agent makes itself and lists as an assumption.</desc>
+
+<defs><marker id="owner-decision-arrow" viewBox="0 0 8 6" refX="5" refY="3" markerWidth="8" markerHeight="6" markerUnits="userSpaceOnUse" orient="auto"><path class="d-arrowhead" d="M0 0L8 3L0 6z"/></marker></defs>
+<rect class="d-bg" x="0" y="0" width="336" height="408" rx="8"/>
+
+<!-- The owner's moment: a band across the spine, painted before the flow lines. -->
+<rect class="d-box-owner" x="16" y="258" width="304" height="48" rx="6"/>
+
+<!-- Flow lines: the spine through the question and the band, the tap into the NO box. -->
+<path class="d-flow" d="M 36 30 V 56" marker-end="url(#owner-decision-arrow)"/>
+<path class="d-flow" d="M 36 77 V 222" marker-end="url(#owner-decision-arrow)"/>
+<path class="d-flow" d="M 36 141 H 57" marker-end="url(#owner-decision-arrow)"/>
+<path class="d-flow" d="M 36 239 V 273" marker-end="url(#owner-decision-arrow)"/>
+<path class="d-flow" d="M 36 288 V 348" marker-end="url(#owner-decision-arrow)"/>
+
+<!-- Boxes: every other choice ends its branch; the owner mark sits in the band. -->
+<rect class="d-box" x="60" y="108" width="260" height="66" rx="6"/>
+<rect class="d-owner-mark" x="290" y="273" width="18" height="18" rx="4"/>
+<rect class="d-owner-bar" x="295" y="277.5" width="2.5" height="9"/>
+<rect class="d-owner-bar" x="300.5" y="277.5" width="2.5" height="9"/>
+
+<!-- Marks on the spine. -->
+<circle class="d-start" cx="36" cy="24" r="6"/>
+<polygon class="d-decision" points="36 59 45 68 36 77 27 68"/>
+<circle class="d-junction" cx="36" cy="141" r="3"/>
+<rect class="d-subagent" x="29" y="225" width="14" height="14" rx="3"/>
+<rect class="d-session" x="30" y="276" width="12" height="12" rx="2"/>
+<circle class="d-end" cx="36" cy="358" r="7"/>
+<circle class="d-end-dot" cx="36" cy="358" r="3"/>
+
+<!-- Text. -->
+<text class="d-label" x="52" y="29">A sub-agent meets a choice</text>
+<text class="d-label" x="52" y="73">Is it an owner decision?</text>
+<text class="d-text" x="52" y="91">one of the five kinds</text>
+
+<text class="d-cond" x="72" y="127">NO</text>
+<text class="d-label" x="72" y="145">It makes the choice itself</text>
+<text class="d-text" x="72" y="163">and lists it as an assumption</text>
+
+<text class="d-cond" x="52" y="202">YES</text>
+<text class="d-label" x="52" y="237">The sub-agent stops</text>
+
+<text class="d-label" x="52" y="287">The session asks the owner</text>
+
+<text class="d-pass" x="52" y="330">the answer</text>
+
+<text class="d-label" x="52" y="363">A fresh sub-agent</text>
+<text class="d-text" x="52" y="381">of the same role goes on</text>
+</svg>
+        <figcaption>A sub-agent stops for an owner decision, and makes every other choice itself.</figcaption>
+      </figure>
+      <article class="card" data-src="1-start-here">
+        <h3>Five kinds of owner decision</h3>
+        <ol class="form-list"><li>scope</li><li>a public contract</li><li>a breaking change</li><li>a security trade-off</li><li>a new dependency</li></ol>
+      </article>
+    </div>
+    <div class="table-wrap" data-src="1-start-here per-slice the-fix-round">
+      <table class="tbl" id="p-who-may">
+        <thead><tr><th scope="col">Action</th><th scope="col">Who</th><th scope="col">When</th><th scope="col">Never</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Commit</th><td data-label="Who"><span>the session</span></td><td data-label="When"><span>only on a branch other than main; after it loads <code>commit</code></span></td><td data-label="Never"><span>amend a commit</span></td></tr>
+          <tr><th scope="row">Tick a task box</th><td data-label="Who"><span>the session</span></td><td data-label="When"><span>at the code commit of its slice, or the fix</span></td><td></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div data-src="1-start-here">
+      <p class="label">Never in commit, pull request, issue, comment or release note text</p>
+      <ul class="nevers"><li>a session ID</li><li>a session link</li><li>a "Generated with" footer</li><li>an attribution or signature line that names a model</li><li>a bare <code>@name</code></li></ul>
+      <p><span class="state def solo"><svg width="12" height="10" viewBox="0 0 12 10" aria-hidden="true"><rect x="0.8" y="1.8" width="10.4" height="6.4" rx="3.2" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="7.8" cy="5" r="1.9" fill="currentColor"/></svg>Default</span> No attribution line; no <code>@</code> before a word, code spans included.</p>
+    </div>
+    <p data-src="1-start-here"><svg class="os mk" viewBox="0 0 24 24" role="img" aria-label="Stop for the owner"><rect class="d-owner-mark" x="3" y="3" width="18" height="18" rx="4"/><rect class="d-owner-bar" x="8" y="7.5" width="2.5" height="9"/><rect class="d-owner-bar" x="13.5" y="7.5" width="2.5" height="9"/></svg> A hook blocks a command: the agent asks the owner, and never works around it.</p>
+    <p class="twin"><span class="label">In WORKFLOW.md</span> <cite>§ 1. Start here: Who does what; How the agent asks a question</cite></p>
+  </section>
+
+  <section id="p-question-form" data-view="who" aria-labelledby="h-p-question-form" data-src="1-start-here">
+    <div class="sec-head">
+      <h2 id="h-p-question-form">How the agent asks: one question per message, one form</h2>
+    </div>
+    <div class="qform" data-src="1-start-here">
+      <div class="qmsg">
+        <div class="part"><p class="label">Heading</p><p><b>### Error text, Q1 of about 3: What does the refusal tell the uploader?</b></p></div>
+        <div class="part"><p><b>Background:</b> Today the service stores a file with an <mark class="req">empty name</mark> and answers 201. The change will refuse it. The uploader must see what was wrong.</p></div>
+        <div class="part">
+          <p><b>Options:</b></p>
+          <p><b>A. Name the field (recommended)</b></p><p class="li">- A 400 error whose message names the field: filename must not be empty.</p><p class="li">- Pro: the uploader sees at once which field to fix.</p><p class="li">- Con: one more message in the messages file.</p>
+          <p><b>B. A plain refusal</b></p><p class="li">- A 400 error with the generic text bad request.</p><p class="li">- Pro: no new message.</p><p class="li">- Con: the uploader must guess what was wrong.</p></div>
+        <div class="part"><p><b>Recommendation: A.</b> The service's other errors name their field (the error form in the upload handler).</p></div>
+        <div class="part"><p class="label">Last line</p><p>Next: answer A or B.</p></div>
+      </div>
+    </div>
+  </section>
+  <section class="chapter" id="3-other-roads" data-view="roads" aria-labelledby="h-3-other-roads" data-src="3-other-roads">
+    <div class="sec-head">
+      <h2 id="h-3-other-roads">Other roads: three kinds of work change the path</h2>
+    </div>
+    <div class="mtab">
+      <div class="mrow" data-src="2-the-path-five-steps-from-an-idea-to-main"><a class="mname" href="#2-the-path-five-steps-from-an-idea-to-main">The path</a><ol class="mrail" aria-label="All five steps"><li class="on"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">1</text></svg></li><li class="on"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">2</text></svg></li><li class="on"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">3</text></svg></li><li class="on"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">4</text></svg></li><li class="on"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">5</text></svg></li></ol><span class="pill">All five steps</span></div>
+      <div class="mrow" data-src="the-fast-path"><a class="mname" href="#the-fast-path">Small change: the fast path</a><ol class="mrail" aria-label="Skips step 1; changes step 2"><li class="skip"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">1</text><path class="p-slash" d="M5 19L19 5"/></svg></li><li class="bent"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">2</text></svg></li><li class="on"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">3</text></svg></li><li class="on"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">4</text></svg></li><li class="on"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">5</text></svg></li></ol><span class="pill">Starts at step 2</span></div>
+      <div class="mrow" data-src="no-slices-section"><a class="mname" href="#no-slices-section">Small change: no Slices section</a><ol class="mrail" aria-label="Changes steps 2, 3 and 4"><li class="on"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">1</text></svg></li><li class="bent"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">2</text></svg></li><li class="bent"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">3</text></svg></li><li class="bent"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">4</text></svg></li><li class="on"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">5</text></svg></li></ol><span class="pill">Changes steps 2 to 4</span></div>
+      <div class="mrow" data-src="a-bug"><a class="mname" href="#a-bug">A bug</a><ol class="mrail" aria-label="Changes step 3 or step 4, or runs outside the steps"><li class="on"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">1</text></svg></li><li class="on"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">2</text></svg></li><li class="bent"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">3</text></svg></li><li class="bent"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">4</text></svg></li><li class="on"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">5</text></svg></li></ol><span class="pill">Step 3 or 4, or outside the steps</span></div>
+      <div class="mrow" data-src="work-outside-a-change"><a class="mname" href="#work-outside-a-change">Work outside a change</a><ol class="mrail" aria-label="Skips all five steps"><li class="skip"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">1</text><path class="p-slash" d="M5 19L19 5"/></svg></li><li class="skip"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">2</text><path class="p-slash" d="M5 19L19 5"/></svg></li><li class="skip"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">3</text><path class="p-slash" d="M5 19L19 5"/></svg></li><li class="skip"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">4</text><path class="p-slash" d="M5 19L19 5"/></svg></li><li class="skip"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">5</text><path class="p-slash" d="M5 19L19 5"/></svg></li></ol><span class="pill">Uses no step</span></div>
+    </div>
+    <p class="twin"><span class="label">In WORKFLOW.md</span> <cite>§ 3. Other roads</cite></p>
+  </section>
+
+  <section id="a-small-change" data-view="roads" aria-labelledby="h-a-small-change" data-src="a-small-change">
+    <div class="sec-head">
+      <h2 id="h-a-small-change">A small change: two shortcuts</h2>
+      <p data-src="a-small-change">Small: one repo, at most two task sections <span class="state def"><svg width="12" height="10" viewBox="0 0 12 10" aria-hidden="true"><rect x="0.8" y="1.8" width="10.4" height="6.4" rx="3.2" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="7.8" cy="5" r="1.9" fill="currentColor"/></svg>Default</span></p>
+    </div>
+    <div class="cards-row two">
+      <article class="card" id="the-fast-path" data-src="the-fast-path">
+        <h3>The fast path: skip step 1</h3>
+        <p>Propose first checks four things, read-only:</p>
+        <ul class="checks"><li>the outcome and the done-test each fit in one sentence</li><li>no owner decision is open</li><li>at most two task sections</li><li>no assumption is open</li></ul>
+        <p><svg class="os mk" viewBox="0 0 24 24" role="img" aria-label="Stop for the owner"><rect class="d-owner-mark" x="3" y="3" width="18" height="18" rx="4"/><rect class="d-owner-bar" x="8" y="7.5" width="2.5" height="9"/><rect class="d-owner-bar" x="13.5" y="7.5" width="2.5" height="9"/></svg> One fails: step 2 writes nothing and points to the explore command.</p>
+      </article>
+      <article class="card" id="no-slices-section" data-src="no-slices-section">
+        <h3>No Slices section</h3>
+        <p>Each task section is one slice, built in order.</p>
+        <p><span class="state def solo"><svg width="12" height="10" viewBox="0 0 12 10" aria-hidden="true"><rect x="0.8" y="1.8" width="10.4" height="6.4" rx="3.2" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="7.8" cy="5" r="1.9" fill="currentColor"/></svg>Default</span></p>
+        <ul><li>each slice depends on the section before it</li></ul>
+        <p>The agreed seam stands on a <code>Seam:</code> line under each task heading.</p>
+      </article>
+    </div>
+  </section>
+
+  <section id="a-bug" data-view="roads" aria-labelledby="h-a-bug" data-src="a-bug">
+    <div class="sec-head">
+      <h2 id="h-a-bug">A bug: where it is found decides its road</h2>
+      <ul class="routes" data-src="a-bug">
+        <li><span class="cond">During a build</span><a href="#a-bug-found-during-the-build">step 3</a></li>
+        <li><span class="cond">In the fix round</span><a href="#the-fix-round">step 4</a></li>
+        <li><span class="cond">Reported</span><span>the <code>diagnosing-bugs</code> loop, below</span></li>
+      </ul>
+    </div>
+    <ol class="trace solo" data-src="a-bug">
+      <li class="band">
+        <ol class="rows">
+          <li class="tr"><svg class="tmk mk" viewBox="0 0 24 24" aria-hidden="true"><rect class="d-session" x="6" y="6" width="12" height="12" rx="2"/></svg><div class="tr-text"><h3>Redacts every secret first</h3></div></li>
+          <li class="tr"><svg class="tmk mk" viewBox="0 0 24 24" aria-hidden="true"><rect class="d-session" x="6" y="6" width="12" height="12" rx="2"/></svg><div class="tr-text"><h3>Builds a loop that goes red on the bug</h3></div></li>
+          <li class="tr"><svg class="tmk mk" viewBox="0 0 24 24" aria-hidden="true"><rect class="d-session" x="6" y="6" width="12" height="12" rx="2"/></svg><div class="tr-text"><h3>Minimises the repro</h3></div></li>
+          <li class="tr"><svg class="tmk mk" viewBox="0 0 24 24" aria-hidden="true"><rect class="d-session" x="6" y="6" width="12" height="12" rx="2"/></svg><div class="tr-text"><h3>Ranks its hypotheses and shows them to the owner</h3><p>Without waiting when the owner is away.</p></div></li>
+          <li class="tr"><svg class="tmk mk" viewBox="0 0 24 24" aria-hidden="true"><rect class="d-session" x="6" y="6" width="12" height="12" rx="2"/></svg><div class="tr-text"><h3>Tags its debug logs</h3></div></li>
+          <li class="tr"><svg class="tmk mk" viewBox="0 0 24 24" aria-hidden="true"><rect class="d-session" x="6" y="6" width="12" height="12" rx="2"/></svg><div class="tr-text"><h3>Writes a regression test where a correct seam exists, then the fix</h3></div></li>
+          <li class="tr"><svg class="tmk mk" viewBox="0 0 24 24" aria-hidden="true"><rect class="d-session" x="6" y="6" width="12" height="12" rx="2"/></svg><div class="tr-text"><h3>Checks the cleanup</h3></div></li>
+        </ol>
+      </li>
+    </ol>
+    <p data-src="a-bug">It writes loop code: never inside a read-only step such as explore.</p>
+    <div data-src="a-bug">
+      <p><svg class="os mk" viewBox="0 0 24 24" role="img" aria-label="Stop for the owner"><rect class="d-owner-mark" x="3" y="3" width="18" height="18" rx="4"/><rect class="d-owner-bar" x="8" y="7.5" width="2.5" height="9"/><rect class="d-owner-bar" x="13.5" y="7.5" width="2.5" height="9"/></svg> When no loop can be built: one question, three options.</p>
+      <ul><li>access to an environment that reproduces it</li><li>a captured artifact, secrets redacted</li><li>temporary instrumentation in production, named as a security trade-off</li></ul>
+      <p>No loop, no hypothesis.</p>
+      <p><svg class="os mk" viewBox="0 0 24 24" role="img" aria-label="Stop for the owner"><rect class="d-owner-mark" x="3" y="3" width="18" height="18" rx="4"/><rect class="d-owner-bar" x="8" y="7.5" width="2.5" height="9"/><rect class="d-owner-bar" x="13.5" y="7.5" width="2.5" height="9"/></svg> Redacted output not enough: one question for the missing signal.</p>
+    </div>
+  </section>
+
+  <section id="work-outside-a-change" data-view="roads" aria-labelledby="h-work-outside-a-change" data-src="work-outside-a-change">
+    <div class="sec-head">
+      <h2 id="h-work-outside-a-change">Outside a change: a bug fix or a chore</h2>
+    </div>
+    <div class="cards-row two">
+      <article class="card" data-src="work-outside-a-change">
+        <h3>Only inside a change</h3>
+        <ul><li>two writers</li><li>the test-lock check</li></ul>
+      </article>
+      <article class="card" data-src="work-outside-a-change">
+        <h3>Outside a change</h3>
+        <ul><li>one agent may write the test and the fix</li><li>each new test red for <a href="#per-slice">the right reason</a></li><li><a href="#p-who-may">the commit rules</a></li><li><a href="#the-pull-request">a push only when the owner asks</a></li></ul>
+      </article>
+    </div>
+    <ul class="tags" data-src="work-outside-a-change"><li><code>tdd:</code> one seam, one test, one minimal implementation</li><li>refactoring: the <code>code-review</code> skill</li></ul>
+    <p data-src="work-outside-a-change"><svg class="os mk" viewBox="0 0 24 24" role="img" aria-label="Stop for the owner"><rect class="d-owner-mark" x="3" y="3" width="18" height="18" rx="4"/><rect class="d-owner-bar" x="8" y="7.5" width="2.5" height="9"/><rect class="d-owner-bar" x="13.5" y="7.5" width="2.5" height="9"/></svg> The agent proposes the seams: one question per seam.</p>
+  </section>
+  <section class="chapter" id="4-optional-parts" data-view="parts" aria-labelledby="h-4-optional-parts" data-src="4-optional-parts">
+    <div class="sec-head">
+      <h2 id="h-4-optional-parts">Optional parts: a project skips what it does not use</h2>
+    </div>
+    <div class="mtab">
+      <p class="label" data-src="4-optional-parts">A solid mark: the part joins there</p>
+      <div class="mrow" data-src="an-enhancement-store"><a class="mname" href="#an-enhancement-store">An enhancement store</a><ol class="mrail" aria-label="Joins at steps 1, 2 and 5"><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-start" cx="12" cy="12" r="6"/></svg></li><li class="join"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">1</text></svg></li><li class="join"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">2</text></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">3</text></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">4</text></svg></li><li class="join"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">5</text></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-end" cx="12" cy="12" r="7"/><circle class="d-end-dot" cx="12" cy="12" r="3"/></svg></li></ol><p class="mtail">track question; proposal; pull request body</p></div>
+      <div class="mrow" data-src="a-tracker-issue-for-several-repos"><a class="mname" href="#a-tracker-issue-for-several-repos">A tracker issue</a><ol class="mrail" aria-label="Joins at steps 1 and 5"><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-start" cx="12" cy="12" r="6"/></svg></li><li class="join"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">1</text></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">2</text></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">3</text></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">4</text></svg></li><li class="join"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">5</text></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-end" cx="12" cy="12" r="7"/><circle class="d-end-dot" cx="12" cy="12" r="3"/></svg></li></ol><p class="mtail">explore; pull request body; link, tick, close</p></div>
+      <div class="mrow" data-src="many-repos-in-one-workspace"><a class="mname" href="#many-repos-in-one-workspace">Many repos</a><ol class="mrail" aria-label="Joins at the start and at steps 1 to 4"><li class="join"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-start" cx="12" cy="12" r="6"/></svg></li><li class="join"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">1</text></svg></li><li class="join"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">2</text></svg></li><li class="join"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">3</text></svg></li><li class="join"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">4</text></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">5</text></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-end" cx="12" cy="12" r="7"/><circle class="d-end-dot" cx="12" cy="12" r="3"/></svg></li></ol><p class="mtail">names the repo; repo root; root commands</p></div>
+      <div class="mrow" data-src="release-rules-tied-to-commit-types"><a class="mname" href="#release-rules-tied-to-commit-types">Release rules</a><ol class="mrail" aria-label="Joins at step 5 and after main"><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-start" cx="12" cy="12" r="6"/></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">1</text></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">2</text></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">3</text></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">4</text></svg></li><li class="join"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">5</text></svg></li><li class="join"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-end" cx="12" cy="12" r="7"/><circle class="d-end-dot" cx="12" cy="12" r="3"/></svg></li></ol><p class="mtail">the merge; after main</p></div>
+      <div class="mrow" data-src="a-repo-without-specs"><a class="mname" href="#a-repo-without-specs">A repo without specs</a><ol class="mrail" aria-label="Joins at steps 2, 3, 4 and 5"><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-start" cx="12" cy="12" r="6"/></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">1</text></svg></li><li class="join"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">2</text></svg></li><li class="join"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">3</text></svg></li><li class="join"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">4</text></svg></li><li class="join"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">5</text></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-end" cx="12" cy="12" r="7"/><circle class="d-end-dot" cx="12" cy="12" r="3"/></svg></li></ol><p class="mtail">detection is automatic</p></div>
+      <div class="mrow" data-src="owner-gates"><a class="mname" href="#owner-gates">Owner gates</a><ol class="mrail" aria-label="Joins at steps 2, 3, 4 and 5"><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-start" cx="12" cy="12" r="6"/></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">1</text></svg></li><li class="join"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">2</text></svg></li><li class="join"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">3</text></svg></li><li class="join"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">4</text></svg></li><li class="join"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">5</text></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-end" cx="12" cy="12" r="7"/><circle class="d-end-dot" cx="12" cy="12" r="3"/></svg></li></ol><p class="mtail">plan gate; the build reads it; result gate; the push waits</p></div>
+      <p class="label" data-src="4-optional-parts">Small parts, inside the path</p>
+      <div class="mrow" data-src="the-grill"><a class="mname" href="#p-side-step">Side step and evidence folder</a><ol class="mrail" aria-label="Joins at steps 1 and 2"><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-start" cx="12" cy="12" r="6"/></svg></li><li class="join"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">1</text></svg></li><li class="join"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">2</text></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">3</text></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">4</text></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">5</text></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-end" cx="12" cy="12" r="7"/><circle class="d-end-dot" cx="12" cy="12" r="3"/></svg></li></ol></div>
+      <div class="mrow" data-src="the-grill before-the-first-slice"><a class="mname" href="#p-records">Glossary and decision records</a><ol class="mrail" aria-label="Joins at steps 1 and 3"><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-start" cx="12" cy="12" r="6"/></svg></li><li class="join"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">1</text></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">2</text></svg></li><li class="join"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">3</text></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">4</text></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">5</text></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-end" cx="12" cy="12" r="7"/><circle class="d-end-dot" cx="12" cy="12" r="3"/></svg></li></ol></div>
+      <div class="mrow" data-src="the-change-folder the-verify-rules-file"><a class="mname" href="#the-change-folder">User stories</a><ol class="mrail" aria-label="Joins at steps 2 and 4"><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-start" cx="12" cy="12" r="6"/></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">1</text></svg></li><li class="join"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">2</text></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">3</text></svg></li><li class="join"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">4</text></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">5</text></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-end" cx="12" cy="12" r="7"/><circle class="d-end-dot" cx="12" cy="12" r="3"/></svg></li></ol></div>
+      <div class="mrow" data-src="per-slice"><a class="mname" href="#per-slice">Check scripts</a><ol class="mrail" aria-label="Joins at steps 2, 3 and 4"><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-start" cx="12" cy="12" r="6"/></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">1</text></svg></li><li class="join"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">2</text></svg></li><li class="join"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">3</text></svg></li><li class="join"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">4</text></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">5</text></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-end" cx="12" cy="12" r="7"/><circle class="d-end-dot" cx="12" cy="12" r="3"/></svg></li></ol></div>
+    </div>
+    <p class="twin"><span class="label">In WORKFLOW.md</span> <cite>§ 4. Optional parts</cite></p>
+  </section>
+
+  <section id="an-enhancement-store" data-view="parts" aria-labelledby="h-an-enhancement-store" data-src="an-enhancement-store">
+    <div class="sec-head">
+      <h2 id="h-an-enhancement-store">An enhancement store: major features, designed before any repo change</h2>
+    </div>
+    <dl class="terms" data-src="an-enhancement-store">
+      <dt>When</dt><dd>major features that span repos; the size of the feature decides</dd>
+      <dt>Without it</dt><dd>the track question loses its first two questions</dd>
+    </dl>
+    <ol class="trace solo">
+      <li class="band">
+        <ol class="rows">
+          <li class="tr" id="an-entry" data-src="an-entry from-draft-to-delivered"><svg class="tmk mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-start" cx="12" cy="12" r="6"/></svg><div class="tr-text"><h3>A live entry: one OpenSpec change in the store</h3></div></li>
+          <li class="tr" id="from-draft-to-delivered" data-src="from-draft-to-delivered"><svg class="tmk mk" viewBox="0 0 24 24" aria-hidden="true"><polygon class="d-decision" points="12 3 21 12 12 21 3 12"/></svg><div class="tr-text"><h3>The accept step</h3><p>It refuses the entry while an open question is blocking or answered.</p></div></li>
+          <li class="tr" data-src="from-draft-to-delivered"><div class="tr-text"><h3>Repo changes deliver its task lines; each names the entry line</h3></div></li>
+          <li class="tr" data-src="from-draft-to-delivered"><div class="tr-text"><h3>A pull request on the store ticks the line</h3></div></li>
+          <li class="tr" data-src="from-draft-to-delivered"><svg class="tmk mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-end" cx="12" cy="12" r="7"/><circle class="d-end-dot" cx="12" cy="12" r="3"/></svg><div class="tr-text"><h3>A delivered entry is archived</h3></div></li>
+        </ol>
+      </li>
+    </ol>
+    <p id="corrections" data-src="corrections"><b>A store correction</b> carries no new behaviour, and cites only merged changes.</p>
+    <p data-src="from-draft-to-delivered">The flow names no entry command: each project makes and changes entries its own way, and its profile says how.</p>
+    <p class="openl" data-src="from-draft-to-delivered"><span class="state open"><svg width="10" height="10" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-dasharray="2.2 1.6"/></svg>Open</span> Whether size alone makes work an enhancement; the store checks no delivered line. <span class="label">until then</span> step 1's track question stands; the profile says how the project checks one.</p>
+  </section>
+
+  <section id="a-tracker-issue-for-several-repos" data-view="parts" aria-labelledby="h-a-tracker-issue-for-several-repos" data-src="a-tracker-issue-for-several-repos">
+    <div class="sec-head">
+      <h2 id="h-a-tracker-issue-for-several-repos">A tracker issue: one change per repo, one issue ties them</h2>
+    </div>
+    <dl class="terms" data-src="a-tracker-issue-for-several-repos">
+      <dt>When</dt><dd>work over several repos that is not a major feature; without a store, all work over several repos</dd>
+      <dt>Without it</dt><dd>each repo's change stands alone; nothing checks that every repo was done</dd>
+    </dl>
+    <div class="pair">
+      <figure class="figure" data-src="a-tracker-issue-for-several-repos the-track-question an-enhancement-store">
+<svg xmlns="http://www.w3.org/2000/svg" class="dg" viewBox="0 0 336 520" width="420" height="650" role="img" aria-labelledby="track-question-title track-question-desc">
+<title id="track-question-title">The track question</title>
+<desc id="track-question-desc">The track question, which the owner answers: its three questions in their order, the optional part that adds each, the track that each yes leads to, and one change in one repo when all are no.</desc>
+
+<defs><marker id="track-question-arrow" viewBox="0 0 8 6" refX="5" refY="3" markerWidth="8" markerHeight="6" markerUnits="userSpaceOnUse" orient="auto"><path class="d-arrowhead" d="M0 0L8 3L0 6z"/></marker></defs>
+<rect class="d-bg" x="0" y="0" width="336" height="520" rx="8"/>
+
+<!-- The owner's moment: a band across the start row, painted before the flow lines. -->
+<rect class="d-box-owner" x="16" y="10" width="304" height="48" rx="6"/>
+
+<!-- Flow lines: the spine carries each no to the next question; each yes taps into its box. -->
+<path class="d-flow" d="M 36 30 V 102" marker-end="url(#track-question-arrow)"/>
+<path class="d-flow" d="M 36 123 V 218" marker-end="url(#track-question-arrow)"/>
+<path class="d-flow" d="M 36 178 H 57" marker-end="url(#track-question-arrow)"/>
+<path class="d-flow" d="M 36 239 V 364" marker-end="url(#track-question-arrow)"/>
+<path class="d-flow" d="M 36 285 H 57" marker-end="url(#track-question-arrow)"/>
+<path class="d-flow" d="M 36 385 V 482" marker-end="url(#track-question-arrow)"/>
+<path class="d-flow" d="M 36 431 H 57" marker-end="url(#track-question-arrow)"/>
+
+<!-- Boxes: each yes ends its branch in the track it names; the owner mark sits in the band. -->
+<rect class="d-box" x="60" y="154" width="260" height="48" rx="6"/>
+<rect class="d-box" x="60" y="252" width="260" height="66" rx="6"/>
+<rect class="d-box" x="60" y="398" width="260" height="66" rx="6"/>
+<rect class="d-owner-mark" x="290" y="17" width="18" height="18" rx="4"/>
+<rect class="d-owner-bar" x="295" y="21.5" width="2.5" height="9"/>
+<rect class="d-owner-bar" x="300.5" y="21.5" width="2.5" height="9"/>
+
+<!-- Marks on the spine. -->
+<circle class="d-start" cx="36" cy="24" r="6"/>
+<polygon class="d-decision" points="36 105 45 114 36 123 27 114"/>
+<circle class="d-junction" cx="36" cy="178" r="3"/>
+<polygon class="d-decision" points="36 221 45 230 36 239 27 230"/>
+<circle class="d-junction" cx="36" cy="285" r="3"/>
+<polygon class="d-decision" points="36 367 45 376 36 385 27 376"/>
+<circle class="d-junction" cx="36" cy="431" r="3"/>
+<circle class="d-end" cx="36" cy="492" r="7"/>
+<circle class="d-end-dot" cx="36" cy="492" r="3"/>
+
+<!-- Text. Who answers sits under the start. A condition beside the spine names the part that
+     adds the questions below it. -->
+<text class="d-label" x="52" y="29">At the end of explore</text>
+<text class="d-text" x="52" y="47">the owner answers</text>
+
+<text class="d-cond" x="52" y="84">WITH AN ENHANCEMENT STORE</text>
+<text class="d-label" x="52" y="119">Does the work deliver a line</text>
+<text class="d-label" x="52" y="137">of a live entry?</text>
+
+<text class="d-cond" x="72" y="173">YES</text>
+<text class="d-label" x="72" y="191">It goes through that entry</text>
+
+<text class="d-label" x="52" y="235">Is it a major feature?</text>
+
+<text class="d-cond" x="72" y="271">YES</text>
+<text class="d-label" x="72" y="289">It becomes an enhancement</text>
+<text class="d-label" x="72" y="307">in the store</text>
+
+<text class="d-cond" x="52" y="346">WITH TRACKER ISSUES</text>
+<text class="d-label" x="52" y="381">Does it touch several repos?</text>
+
+<text class="d-cond" x="72" y="417">YES</text>
+<text class="d-label" x="72" y="435">One tracker issue ties</text>
+<text class="d-label" x="72" y="453">one change per repo</text>
+
+<text class="d-label" x="52" y="497">All no: <tspan class="d-text">one change in one repo</tspan></text>
+</svg>
+        <figcaption>The track question with both parts: the questions in their order, and the track that each yes leads to.</figcaption>
+      </figure>
+      <div class="side">
+      <div><p class="label">The issue body</p><pre class="snip" id="opening-the-issue" data-src="opening-the-issue">an intro sentence
+[ ] repo, PR link   (in merge order)
+<b>Not affected:</b> repo, reason
+<b>Store correction</b> (where there is a store)</pre></div>
+      <ol class="trace solo">
+        <li class="band">
+          <ol class="rows">
+            <li class="tr" data-src="the-explore-command"><svg class="tmk mk" viewBox="0 0 24 24" aria-hidden="true"><rect class="d-session" x="6" y="6" width="12" height="12" rx="2"/></svg><div class="tr-text"><h3>Explore lists the open tracker issues first</h3></div></li>
+            <li class="tr" data-src="opening-the-issue"><svg class="tmk mk" viewBox="0 0 24 24" role="img" aria-label="Stop for the owner"><rect class="d-owner-mark" x="3" y="3" width="18" height="18" rx="4"/><rect class="d-owner-bar" x="8" y="7.5" width="2.5" height="9"/><rect class="d-owner-bar" x="13.5" y="7.5" width="2.5" height="9"/></svg><div class="tr-text"><h3>The owner approves the repo list; no approval, no issue</h3></div></li>
+            <li class="tr" id="while-the-changes-run" data-src="while-the-changes-run"><svg class="tmk mk" viewBox="0 0 24 24" aria-hidden="true"><rect class="d-session" x="6" y="6" width="12" height="12" rx="2"/></svg><div class="tr-text"><h3>A link when a pull request opens</h3><p>Each pull request body ends with a <code>Part of &lt;issue URL&gt;</code> line.</p></div></li>
+            <li class="tr" data-src="while-the-changes-run"><svg class="tmk mk" viewBox="0 0 24 24" aria-hidden="true"><rect class="d-session" x="6" y="6" width="12" height="12" rx="2"/></svg><div class="tr-text"><h3>A tick when it merges</h3></div></li>
+            <li class="tr" id="closing-the-issue" data-src="closing-the-issue"><svg class="tmk mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-end" cx="12" cy="12" r="7"/><circle class="d-end-dot" cx="12" cy="12" r="3"/></svg><div class="tr-text"><h3>One close</h3><p>By the session that merges the last pull request, once every line is ticked.</p></div></li>
+          </ol>
+        </li>
+      </ol>
+      </div>
+    </div>
+  </section>
+
+  <section id="many-repos-in-one-workspace" data-view="parts" aria-labelledby="h-many-repos-in-one-workspace" data-src="many-repos-in-one-workspace">
+    <div class="sec-head">
+      <h2 id="h-many-repos-in-one-workspace">Many repos: each repo gets the kit</h2>
+    </div>
+    <dl class="terms" data-src="many-repos-in-one-workspace">
+      <dt>When</dt><dd>several independent repos in one workspace, the same flow in each</dd>
+      <dt>Without it</dt><dd>no shared rules file and no root command</dd>
+    </dl>
+    <ul class="tree" id="the-kit-in-every-repo" data-src="the-kit-in-every-repo many-repos-in-one-workspace">
+      <li><b>workspace</b>
+        <ul>
+          <li>root command: picks the repo, then starts or names the step command</li>
+          <li><b>each repo</b>: skills and step commands through the plugin, which the repo names in its settings</li>
+        </ul>
+      </li>
+    </ul>
+  </section>
+
+  <section id="release-rules-tied-to-commit-types" data-view="parts" aria-labelledby="h-release-rules-tied-to-commit-types" data-src="release-rules-tied-to-commit-types">
+    <div class="sec-head">
+      <h2 id="h-release-rules-tied-to-commit-types">Release rules: the title's type may decide who merges</h2>
+    </div>
+    <dl class="terms" data-src="release-rules-tied-to-commit-types">
+      <dt>When</dt><dd>a release tool versions from the titles of squash-merged pull requests</dd>
+      <dt>Without it</dt><dd>one merge rule for every pull request</dd>
+    </dl>
+    <ul class="routes" data-src="release-rules-tied-to-commit-types">
+      <li><span class="cond">Cuts a release, for example <code>feat</code> <code>fix</code></span><span><svg class="os mk" viewBox="0 0 24 24" role="img" aria-label="Stop for the owner"><rect class="d-owner-mark" x="3" y="3" width="18" height="18" rx="4"/><rect class="d-owner-bar" x="8" y="7.5" width="2.5" height="9"/><rect class="d-owner-bar" x="13.5" y="7.5" width="2.5" height="9"/></svg> waits for the owner's approval</span></li>
+      <li><span class="cond">Cuts no release, for example <code>chore</code> <code>test</code></span><span>where the merge rule says so, the agent merges under <a href="#the-merge">the merge conditions</a></span></li>
+    </ul>
+    <p data-src="release-rules-tied-to-commit-types">The owner can override. <span class="state def"><svg width="12" height="10" viewBox="0 0 12 10" aria-hidden="true"><rect x="0.8" y="1.8" width="10.4" height="6.4" rx="3.2" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="7.8" cy="5" r="1.9" fill="currentColor"/></svg>Default</span> An override works either way, one pull request at a time.</p>
+  </section>
+
+  <section id="a-repo-without-specs" data-view="parts" aria-labelledby="h-a-repo-without-specs" data-src="a-repo-without-specs">
+    <div class="sec-head">
+      <h2 id="h-a-repo-without-specs">A repo without specs: no tests first</h2>
+    </div>
+    <dl class="terms" data-src="a-repo-without-specs">
+      <dt>When</dt><dd>a repo's OpenSpec schema has no specs artifact</dd>
+      <dt>Without it</dt><dd>every repo has a specs artifact, or such repos stay outside the flow</dd>
+    </dl>
+    <div class="pair">
+      <figure class="figure" data-src="a-repo-without-specs">
+<svg xmlns="http://www.w3.org/2000/svg" class="dg" viewBox="0 0 336 568" width="420" height="710" role="img" aria-labelledby="slice-without-specs-title slice-without-specs-desc">
+<title id="slice-without-specs-title">A slice in a repo without specs</title>
+<desc id="slice-without-specs-desc">The seven parts of a slice in a repo without specs: the gate, the code writer and one commit run, and the other four parts are skipped.</desc>
+
+<defs><marker id="slice-without-specs-arrow" viewBox="0 0 8 6" refX="5" refY="3" markerWidth="8" markerHeight="6" markerUnits="userSpaceOnUse" orient="auto"><path class="d-arrowhead" d="M0 0L8 3L0 6z"/></marker></defs>
+<rect class="d-bg" x="0" y="0" width="336" height="568" rx="8"/>
+
+<!-- Flow lines: the spine passes each skipped row with no head; the loop back to (a); the end. -->
+<path class="d-flow" d="M 36 30 V 56" marker-end="url(#slice-without-specs-arrow)"/>
+<path class="d-flow" d="M 36 77 V 234" marker-end="url(#slice-without-specs-arrow)"/>
+<path class="d-flow" d="M 36 251 V 323" marker-end="url(#slice-without-specs-arrow)"/>
+<path class="d-flow" d="M 36 338 V 384"/>
+<path class="d-flow" d="M 36 384 H 16 Q 10 384 10 378 V 74 Q 10 68 16 68 H 24" marker-end="url(#slice-without-specs-arrow)"/>
+<path class="d-flow" d="M 36 384 V 418" marker-end="url(#slice-without-specs-arrow)"/>
+
+<!-- Marks: only the parts that run, on the rows of per-slice.svg. -->
+<circle class="d-start" cx="36" cy="24" r="6"/>
+<polygon class="d-decision" points="36 59 45 68 36 77 27 68"/>
+<rect class="d-subagent" x="29" y="237" width="14" height="14" rx="3"/>
+<rect class="d-session" x="30" y="326" width="12" height="12" rx="2"/>
+<circle class="d-junction" cx="36" cy="384" r="3"/>
+<circle class="d-end" cx="36" cy="428" r="7"/>
+<circle class="d-end-dot" cx="36" cy="428" r="3"/>
+
+<!-- Text. A skipped part has no mark: its label in d-text, and SKIPPED aligned right. -->
+<text class="d-label" x="52" y="29">The set-up is done</text>
+<text class="d-label" x="52" y="73">(a) Gate</text>
+<text class="d-text" x="52" y="117">(b) Test writer</text>
+<text class="d-cond" x="320" y="117" text-anchor="end">SKIPPED</text>
+<text class="d-text" x="52" y="161">(c) Red check</text>
+<text class="d-cond" x="320" y="161" text-anchor="end">SKIPPED</text>
+<text class="d-text" x="52" y="205">(d) Tests commit</text>
+<text class="d-cond" x="320" y="205" text-anchor="end">SKIPPED</text>
+<text class="d-label" x="52" y="249">(e) Code writer</text>
+<text class="d-text" x="52" y="293">(f) Test-lock check</text>
+<text class="d-cond" x="320" y="293" text-anchor="end">SKIPPED</text>
+<text class="d-label" x="52" y="337">(g) Code commit</text>
+<text class="d-text" x="52" y="355">after the check command passes</text>
+<text class="d-label" x="52" y="389">Slices left</text>
+<text class="d-label" x="52" y="433">Every slice closed</text>
+
+<!-- Legend: the two actor marks and the decision. -->
+<rect class="d-session" x="30" y="482" width="12" height="12" rx="2"/>
+<rect class="d-subagent" x="29" y="505" width="14" height="14" rx="3"/>
+<polygon class="d-decision" points="36 527 45 536 36 545 27 536"/>
+<text class="d-text" x="52" y="493">the session</text>
+<text class="d-text" x="52" y="517">a sub-agent</text>
+<text class="d-text" x="52" y="541">a check or a ruling</text>
+</svg>
+        <figcaption>A slice in a repo without specs skips four of its seven parts, and one commit closes it.</figcaption>
+      </figure>
+      <div class="side">
+      <ol class="trace solo">
+        <li class="band">
+          <ol class="rows">
+            <li class="tr" data-src="a-repo-without-specs"><svg class="tmk mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">2</text></svg><div class="tr-text"><h3>No delta specs; a Done when line covers each user story</h3></div></li>
+            <li class="tr" data-src="a-repo-without-specs"><svg class="tmk mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">3</text></svg><div class="tr-text"><h3>A bug in this change's code: fixed in the slice's commit <span class="state def"><svg width="12" height="10" viewBox="0 0 12 10" aria-hidden="true"><rect x="0.8" y="1.8" width="10.4" height="6.4" rx="3.2" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="7.8" cy="5" r="1.9" fill="currentColor"/></svg>Default</span></h3></div></li>
+            <li class="tr" data-src="a-repo-without-specs"><svg class="tmk mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">4</text></svg><div class="tr-text"><h3>The check command; no red check, no test-lock check</h3></div></li>
+            <li class="tr" data-src="a-repo-without-specs"><svg class="tmk mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">5</text></svg><div class="tr-text"><h3>The archive only moves the folder</h3></div></li>
+          </ol>
+        </li>
+      </ol>
+      <p data-src="a-repo-without-specs"><svg class="os mk" viewBox="0 0 24 24" role="img" aria-label="Stop for the owner"><rect class="d-owner-mark" x="3" y="3" width="18" height="18" rx="4"/><rect class="d-owner-bar" x="8" y="7.5" width="2.5" height="9"/><rect class="d-owner-bar" x="13.5" y="7.5" width="2.5" height="9"/></svg> <span class="state def"><svg width="12" height="10" viewBox="0 0 12 10" aria-hidden="true"><rect x="0.8" y="1.8" width="10.4" height="6.4" rx="3.2" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="7.8" cy="5" r="1.9" fill="currentColor"/></svg>Default</span> A disputed test, or a needed test change, goes straight to the owner.</p>
+      <p class="openl" data-src="a-repo-without-specs"><span class="state open"><svg width="10" height="10" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-dasharray="2.2 1.6"/></svg>Open</span> A small change here has no Done when line. <span class="label">until then</span> the profile says how the project builds one.</p>
+      </div>
+    </div>
+  </section>
+  <section id="owner-gates" data-view="parts" aria-labelledby="h-owner-gates" data-src="owner-gates">
+    <div class="sec-head">
+      <h2 id="h-owner-gates">Owner gates: the agent decides whether the owner looks</h2>
+    </div>
+    <dl class="terms" data-src="owner-gates">
+      <dt>When</dt><dd>the owner wants to see the plan or the verified change, only where a look matters</dd>
+      <dt>Without it</dt><dd>no owner gate runs; the owner still decides at every stop</dd>
+    </dl>
+    <ul class="tags" data-src="owner-gates"><li>soft: no hook, no script</li><li>both on; <code>Plan gate: off.</code> or <code>Result gate: off.</code> turns one off</li><li>the owner can override for one change</li></ul>
+    <div class="cards-row two">
+      <article class="card" data-src="owner-gates">
+        <h3>The plan gate: after propose</h3>
+        <p><span class="state def solo"><svg width="12" height="10" viewBox="0 0 12 10" aria-hidden="true"><rect x="0.8" y="1.8" width="10.4" height="6.4" rx="3.2" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="7.8" cy="5" r="1.9" fill="currentColor"/></svg>Default</span> The owner looks when:</p>
+        <ul class="checks"><li>the plan rests on an assumption</li><li>a public contract, or a breaking change</li></ul>
+      </article>
+      <article class="card" data-src="owner-gates">
+        <h3>The result gate: after a passed verify</h3>
+        <p><span class="state def solo"><svg width="12" height="10" viewBox="0 0 12 10" aria-hidden="true"><rect x="0.8" y="1.8" width="10.4" height="6.4" rx="3.2" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="7.8" cy="5" r="1.9" fill="currentColor"/></svg>Default</span> The owner looks when:</p>
+        <ul class="checks"><li>verify needed a fix round</li><li>the final report names a disputed test, a bug or a stop</li><li>a lead or an Owner finding is still in the report</li></ul>
+      </article>
+    </div>
+    <ul class="routes" data-src="owner-gates">
+      <li><span class="cond">No criterion holds</span><span>The gate passes; the work goes on.</span></li>
+      <li><span class="cond">One holds</span><span><svg class="os mk" viewBox="0 0 24 24" role="img" aria-label="Stop for the owner"><rect class="d-owner-mark" x="3" y="3" width="18" height="18" rx="4"/><rect class="d-owner-bar" x="8" y="7.5" width="2.5" height="9"/><rect class="d-owner-bar" x="13.5" y="7.5" width="2.5" height="9"/></svg> The owner reviews the real files in the review tool, or answers one question.</span>
+        <ul class="held"><li>approve</li><li>approve with changes</li><li>change and show again</li></ul></li>
+    </ul>
+    <p data-src="owner-gates">The agent never approves for the owner. While the owner is away, the work waits.</p>
+    <article class="card narrow" data-src="owner-gates">
+      <p class="label">The record, in the change folder</p>
+      <pre class="snip"><b>gates.json</b>
+"plan": {
+  "outcome": "reviewed",
+  "criteria": ["assumption"],
+  "reason": "No explore answer covers where the error text lives.",
+  "result": "approve-with-changes",
+  "comments": [{ "comment": "...", "change": "..." }],
+  "datetime": "2026-11-23T08:14:00Z"
+},
+"result": { "outcome": "off", "source": "config" }</pre>
+      <p>The build reads it before the first slice.</p>
+    </article>
+  </section>
+  <section class="chapter" id="5-setting-up-a-project" data-view="setup" aria-labelledby="h-5-setting-up-a-project" data-src="5-setting-up-a-project">
+    <div class="sec-head">
+      <h2 id="h-5-setting-up-a-project">Setting up a project: once per repo, before its first change</h2>
+      <p data-src="what-a-repo-needs-before-its-first-change">The repo's own files must be enough to run the whole flow in a lone clone.</p>
+    </div>
+    <div class="checklist" id="what-a-repo-needs-before-its-first-change" data-src="what-a-repo-needs-before-its-first-change">
+      <div class="cl-group" id="openspec" data-src="openspec">
+        <p class="label">OpenSpec</p>
+        <ul>
+          <li>one pinned OpenSpec version, and a check</li>
+          <li><code>openspec/config.yaml</code>
+            <ul>
+              <li><code>references:</code> <span class="state opt"><svg width="10" height="10" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.8" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6 3.6v4.8M3.6 6h4.8" stroke="currentColor" stroke-width="1.4"/></svg>Optional</span></li>
+              <li><code>rules:</code>
+                <ul>
+                  <li><code>## Slices</code></li>
+                  <li>one task section per slice</li>
+                  <li>the proposal rule asks for user stories <span class="state opt"><svg width="10" height="10" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.8" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6 3.6v4.8M3.6 6h4.8" stroke="currentColor" stroke-width="1.4"/></svg>Optional</span></li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+          <li>a config check</li>
+        </ul>
+      </div>
+      <div class="cl-group" id="steering-verify" data-src="steering-verify">
+        <p class="label">Steering verify</p>
+        <ul><li>the verify rules file</li><li>the verify command applies it</li><li>one line of the repo guide guards a bare run of OpenSpec's verify skill</li></ul>
+        <p class="openl"><span class="state open"><svg width="10" height="10" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-dasharray="2.2 1.6"/></svg>Open</span> The workflow list is set per machine; where it lacks verify, an update deletes the verify skill. <span class="label">until then</span> the profile says.</p>
+      </div>
+      <div class="cl-group" id="steering-the-build" data-src="steering-the-build">
+        <p class="label">Steering the build</p>
+        <ul><li>only the owner starts a build, with the build command</li><li>one line of the repo guide guards the run of OpenSpec's apply skill</li></ul>
+      </div>
+      <div class="cl-group" id="the-repos-own-files" data-src="the-repos-own-files">
+        <p class="label">The repo's own files</p>
+        <ul><li>the repo guide</li><li>the rules sections</li><li>the written standards</li><li>a check command</li><li>a test command</li><li>a glossary and decision records <span class="state opt"><svg width="10" height="10" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.8" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6 3.6v4.8M3.6 6h4.8" stroke="currentColor" stroke-width="1.4"/></svg>Optional</span></li></ul>
+      </div>
+      <div class="cl-group" id="the-kit" data-src="the-kit">
+        <p class="label">The kit</p>
+        <ul><li>the kit skills and the four step commands: <a href="#the-kit-in-every-repo">from the plugin</a></li><li>the config check script</li><li>check scripts <span class="state opt"><svg width="10" height="10" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.8" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6 3.6v4.8M3.6 6h4.8" stroke="currentColor" stroke-width="1.4"/></svg>Optional</span></li><li>a text hook <span class="state opt"><svg width="10" height="10" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.8" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6 3.6v4.8M3.6 6h4.8" stroke="currentColor" stroke-width="1.4"/></svg>Optional</span></li></ul>
+      </div>
+    </div>
+    <div data-src="openspec">
+      <p class="label">Never</p>
+      <ul class="nevers"><li>an agent runs OpenSpec's upgrade command</li><li>anyone edits a generated skill by hand</li></ul>
+    </div>
+    <p class="twin"><span class="label">In WORKFLOW.md</span> <cite>§ 5. Setting up a project</cite></p>
+  </section>
+
+  <section id="the-skills" data-view="setup" aria-labelledby="h-the-skills" data-src="the-skills">
+    <div class="sec-head">
+      <h2 id="h-the-skills">The skills: where each one acts</h2>
+    </div>
+    <div class="mtab" data-src="the-skills">
+      <p class="label" data-src="the-skills">From step 1</p>
+      <div class="mrow"><span class="mname"><code>grilling</code></span><ol class="mrail" aria-label="Used in step 1, and at every stop"><li class="on"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">1</text></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">2</text></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">3</text></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">4</text></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">5</text></svg></li></ol><p class="mtail"><span class="pill">adapted</span> <span class="mjob">Runs the grill; holds the question form. <svg class="os mk" viewBox="0 0 24 24" role="img" aria-label="Stop for the owner"><rect class="d-owner-mark" x="3" y="3" width="18" height="18" rx="4"/><rect class="d-owner-bar" x="8" y="7.5" width="2.5" height="9"/><rect class="d-owner-bar" x="13.5" y="7.5" width="2.5" height="9"/></svg> every stop</span></p></div>
+      <div class="mrow"><span class="mname"><code>research</code></span><ol class="mrail" aria-label="Used in step 1, as a side step"><li class="on"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">1</text></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">2</text></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">3</text></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">4</text></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">5</text></svg></li></ol><p class="mtail"><span class="pill">adapted</span> <span class="mjob">Settles a fact from primary sources, in a cited note. Side step.</span></p></div>
+      <div class="mrow"><span class="mname"><code>prototype</code></span><ol class="mrail" aria-label="Used in step 1, as a side step"><li class="on"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">1</text></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">2</text></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">3</text></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">4</text></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">5</text></svg></li></ol><p class="mtail"><span class="pill">adapted</span> <span class="mjob">Settles a design question with throwaway code. Side step.</span></p></div>
+      <div class="mrow"><span class="mname"><code>domain-modeling</code></span><ol class="mrail" aria-label="Used in step 1"><li class="on"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">1</text></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">2</text></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">3</text></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">4</text></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">5</text></svg></li></ol><p class="mtail"><span class="pill">adapted</span> <span class="mjob">Writes a term or a decision record, on the owner's yes.</span></p></div>
+      <div class="mrow"><span class="mname"><code>codebase-design</code></span><ol class="mrail" aria-label="Used in steps 1 and 3"><li class="on"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">1</text></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">2</text></svg></li><li class="on"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">3</text></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">4</text></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">5</text></svg></li></ol><p class="mtail"><span class="pill">adapted</span> <span class="mjob">A reference: the words for deep modules and seams.</span></p></div>
+      <div class="mrow"><span class="mname"><code>improve-codebase-architecture</code></span><p class="mtail">before step 2</p><p class="mtail"><span class="pill">upstream, not shipped</span> <span class="mjob">Finds modules to deepen.</span></p></div>
+      <p class="label" data-src="the-skills">From step 3</p>
+      <div class="mrow"><span class="mname"><code>slice-build</code></span><ol class="mrail" aria-label="Used in steps 3 and 4"><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">1</text></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">2</text></svg></li><li class="on"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">3</text></svg></li><li class="on"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">4</text></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">5</text></svg></li></ol><p class="mtail"><span class="pill">own</span> <span class="mjob">Builds a change slice by slice, tests first; runs the fix round.</span></p></div>
+      <div class="mrow"><span class="mname"><code>tdd</code></span><ol class="mrail" aria-label="Used in step 3, and outside a change"><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">1</text></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">2</text></svg></li><li class="on"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">3</text></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">4</text></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">5</text></svg></li></ol><p class="mtail"><span class="pill">adapted</span> <span class="mjob">The rules for good tests and the red-green loop. Outside a change.</span></p></div>
+      <div class="mrow"><span class="mname"><code>diagnosing-bugs</code></span><ol class="mrail" aria-label="Used in step 3, and for a bug"><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">1</text></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">2</text></svg></li><li class="on"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">3</text></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">4</text></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">5</text></svg></li></ol><p class="mtail"><span class="pill">adapted</span> <span class="mjob">A diagnosis loop for hard bugs and performance regressions. A bug.</span></p></div>
+      <div class="mrow"><span class="mname"><code>code-review</code></span><ol class="mrail" aria-label="Used in step 4, and outside a change"><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">1</text></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">2</text></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">3</text></svg></li><li class="on"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">4</text></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">5</text></svg></li></ol><p class="mtail"><span class="pill">adapted</span> <span class="mjob">Reviews the diff against written standards and smells. Outside a change.</span></p></div>
+      <div class="mrow"><span class="mname"><code>pr</code></span><ol class="mrail" aria-label="Used in step 5"><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">1</text></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">2</text></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">3</text></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">4</text></svg></li><li class="on"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">5</text></svg></li></ol><p class="mtail"><span class="pill">adapted</span> <span class="mjob">Writes the pull request body and the breaking footer.</span></p></div>
+      <p class="label" data-src="the-skills">Across the path</p>
+      <div class="mrow"><span class="mname"><code>commit</code></span><p class="mtail">every commit</p><p class="mtail"><span class="pill">own</span> <span class="mjob">The rules for every commit.</span></p></div>
+      <div class="mrow"><span class="mname"><code>owner-gate</code></span><p class="mtail">steps 2 to 5, with owner gates</p><p class="mtail"><span class="pill">own</span> <span class="mjob">Applies the two owner gates, and records the outcome.</span></p></div>
+      <div class="mrow"><span class="mname">OpenSpec's generated skills</span><ol class="mrail" aria-label="Used in steps 1, 2, 4 and 5"><li class="on"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">1</text></svg></li><li class="on"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">2</text></svg></li><li class="off"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">3</text></svg></li><li class="on"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">4</text></svg></li><li class="on"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">5</text></svg></li></ol><p class="mtail"><span class="pill">OpenSpec</span> <span class="mjob">Explore; write, check and archive the change files.</span></p></div>
+    </div>
+    <div data-src="the-skills">
+      <p class="label">The kit set</p>
+      <ul class="tree">
+        <li><b><code>slice-build</code></b> loads
+          <ul>
+            <li><code>tdd</code> <code>grilling</code> <code>commit</code> <code>diagnosing-bugs</code> <code>codebase-design</code> <code>owner-gate</code>
+              <ul><li>those load <code>code-review</code> <code>domain-modeling</code> <code>pr</code> <code>prototype</code> <code>research</code></li></ul>
+            </li>
+          </ul>
+        </li>
+        <li>not in the set, and not shipped by the plugin: <code>improve-codebase-architecture</code>, which the reader installs from upstream</li>
+      </ul>
+    </div>
+    <article class="card narrow" id="credit-and-licence-duties" data-src="credit-and-licence-duties">
+      <h3>Credit and licence duties</h3>
+      <p>Upstream: <a href="https://github.com/mattpocock/skills">github.com/mattpocock/skills</a></p>
+      <p>OpenSpec is the npm package <code>@fission-ai/openspec</code></p>
+      <ul><li>The upstream licence is MIT; its full text must stay with any copy.</li><li>The credits file names the upstream source and the upstream commit.</li><li>The credits file records every local change to an upstream skill.</li></ul>
+    </article>
+  </section>
+
+  <section id="the-projects-profile" data-view="setup" aria-labelledby="h-the-projects-profile" data-src="the-projects-profile">
+    <div class="sec-head">
+      <h2 id="h-the-projects-profile">The project's profile: one project's answers</h2>
+    </div>
+    <ul class="tags" data-src="the-projects-profile"><li>the optional parts it uses</li><li>its names, commands and paths</li><li>its merge rule</li><li>how it handles each Open point</li><li>its state and dated decisions</li></ul>
+    <p data-src="the-projects-profile">A new project copies <code>profiles/TEMPLATE.md</code> into its own repo and answers it. The profile is a plan: each answer also goes into the repo files that the skills read, and the project deletes the profile when the flow is built.</p>
+  </section>
+</main>
+<script>
+/* The bar: show one view at a time, and mark the view and the section the reader is in.
+   No library, no network, no storage. Without this script the page is one scroll, and the bar
+   holds plain links: the five views over the five steps. */
+(() => {
+  const bar = document.querySelector(".bar");
+  if (!bar) return;
+  const blocks = [...document.querySelectorAll(".wrap > [data-view]")];
+  const rows = [...bar.querySelectorAll("nav[data-view]")];
+  const views = [...bar.querySelectorAll(".views li")];
+  /* a browser that can search hidden text keeps the other views findable */
+  const hide = "onbeforematch" in document.body ? "until-found" : "";
+  const target = a => document.getElementById(a.getAttribute("href").slice(1));
+  const blockOf = el => el && el.closest(".wrap > [data-view]");
+  const set = (li, on) => {
+    li.classList.toggle("here", on);
+    if (!on) return li.firstElementChild.removeAttribute("aria-current");
+    li.firstElementChild.setAttribute("aria-current", "true");
+    li.closest("nav").scrollLeft = li.offsetLeft - 40;
+  };
+  let view = "", tabs = [], marks = [], now = -2, queued = false, aim = null;
+  const mark = () => {
+    queued = false;
+    /* the reading line lies 24px under the bar: a link target stops 16px under it */
+    const line = bar.getBoundingClientRect().bottom + 24;
+    let n = -1;
+    marks.forEach((s, i) => { if (s && s.getBoundingClientRect().top <= line) n = i; });
+    /* at the end of a view a short section cannot reach the line: mark the one aimed at, or the last */
+    if (innerHeight + scrollY >= document.documentElement.scrollHeight - 2) {
+      const k = marks.indexOf(aim);
+      n = Math.max(n, k < 0 ? marks.length - 1 : k);
+    }
+    if (n === now) return;
+    now = n;
+    tabs.forEach((li, i) => set(li, i === n));
+  };
+  const queue = () => { if (!queued) { queued = true; requestAnimationFrame(mark); } };
+  /* after a new view, a new width or new fonts, mark again even if the section is the same */
+  const again = () => { now = -2; queue(); };
+  /* open the view v; true if it was not open */
+  const open = v => {
+    if (v === view) return false;
+    view = v;
+    blocks.forEach(b => { if (b.dataset.view === v) b.hidden = false; else b.setAttribute("hidden", hide); });
+    rows.forEach(r => { r.hidden = r.dataset.view !== v; });
+    views.forEach(li => set(li, li.dataset.view === v));
+    tabs = [...rows.find(r => r.dataset.view === v).querySelectorAll("li")];
+    marks = tabs.map(li => target(li.firstElementChild));
+    again();
+    return true;
+  };
+  /* go where the address says: on load, and after Back or Forward */
+  const go = () => {
+    const el = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+    const b = blockOf(el);
+    if (open(b ? b.dataset.view : "flow")) { if (b) el.scrollIntoView(); else scrollTo(0, 0); }
+  };
+  /* a link into another view opens that view first; the browser then scrolls to the target */
+  addEventListener("click", e => {
+    const a = e.target.closest('a[href^="#"]');
+    const b = a && blockOf(target(a));
+    if (b) { open(b.dataset.view); aim = target(a); }
+  });
+  ["wheel", "touchmove", "keydown"].forEach(t => addEventListener(t, () => { aim = null; }, { passive: true }));
+  /* a search hit in a hidden view opens that view */
+  addEventListener("beforematch", e => { const b = blockOf(e.target); if (b) open(b.dataset.view); });
+  addEventListener("hashchange", go);
+  addEventListener("scroll", queue, { passive: true });
+  addEventListener("resize", again);
+  addEventListener("load", again);
+  if (document.fonts) document.fonts.ready.then(again);
+  go();
+})();
+</script>

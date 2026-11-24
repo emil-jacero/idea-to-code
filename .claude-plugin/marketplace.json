@@ -1,0 +1,13 @@
+{
+  "name": "idea-to-code",
+  "owner": {
+    "name": "emil-jacero"
+  },
+  "description": "The skills and the step commands of the Idea to Code flow, as one plugin.",
+  "plugins": [
+    {
+      "name": "idea-to-code",
+      "source": "./"
+    }
+  ]
+}

@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" class="dg" viewBox="0 0 336 408" width="420" height="510" role="img" aria-labelledby="owner-decision-title owner-decision-desc">
+<title id="owner-decision-title">An owner decision or a sub-agent's choice</title>
+<desc id="owner-decision-desc">An owner decision goes from the sub-agent back to the session, which asks the owner, and every other choice the sub-agent makes itself and lists as an assumption.</desc>
+<style>
+:root {
+  --bg: #f3f5f7; --surface: #ffffff; --ink: #15202b; --ink-soft: #364250;
+  --muted: #5a6673; --owner: #a23468; --owner-tint: #f8e4ed;
+  --font-sans: "IBM Plex Sans", "Noto Sans", system-ui, -apple-system, "Segoe UI", Roboto,
+    sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f151b; --surface: #17202a; --ink: #e4eaf0; --ink-soft: #c3cdd7;
+    --muted: #97a4b1; --owner: #e687b5; --owner-tint: #3b1c2c;
+  }
+}
+.dg { font-family: var(--font-sans); font-size: 13px; }
+.d-bg { fill: var(--bg); }
+.d-flow { fill: none; stroke: var(--ink); stroke-width: 1.6; stroke-linejoin: round; }
+.d-arrowhead, .d-start, .d-end-dot, .d-junction, .d-session { fill: var(--ink); }
+.d-end, .d-step, .d-decision, .d-subagent {
+  fill: var(--surface); stroke: var(--ink); stroke-width: 1.6;
+}
+.d-owner-mark { fill: var(--owner-tint); stroke: var(--owner); stroke-width: 1.2; }
+.d-owner-bar { fill: var(--owner); }
+.d-box { fill: var(--surface); stroke: var(--muted); stroke-width: 1; }
+.d-box-owner { fill: var(--owner-tint); stroke: var(--owner); stroke-width: 1.2; }
+.d-chip-agent { fill: var(--surface); stroke: var(--muted); stroke-width: 1; }
+.d-chip-owner { fill: var(--owner-tint); stroke: var(--owner); stroke-width: 1; }
+.d-name { font-size: 14px; font-weight: 600; fill: var(--ink); }
+.d-label { font-weight: 600; fill: var(--ink); }
+.d-text { font-weight: 400; fill: var(--ink-soft); }
+.d-pass { font-style: italic; font-weight: 400; fill: var(--ink-soft); }
+.d-num { font-weight: 700; fill: var(--ink); }
+.d-cond, .d-cond-owner, .d-chip-agent-text, .d-chip-owner-text {
+  font-weight: 700; letter-spacing: 0.06em;
+}
+.d-cond { fill: var(--muted); }
+.d-cond-owner, .d-chip-owner-text { fill: var(--owner); }
+.d-chip-agent-text { fill: var(--ink-soft); }
+</style>
+<defs><marker id="owner-decision-arrow" viewBox="0 0 8 6" refX="5" refY="3" markerWidth="8" markerHeight="6" markerUnits="userSpaceOnUse" orient="auto"><path class="d-arrowhead" d="M0 0L8 3L0 6z"/></marker></defs>
+<rect class="d-bg" x="0" y="0" width="336" height="408" rx="8"/>
+
+<!-- The owner's moment: a band across the spine, painted before the flow lines. -->
+<rect class="d-box-owner" x="16" y="258" width="304" height="48" rx="6"/>
+
+<!-- Flow lines: the spine through the question and the band, the tap into the NO box. -->
+<path class="d-flow" d="M 36 30 V 56" marker-end="url(#owner-decision-arrow)"/>
+<path class="d-flow" d="M 36 77 V 222" marker-end="url(#owner-decision-arrow)"/>
+<path class="d-flow" d="M 36 141 H 57" marker-end="url(#owner-decision-arrow)"/>
+<path class="d-flow" d="M 36 239 V 273" marker-end="url(#owner-decision-arrow)"/>
+<path class="d-flow" d="M 36 288 V 348" marker-end="url(#owner-decision-arrow)"/>
+
+<!-- Boxes: every other choice ends its branch; the owner mark sits in the band. -->
+<rect class="d-box" x="60" y="108" width="260" height="66" rx="6"/>
+<rect class="d-owner-mark" x="290" y="273" width="18" height="18" rx="4"/>
+<rect class="d-owner-bar" x="295" y="277.5" width="2.5" height="9"/>
+<rect class="d-owner-bar" x="300.5" y="277.5" width="2.5" height="9"/>
+
+<!-- Marks on the spine. -->
+<circle class="d-start" cx="36" cy="24" r="6"/>
+<polygon class="d-decision" points="36 59 45 68 36 77 27 68"/>
+<circle class="d-junction" cx="36" cy="141" r="3"/>
+<rect class="d-subagent" x="29" y="225" width="14" height="14" rx="3"/>
+<rect class="d-session" x="30" y="276" width="12" height="12" rx="2"/>
+<circle class="d-end" cx="36" cy="358" r="7"/>
+<circle class="d-end-dot" cx="36" cy="358" r="3"/>
+
+<!-- Text. -->
+<text class="d-label" x="52" y="29">A sub-agent meets a choice</text>
+<text class="d-label" x="52" y="73">Is it an owner decision?</text>
+<text class="d-text" x="52" y="91">one of the five kinds</text>
+
+<text class="d-cond" x="72" y="127">NO</text>
+<text class="d-label" x="72" y="145">It makes the choice itself</text>
+<text class="d-text" x="72" y="163">and lists it as an assumption</text>
+
+<text class="d-cond" x="52" y="202">YES</text>
+<text class="d-label" x="52" y="237">The sub-agent stops</text>
+
+<text class="d-label" x="52" y="287">The session asks the owner</text>
+
+<text class="d-pass" x="52" y="330">the answer</text>
+
+<text class="d-label" x="52" y="363">A fresh sub-agent</text>
+<text class="d-text" x="52" y="381">of the same role goes on</text>
+</svg>

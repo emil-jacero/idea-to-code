@@ -1,0 +1,136 @@
+# Example `openspec/config.yaml` for a repo that runs the idea-to-code flow.
+#
+# For an agent that sets up a new repo: copy this file to `openspec/config.yaml`, replace the
+# placeholders of the `context` block, of the Optional parts above `rules:` and of the example
+# design rule, and delete each block marked Optional that the project does not use. Every other
+# form in angle brackets under `rules:`, such as `S<n>` and `<actor>`, stays: the flow fills it.
+# Last, delete this header comment, every line above `schema:`. The lines
+# marked "Flow" carry the flow: keep their meaning, and reword them only to fit the repo. Every
+# other line is an example of the repo's own rules. WORKFLOW.md, chapter 5 ("OpenSpec"), says why
+# each part exists. Checked against OpenSpec 2.1.1.
+#
+# Three rules for this file:
+# - It points only at files inside the repo, so the repo works in a lone clone.
+# - Every entry under `rules:` is plain text, and every key under `rules:` names an artifact of
+#   the schema. With the built-in `spec-driven` schema these are proposal, specs, design, tasks.
+# - `operations:` takes only `apply` and `archive`. OpenSpec drops a `verify` key, so the verify
+#   rules live in `openspec/verify.md`, where the repo has that file, and not here. The
+#   `/idea-to-code:verify` command applies that file, and the repo guide holds the verify line.
+#
+# A comment cannot stand inside the `context` block. So this header marks its optional lines:
+# - Optional (owner gates off): both gates are on. To turn one off, add its gate line at the end
+#   of the block, indented as the lines above it, without the `#`. A line in this comment turns
+#   no gate off.
+#     Plan gate: off.
+#     Result gate: off.
+# - Optional (check scripts): see the comment under the block.
+#
+# How to fill the three command lines of the block:
+# - `<check command>` is the repo's one command that runs its checks, for example its linter
+#   and its build. The `idea-to-code:commit` skill runs it before every commit except a
+#   tests commit, because the tests of a tests commit fail by design; the line `Checks before a
+#   commit:` names the command, and it does not say that every commit runs it.
+# - `<test command>` runs the whole test suite.
+# - `<test-file patterns>` is one or more patterns in git's glob form (`*`, `?`, `[...]`, and `**`
+#   as a whole path part; no braces). Each is a path from the repo root, but a pattern with no
+#   slash matches at any depth. No pattern matches a path under `openspec/`. Each pattern stands in
+#   its own code span, with a comma between two. One pattern:
+#     Test files: `tests/test_*.py`.
+
+schema: spec-driven
+
+# Optional: an enhancement store. Delete the block when the project has no store.
+# references:
+#   - id: <store-id>
+#     remote: <git URL of the store repo>
+
+# `context` reaches every artifact and the apply step. Keep it short: it is read on every run.
+context: |
+  Owner gates: apply them with the `idea-to-code:owner-gate` skill.
+
+  <What the repo is, in two or three lines.>
+  <The repo's hard rules, or one line that names the guide which holds them, such as `AGENTS.md`.>
+
+  Checks before a commit: `<check command>`. It runs before every commit except a tests commit.
+  Tests: `<test command>`.
+  Test files: `<test-file patterns>`.
+
+# Optional (check scripts). A comment cannot stand inside the `context` block, so the two lines
+# stand here. A repo that has a check script adds its line at the end of the block, indented as
+# the lines above it, without the `#`. A repo with no script adds no line, and the build then
+# checks by hand.
+#   Slice check: `<slice check command>`.
+#   Test check: `<test check command>`.
+
+rules:
+  proposal:
+    - "Say why the change exists, what it changes, and what is out of scope."
+    # Flow, optional (user stories). Delete it when the project writes no user stories.
+    - "Add a `## User stories` list of at most about seven lines, one story per line:
+      `As a <actor>, I want <feature>, so that <benefit>`. A change with no user-visible
+      behaviour has no list."
+    # Flow, optional (enhancement store). Delete it when the project has no store.
+    # - "When the change delivers a line of a store entry, add `## Enhancement` with one line
+    #   `Delivers <entry>, task <X.Y>.` per line; otherwise write `None.`"
+
+  specs:
+    - "Describe behaviour that a user or a caller can observe, not how the code does it."
+    - "Use ADDED, MODIFIED and REMOVED sections. State each requirement with SHALL or MUST,
+      and give it at least one scenario in WHEN and THEN form."
+    - "A MODIFIED requirement keeps the name of every scenario it had. To retire a scenario,
+      remove the requirement and add it again."
+
+  design:
+    # Flow: the Slices section. The build reads it, slice by slice.
+    - "End the design with a `## Slices` section. It holds one block per slice, headed
+      `### S<n>: <name>`, with exactly four fields, one per line: `Delivers:` (the scenarios the
+      slice makes true), `Seam:` (the public interface where its tests go), `Depends on:` (the
+      slices it needs first, or `none`) and `Done when:` (one checkable sentence, which gets a
+      test too)."
+    - "Every slice is a real slice that leaves the tests green. None is a try-out or a spike:
+      an open assumption is settled before the change is proposed."
+    - "A small change (one repo, at most two task sections) needs no Slices section, and may
+      have no design at all."
+    # Optional (the repo's own design rules): replace the example with a rule of the repo, or
+    # delete the line.
+    - "<The repo's own design rules, for example: name each exported function that changes.>"
+
+  tasks:
+    # Flow: one task section per slice.
+    - "Write one `## N.` section per slice: section N holds every task of slice S<n> and
+      nothing else. Number the tasks N.1, N.2 and so on."
+    - "Put an extra line of a section directly under its `## N.` heading, never as a plain line
+      after a checkbox."
+    # Flow: the agreed seam of a change with no Slices section.
+    - "In a change with no Slices section, put each slice's agreed seam on a `Seam:` line
+      directly under its `## N.` heading."
+    - "Write no task for a commit, a push, a pull request, a tag or a release. The build makes
+      the commits, and a slice closes with its code commit."
+    # Flow: the red check of the build decides why a new test fails.
+    - "A task that adds tests names the scenarios they cover, and never says how or why a test
+      fails: the build's red check decides that."
+
+operations:
+  apply:
+    guidance:
+      # Flow: the build. Words do not build: only the owner starts it.
+      - "The `/idea-to-code:build` command builds the change with the
+        `idea-to-code:slice-build` skill: slice by slice, tests first, each slice by fresh
+        sub-agents. A slice closes with its code commit."
+      - "A run of OpenSpec's apply skill builds nothing: it names
+        `/idea-to-code:build <change>` for the owner to type, and stops."
+      - "Commit only on the working branch, never on the default branch. Apply pushes nothing
+        and opens no pull request."
+  archive:
+    guidance:
+      # Flow: the archive.
+      - "The archive commit goes into the change's own pull request."
+      # Flow, optional (enhancement store). Delete it when the project has no store.
+      # - "When the change delivers a line of a store entry, name that line in the pull
+      #   request body."
+
+# Optional (a repo without specs): delete this comment in a repo with specs.
+# A repo without specs (docs, configuration or content with few tests) differs in three points:
+# - `schema:` names the project's own schema, which has no specs artifact.
+# - There is no `rules.specs` key: a key that names no artifact of the schema is refused.
+# - Add to `rules.design`: "A `Done when:` line covers each user story."

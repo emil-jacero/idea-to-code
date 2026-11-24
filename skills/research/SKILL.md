@@ -1,0 +1,12 @@
+---
+name: research
+description: Investigate a question against high-trust primary sources and capture the findings as a cited Markdown note. Use when the user wants a topic researched, docs or API facts gathered, a fact a design rests on settled from a source, or reading legwork delegated to a background agent.
+---
+
+Spin up a **background agent** to do the research, so you keep working while it reads. Start it with a fresh context window. Brief it with the question, the repo it serves, and the change name or "no change yet". If you are already a sub-agent, do the research yourself and start no other agent.
+
+Its job:
+
+1. Investigate the question against **primary sources** (official docs, source code, specs, first-party APIs), not a secondary write-up of them. Follow every claim back to the source that owns it.
+2. Write the findings to a single Markdown file, citing each claim's source.
+3. Save it as `README.md` in a folder `<nn>-<name>/` (`<nn>` is the next free two-digit number in the change's `evidence/`, `01` in a scratch folder). While no OpenSpec change exists yet (explore paused for this question), put that folder in a scratch folder outside any repo, made with `mktemp -d` under `$TMPDIR` (else `/tmp`); report its full path. Propose moves it to `openspec/changes/<change>/evidence/<nn>-<name>/`; the change's `design.md` points at the folder. When the change already exists, write the folder straight into its `evidence/`. For a question that serves no change, save it where the repo the question serves already keeps such notes, or else in the scratch folder. Report the path and a one-line answer, so the paused step resumes with it and the design can cite it. Commit nothing.

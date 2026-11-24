@@ -1,0 +1,132 @@
+<svg xmlns="http://www.w3.org/2000/svg" class="dg" viewBox="0 0 336 720" width="420" height="900" role="img" aria-labelledby="the-path-title the-path-desc">
+<title id="the-path-title">The path from an idea to main</title>
+<desc id="the-path-desc">The five steps of the path from an idea to main, who acts at each, the side step that explore may pause for, and the loops of build and verify.</desc>
+<style>
+:root {
+  --bg: #f3f5f7; --surface: #ffffff; --ink: #15202b; --ink-soft: #364250;
+  --muted: #5a6673; --owner: #a23468; --owner-tint: #f8e4ed;
+  --font-sans: "IBM Plex Sans", "Noto Sans", system-ui, -apple-system, "Segoe UI", Roboto,
+    sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f151b; --surface: #17202a; --ink: #e4eaf0; --ink-soft: #c3cdd7;
+    --muted: #97a4b1; --owner: #e687b5; --owner-tint: #3b1c2c;
+  }
+}
+.dg { font-family: var(--font-sans); font-size: 13px; }
+.d-bg { fill: var(--bg); }
+.d-flow { fill: none; stroke: var(--ink); stroke-width: 1.6; stroke-linejoin: round; }
+.d-arrowhead, .d-start, .d-end-dot, .d-junction, .d-session { fill: var(--ink); }
+.d-end, .d-step, .d-decision, .d-subagent {
+  fill: var(--surface); stroke: var(--ink); stroke-width: 1.6;
+}
+.d-owner-mark { fill: var(--owner-tint); stroke: var(--owner); stroke-width: 1.2; }
+.d-owner-bar { fill: var(--owner); }
+.d-box { fill: var(--surface); stroke: var(--muted); stroke-width: 1; }
+.d-box-owner { fill: var(--owner-tint); stroke: var(--owner); stroke-width: 1.2; }
+.d-chip-agent { fill: var(--surface); stroke: var(--muted); stroke-width: 1; }
+.d-chip-owner { fill: var(--owner-tint); stroke: var(--owner); stroke-width: 1; }
+.d-name { font-size: 14px; font-weight: 600; fill: var(--ink); }
+.d-label { font-weight: 600; fill: var(--ink); }
+.d-text { font-weight: 400; fill: var(--ink-soft); }
+.d-pass { font-style: italic; font-weight: 400; fill: var(--ink-soft); }
+.d-num { font-weight: 700; fill: var(--ink); }
+.d-cond, .d-cond-owner, .d-chip-agent-text, .d-chip-owner-text {
+  font-weight: 700; letter-spacing: 0.06em;
+}
+.d-cond { fill: var(--muted); }
+.d-cond-owner, .d-chip-owner-text { fill: var(--owner); }
+.d-chip-agent-text { fill: var(--ink-soft); }
+</style>
+<defs><marker id="the-path-arrow" viewBox="0 0 8 6" refX="5" refY="3" markerWidth="8" markerHeight="6" markerUnits="userSpaceOnUse" orient="auto"><path class="d-arrowhead" d="M0 0L8 3L0 6z"/></marker></defs>
+<rect class="d-bg" x="0" y="0" width="336" height="720" rx="8"/>
+
+<!-- Flow lines: the spine, the side step, the two loops. Each ends 3 short of its target. -->
+<path class="d-flow" d="M 36 30 V 51" marker-end="url(#the-path-arrow)"/>
+<path class="d-flow" d="M 36 78 V 247" marker-end="url(#the-path-arrow)"/>
+<path class="d-flow" d="M 100 112 V 145" marker-end="url(#the-path-arrow)"/>
+<path class="d-flow" d="M 292 148 V 115" marker-end="url(#the-path-arrow)"/>
+<path class="d-flow" d="M 36 274 V 347" marker-end="url(#the-path-arrow)"/>
+<path class="d-flow" d="M 36 374 V 428"/>
+<path class="d-flow" d="M 36 428 H 12 Q 6 428 6 422 V 368 Q 6 362 12 362 H 21" marker-end="url(#the-path-arrow)"/>
+<path class="d-flow" d="M 36 428 V 475" marker-end="url(#the-path-arrow)"/>
+<path class="d-flow" d="M 36 502 V 556"/>
+<path class="d-flow" d="M 36 556 H 12 Q 6 556 6 550 V 496 Q 6 490 12 490 H 21" marker-end="url(#the-path-arrow)"/>
+<path class="d-flow" d="M 36 556 V 603" marker-end="url(#the-path-arrow)"/>
+<path class="d-flow" d="M 36 630 V 682" marker-end="url(#the-path-arrow)"/>
+
+<!-- Boxes and chips. Step boxes are 64 tall: name at top + 23, chips at top + 33. -->
+<rect class="d-box" x="60" y="48" width="260" height="64" rx="6"/>
+<rect class="d-chip-agent" x="72" y="81" width="76" height="20" rx="10"/>
+<rect class="d-chip-owner" x="154" y="81" width="76" height="20" rx="10"/>
+<rect class="d-box" x="84" y="148" width="236" height="60" rx="6"/>
+<rect class="d-chip-agent" x="232" y="158" width="76" height="20" rx="10"/>
+<rect class="d-box" x="60" y="244" width="260" height="64" rx="6"/>
+<rect class="d-chip-agent" x="72" y="277" width="76" height="20" rx="10"/>
+<rect class="d-box" x="60" y="344" width="260" height="64" rx="6"/>
+<rect class="d-chip-agent" x="72" y="377" width="76" height="20" rx="10"/>
+<rect class="d-chip-owner" x="154" y="377" width="76" height="20" rx="10"/>
+<rect class="d-box" x="60" y="472" width="260" height="64" rx="6"/>
+<rect class="d-chip-agent" x="72" y="505" width="76" height="20" rx="10"/>
+<rect class="d-box" x="60" y="600" width="260" height="64" rx="6"/>
+<rect class="d-chip-agent" x="72" y="633" width="76" height="20" rx="10"/>
+<rect class="d-chip-owner" x="154" y="633" width="76" height="20" rx="10"/>
+
+<!-- Marks on the spine. -->
+<circle class="d-start" cx="36" cy="24" r="6"/>
+<circle class="d-step" cx="36" cy="66" r="12"/>
+<circle class="d-step" cx="36" cy="262" r="12"/>
+<circle class="d-step" cx="36" cy="362" r="12"/>
+<circle class="d-junction" cx="36" cy="428" r="3"/>
+<circle class="d-step" cx="36" cy="490" r="12"/>
+<circle class="d-junction" cx="36" cy="556" r="3"/>
+<circle class="d-step" cx="36" cy="618" r="12"/>
+<circle class="d-end" cx="36" cy="692" r="7"/>
+<circle class="d-end-dot" cx="36" cy="692" r="3"/>
+
+<!-- Text. -->
+<text class="d-label" x="52" y="29">An idea, in the owner's words</text>
+
+<text class="d-num" x="36" y="70.5" text-anchor="middle">1</text>
+<text class="d-name" x="72" y="71">Explore</text>
+<text class="d-chip-agent-text" x="110" y="95.5" text-anchor="middle">AGENT</text>
+<text class="d-chip-owner-text" x="192" y="95.5" text-anchor="middle">OWNER</text>
+
+<text class="d-pass" x="112" y="135">may pause</text>
+<text class="d-pass" x="280" y="135" text-anchor="end">the finding</text>
+
+<text class="d-name" x="96" y="172">Side step</text>
+<text class="d-chip-agent-text" x="270" y="172.5" text-anchor="middle">AGENT</text>
+<text class="d-text" x="96" y="196">Settles an open assumption</text>
+
+<text class="d-pass" x="52" y="231">decisions</text>
+
+<text class="d-num" x="36" y="266.5" text-anchor="middle">2</text>
+<text class="d-name" x="72" y="267">Propose</text>
+<text class="d-chip-agent-text" x="110" y="291.5" text-anchor="middle">AGENT</text>
+
+<text class="d-pass" x="52" y="331">a change folder</text>
+
+<text class="d-num" x="36" y="366.5" text-anchor="middle">3</text>
+<text class="d-name" x="72" y="367">Build</text>
+<text class="d-chip-agent-text" x="110" y="391.5" text-anchor="middle">AGENT</text>
+<text class="d-chip-owner-text" x="192" y="391.5" text-anchor="middle">OWNER</text>
+
+<text class="d-label" x="52" y="433">Slices left</text>
+<text class="d-pass" x="52" y="457">every slice closed, nothing pushed</text>
+
+<text class="d-num" x="36" y="494.5" text-anchor="middle">4</text>
+<text class="d-name" x="72" y="495">Verify</text>
+<text class="d-chip-agent-text" x="110" y="519.5" text-anchor="middle">AGENT</text>
+
+<text class="d-label" x="52" y="561">Findings: <tspan class="d-text">one fix round</tspan></text>
+<text class="d-pass" x="52" y="585">a verified change</text>
+
+<text class="d-num" x="36" y="622.5" text-anchor="middle">5</text>
+<text class="d-name" x="72" y="623">Pull request and archive</text>
+<text class="d-chip-agent-text" x="110" y="647.5" text-anchor="middle">AGENT</text>
+<text class="d-chip-owner-text" x="192" y="647.5" text-anchor="middle">OWNER</text>
+
+<text class="d-label" x="52" y="697">Squash-merged to main</text>
+</svg>

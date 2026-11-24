@@ -1,0 +1,22 @@
+---
+description: "Explore an idea in the current repo before any change is written. Use it to start work on an idea, a topic or an existing change, in place of the repo's openspec-explore skill. The session looks up the facts, then asks the owner one question per message until no decision is open. It writes no change."
+argument-hint: "[idea]"
+---
+
+Run the explore step of the Idea to Code flow in the current repo.
+
+Idea: $ARGUMENTS
+
+The text after `Idea:` is the idea in the owner's words. It may also be a topic, or the name of an existing change to think about. When the line holds no text after the colon, take the idea from the owner's message that started this command. When that message holds none, ask the owner for the idea in one plain sentence, and wait for the answer.
+
+Explore is read-only. Write no code and no change folder, and do not run `openspec new change`. The propose step writes the change, so decline every offer of OpenSpec's explore skill to write change files.
+
+1. Read the repo guide (`AGENTS.md`, else `CLAUDE.md`), the files it names and `openspec/config.yaml`.
+2. Load the repo's `openspec-explore` skill with the Skill tool, and give it the idea. Its name stays bare, because the repo holds this skill and the plugin does not. When the session does not list it, read `.agents/skills/openspec-explore/SKILL.md`, else `.claude/skills/openspec-explore/SKILL.md`, and follow that text. When neither file exists, say so and stop. Do not run the step from memory.
+3. Look up the facts before you ask anything: the code, the tests, the docs, the active changes, and each spec under `openspec/specs/` that the idea touches.
+4. When the idea asks how to make something possible, it is a design question. Present the researched design, your recommendation, the open questions and one proposed next step. Then stop. Before the owner approves the design, write no change folder, no entry in an enhancement store, no branch and no pull request. When the owner approves the design, go on with step 5, unless the answer names another next step. The grill then asks each open question, one per message.
+5. Load the `idea-to-code:grilling` skill and run the grill. Where OpenSpec's explore skill and the grill differ, the grill wins. Every question has the grill's form, and the questions go on until the grill's stop rule ends them. Ask the seams among those questions. A seam is the public interface where tests go, and every seam is agreed with the owner before the change is written. Ask the seams after the decisions that fix what is built, because a seam depends on them. Ask one question per distinct seam, not one per slice. Name the parts of the work whose tests go there. Each option keeps the form of the grill: its example line, then `Catches:` as its pro and `Misses:` as its con, in place of `Pro:` and `Con:`. The recommended option shows its `Misses:` line too. The grill says when to pause for the `idea-to-code:prototype`, `idea-to-code:research` and `idea-to-code:domain-modeling` skills.
+6. When a reported bug needs a diagnosis loop, name the bug and pause explore. Load the `idea-to-code:diagnosing-bugs` skill, and resume explore with its finding. That skill writes loop code, so it runs apart from explore.
+7. Ask a track question only when the repo guide names an enhancement store or tracker issues, and ask it as the guide says. Otherwise the work is one change in this repo, and no track question is asked.
+8. Write the record. List each decision with its mark: the owner's answer, your assumption, or delegated. List each agreed seam as a decision, with the parts of the work whose tests go there. List each file that a skill wrote and that is not committed. List each scratch folder of a side step, with its full path.
+9. Name the next step: `/idea-to-code:propose`, as the last line of your answer, after the record (the Next line is the last line, as the form of the grill wants everywhere). It runs in this session, because the record of decisions lives only in this conversation. When the owner asks you to capture the talk as a change, write no change file in explore: that request is for the propose step, and the propose command writes the change. When explore ends with no change, commit an uncommitted file only when the owner asks.

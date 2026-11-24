@@ -1,0 +1,30 @@
+---
+description: "Write the OpenSpec change folder for work that is decided, in the current repo. Use it after an explore in the same session, or on its own for a small change with no open owner decision or assumption, in place of the repo's openspec-propose skill. It plans only, and it ends with the owner gate for the plan."
+argument-hint: "[change-name or description]"
+---
+
+Run the propose step of the Idea to Code flow in the current repo.
+
+Input: $ARGUMENTS
+
+The text after `Input:` is a change name in kebab-case, or a description of what to build. The line may hold no text after an explore in this conversation: the record of decisions is then the input. When the line holds no text and this conversation holds no explore, take what to build from the owner's message that started this command. When that message holds none, ask the owner what to build in one plain sentence, and wait for the answer.
+
+Propose plans only. Write no project code, make no commit and start no build.
+
+1. Read the repo guide (`AGENTS.md`, else `CLAUDE.md`), the files it names and `openspec/config.yaml`.
+2. When this conversation holds no record of decisions from an explore, this is the fast path. Before anything is written, check four things, read-only:
+   - the outcome and the done-test each fit in one sentence;
+   - no owner decision is open;
+   - the change has at most two task sections;
+   - no assumption is open: no fact that the change rests on waits for a prototype or a research run. An open choice that is not an owner decision does not fail this check. An open seam is asked below. Step 5 writes every other open choice into the change as an assumption, for the plan gate.
+
+   When one check fails, write nothing. Say which check failed, name `/idea-to-code:explore`, and stop.
+
+   On both paths, before anything is written, ask each seam that is still open. A seam is the public interface where the tests of a slice go, and every seam is agreed with the owner before the change is written. A seam is still open when no answer of the owner in this conversation settles it: on the fast path, or when a slice needs a seam that the record of decisions does not hold, or another seam than the agreed one. Ask one question per distinct seam, not one per slice, in the form of the `idea-to-code:grilling` skill. Name the slices whose tests go there. Each option keeps the form of the grill: its example line, then `Catches:` as its pro and `Misses:` as its con, in place of `Pro:` and `Con:`. The recommended option shows its `Misses:` line too. "You decide" is an answer: pick the seam, and record it as delegated.
+3. Load the repo's `openspec-propose` skill with the Skill tool. Give it the name or the description, and the record of decisions. Its name stays bare, because the repo holds this skill and the plugin does not. When the session does not list it, read `.agents/skills/openspec-propose/SKILL.md`, else `.claude/skills/openspec-propose/SKILL.md`, and follow that text. When neither file exists, say so and stop. Do not run the step from memory. That skill says to stop when the planning files are written, and it ends with a summary of its own. Where it and this command differ, this command wins: its stop means that you write no project code. Go on with steps 4 to 9, and give the report of step 9 in place of its summary.
+4. Hold the form of the flow while that skill writes. Write `design.md` with its `## Slices` section, and write one task section per slice. Only a small change (one repo, at most two task sections) may go without the `## Slices` section, and may go without a `design.md` at all. Its task sections are then the slices. The `Seam` field of each slice is a seam that an answer of the owner settled (step 2). In a small change without the `## Slices` section, write that seam on a `Seam:` line directly under the `## <n>.` heading of each task section. The `rules:` of the config give the exact form. Where the config has no rule for the Slices section or for the task sections, load the `idea-to-code:slice-build` skill and take the form from The input. Read that skill for the form only, and start no build.
+5. Ask the owner only in three cases: a change of the same name exists already, an owner decision is open, or a seam is still open (step 2). An owner decision is a choice of scope, a public contract, a breaking change, a security trade-off or a new dependency. Ask it as one question in the form of the `idea-to-code:grilling` skill. On the fast path, an owner decision that shows up before anything is written fails the second check of step 2: stop as that step says. Look up a fact yourself, also when OpenSpec's propose skill wants to ask the owner for it. Write every other open choice into the change's files as an assumption, so that the plan gate finds it.
+6. When a side step left a scratch folder in this conversation, move its files into the evidence folder of the change: `openspec/changes/<name>/evidence/<nn>-<side step>/`, with a short `README.md`. Here `<name>` is the change, and `<side step>` is a short name of the side step. Move the files as the skill of that side step says, `idea-to-code:prototype` or `idea-to-code:research`. That skill gives `<nn>`, what the folder holds, and how its files stay out of the repo's build, lint and test commands. Write the finding into `design.md`, and point at the folder there.
+7. Check the change folder. Run `openspec validate <name> --strict`. Where the config names the slice check script (the command after `Slice check:` in the `context:` of `openspec/config.yaml`), run it as its `--help` says. Correct what fails, and run the check again.
+8. Load the `idea-to-code:owner-gate` skill and apply the plan gate.
+9. Report the change name and its folder, the files written, each assumption, and the outcome of the plan gate. Leave the change folder uncommitted: the first commit of the build carries it. Name the next step, `/idea-to-code:build <name>`, and stop. The owner starts the build.

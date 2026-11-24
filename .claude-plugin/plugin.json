@@ -1,0 +1,11 @@
+{
+  "name": "idea-to-code",
+  "version": "0.1.0",
+  "description": "Twelve method skills and four step commands that run the Idea to Code flow on OpenSpec changes: explore an idea, propose a change, build it slice by slice with tests first, verify it, pass the owner gates, and write the commit and pull request text. Each skill holds the method and reads the project's rules from the repo's own files.",
+  "author": {
+    "name": "emil-jacero"
+  },
+  "homepage": "https://github.com/emil-jacero/idea-to-code",
+  "repository": "https://github.com/emil-jacero/idea-to-code",
+  "license": "MIT"
+}
