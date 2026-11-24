@@ -915,8 +915,8 @@ with a kind field (`lock` or `past`), under `### Answers` in the part `## Fix ro
 
 Inside a change, refactoring happens only as a Fix finding that cites a written standard.
 
-![The fix round sorts each finding into one route, puts each Owner finding to the owner, and
-runs the Fix and Test first findings in five parts.](diagrams/fix-round.svg)
+![The fix round sorts each finding into one route, puts each Owner finding and each Past commit
+finding to the owner, and runs the Fix and Test first findings in five parts.](diagrams/fix-round.svg)
 
 *Figure:* The fix round sorts each finding into one route, and runs the Fix and Test first
 findings in its five parts.

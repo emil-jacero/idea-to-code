@@ -1327,23 +1327,25 @@ Depends on: S1</pre>
               <div class="if-head"><h3><span class="label">If</span> verify has findings: one fix round, then verify once more</h3></div>
               <div class="pair">
                 <figure class="figure" data-src="the-fix-round">
-<svg xmlns="http://www.w3.org/2000/svg" class="dg" viewBox="0 0 336 656" width="420" height="820" role="img" aria-labelledby="fix-round-title fix-round-desc">
+<svg xmlns="http://www.w3.org/2000/svg" class="dg" viewBox="0 0 336 802" width="420" height="1002" role="img" aria-labelledby="fix-round-title fix-round-desc">
 <title id="fix-round-title">The fix round</title>
-<desc id="fix-round-desc">The fix round sorts each finding into one route, puts each Owner finding to the owner, and runs the Fix and Test first findings in five parts.</desc>
+<desc id="fix-round-desc">The fix round sorts each finding into one route, puts each Owner finding and each Past commit finding to the owner, and runs the Fix and Test first findings in five parts.</desc>
 
 <defs><marker id="fix-round-arrow" viewBox="0 0 8 6" refX="5" refY="3" markerWidth="8" markerHeight="6" markerUnits="userSpaceOnUse" orient="auto"><path class="d-arrowhead" d="M0 0L8 3L0 6z"/></marker></defs>
-<rect class="d-bg" x="0" y="0" width="336" height="656" rx="8"/>
+<rect class="d-bg" x="0" y="0" width="336" height="802" rx="8"/>
 
-<!-- Flow lines: the spine, the two taps, the return from the owner, the five parts. -->
+<!-- Flow lines: the spine, the three taps, the two returns from the owner, the five parts. -->
 <path class="d-flow" d="M 36 30 V 59" marker-end="url(#fix-round-arrow)"/>
-<path class="d-flow" d="M 36 74 V 354" marker-end="url(#fix-round-arrow)"/>
+<path class="d-flow" d="M 36 74 V 500" marker-end="url(#fix-round-arrow)"/>
 <path class="d-flow" d="M 36 132 H 57" marker-end="url(#fix-round-arrow)"/>
 <path class="d-flow" d="M 36 224 H 57" marker-end="url(#fix-round-arrow)"/>
-<path class="d-flow" d="M 84 276 V 300 Q 84 306 78 306 H 42" marker-end="url(#fix-round-arrow)"/>
-<path class="d-flow" d="M 36 371 V 450" marker-end="url(#fix-round-arrow)"/>
-<path class="d-flow" d="M 36 467 V 508" marker-end="url(#fix-round-arrow)"/>
-<path class="d-flow" d="M 36 529 V 555" marker-end="url(#fix-round-arrow)"/>
-<path class="d-flow" d="M 36 570 V 614" marker-end="url(#fix-round-arrow)"/>
+<path class="d-flow" d="M 36 361 H 57" marker-end="url(#fix-round-arrow)"/>
+<path class="d-flow" d="M 84 276 V 278 Q 84 284 78 284 H 42" marker-end="url(#fix-round-arrow)"/>
+<path class="d-flow" d="M 84 422 V 446 Q 84 452 78 452 H 42" marker-end="url(#fix-round-arrow)"/>
+<path class="d-flow" d="M 36 517 V 596" marker-end="url(#fix-round-arrow)"/>
+<path class="d-flow" d="M 36 613 V 654" marker-end="url(#fix-round-arrow)"/>
+<path class="d-flow" d="M 36 675 V 701" marker-end="url(#fix-round-arrow)"/>
+<path class="d-flow" d="M 36 716 V 760" marker-end="url(#fix-round-arrow)"/>
 
 <!-- Boxes: a lead ends its branch; an Owner finding comes back. -->
 <rect class="d-box" x="60" y="108" width="260" height="48" rx="6"/>
@@ -1351,19 +1353,25 @@ Depends on: S1</pre>
 <rect class="d-owner-mark" x="290" y="179" width="18" height="18" rx="4"/>
 <rect class="d-owner-bar" x="295" y="183.5" width="2.5" height="9"/>
 <rect class="d-owner-bar" x="300.5" y="183.5" width="2.5" height="9"/>
+<rect class="d-box-owner" x="60" y="300" width="260" height="122" rx="6"/>
+<rect class="d-owner-mark" x="290" y="307" width="18" height="18" rx="4"/>
+<rect class="d-owner-bar" x="295" y="311.5" width="2.5" height="9"/>
+<rect class="d-owner-bar" x="300.5" y="311.5" width="2.5" height="9"/>
 
 <!-- Marks on the spine. -->
 <circle class="d-start" cx="36" cy="24" r="6"/>
 <rect class="d-session" x="30" y="62" width="12" height="12" rx="2"/>
 <circle class="d-junction" cx="36" cy="132" r="3"/>
 <circle class="d-junction" cx="36" cy="224" r="3"/>
-<circle class="d-junction" cx="36" cy="306" r="3"/>
-<rect class="d-subagent" x="29" y="357" width="14" height="14" rx="3"/>
-<rect class="d-subagent" x="29" y="453" width="14" height="14" rx="3"/>
-<polygon class="d-decision" points="36 511 45 520 36 529 27 520"/>
-<rect class="d-session" x="30" y="558" width="12" height="12" rx="2"/>
-<circle class="d-end" cx="36" cy="624" r="7"/>
-<circle class="d-end-dot" cx="36" cy="624" r="3"/>
+<circle class="d-junction" cx="36" cy="284" r="3"/>
+<circle class="d-junction" cx="36" cy="361" r="3"/>
+<circle class="d-junction" cx="36" cy="452" r="3"/>
+<rect class="d-subagent" x="29" y="503" width="14" height="14" rx="3"/>
+<rect class="d-subagent" x="29" y="599" width="14" height="14" rx="3"/>
+<polygon class="d-decision" points="36 657 45 666 36 675 27 666"/>
+<rect class="d-session" x="30" y="704" width="12" height="12" rx="2"/>
+<circle class="d-end" cx="36" cy="770" r="7"/>
+<circle class="d-end-dot" cx="36" cy="770" r="3"/>
 
 <!-- Text. -->
 <text class="d-label" x="52" y="29">Verify has findings</text>
@@ -1379,18 +1387,25 @@ Depends on: S1</pre>
 <text class="d-text" x="72" y="245">The answer moves it to Fix or</text>
 <text class="d-text" x="72" y="263">Test first, or closes it</text>
 
-<text class="d-cond" x="52" y="334">FIX AND TEST FIRST</text>
+<text class="d-cond-owner" x="72" y="319">PAST COMMIT</text>
+<text class="d-label" x="72" y="337">The session asks the owner</text>
+<text class="d-text" x="72" y="355">one question per commit</text>
+<text class="d-text" x="72" y="373">Keep closes it. Fix it in a new</text>
+<text class="d-text" x="72" y="391">commit moves it to Fix.</text>
+<text class="d-text" x="72" y="409">A message gets Keep or Stop</text>
 
-<text class="d-label" x="52" y="369">(1) One fresh test writer</text>
-<text class="d-text" x="52" y="387">tests for the Test first findings</text>
-<text class="d-text" x="52" y="405">then the red check, and the</text>
-<text class="d-text" x="52" y="423">session makes a tests commit</text>
-<text class="d-label" x="52" y="465">(2) One fresh code writer</text>
-<text class="d-text" x="52" y="483">every Fix and Test first finding</text>
-<text class="d-label" x="52" y="525">(3) Test-lock check</text>
-<text class="d-label" x="52" y="569">(4) The session commits the fix</text>
-<text class="d-text" x="52" y="587">after the test command passes</text>
-<text class="d-label" x="52" y="629">(5) Verify runs once more</text>
+<text class="d-cond" x="52" y="480">FIX AND TEST FIRST</text>
+
+<text class="d-label" x="52" y="515">(1) One fresh test writer</text>
+<text class="d-text" x="52" y="533">tests for the Test first findings</text>
+<text class="d-text" x="52" y="551">then the red check, and the</text>
+<text class="d-text" x="52" y="569">session makes a tests commit</text>
+<text class="d-label" x="52" y="611">(2) One fresh code writer</text>
+<text class="d-text" x="52" y="629">every Fix and Test first finding</text>
+<text class="d-label" x="52" y="671">(3) Test-lock check</text>
+<text class="d-label" x="52" y="715">(4) The session commits the fix</text>
+<text class="d-text" x="52" y="733">after the test command passes</text>
+<text class="d-label" x="52" y="775">(5) Verify runs once more</text>
 </svg>
                   <figcaption>The fix round sorts each finding into one route, and runs the Fix and Test first findings in its five parts.</figcaption>
                 </figure>
