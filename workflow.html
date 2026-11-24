@@ -1,3 +1,8 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Idea to Code</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap">
 <style>
@@ -44,7 +49,7 @@
   --req: #a3b5f2; --req-tint: #1e2849;
   color-scheme: dark;
 }
-body { background: var(--bg); color: var(--ink); font-family: var(--font-sans); font-size: 15px; line-height: 1.55; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-sans); font-size: 15px; line-height: 1.55; }
 
 /* page frame */
 .wrap {
@@ -754,6 +759,8 @@ section > div:not([class]) > ul:not([class]) { margin: 0; padding-left: 1.25em; 
   [hidden="until-found"] { content-visibility: visible; }
 }
 </style>
+</head>
+<body>
 
 <main class="wrap">
   <header class="top" id="idea-to-code" data-view="flow" data-src="idea-to-code">
@@ -1043,8 +1050,8 @@ Depends on: S1</pre>
     <p class="stepmark" aria-hidden="true"><span><svg class="mk" viewBox="0 0 24 24"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">3</text></svg><b>Build</b></span></p>
     <div class="sec-head">
       <h2 id="h-step-3-build"><svg class="hnum mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">3</text></svg><span class="hstep">Build: </span><span class="hrest">each slice becomes tests, then code</span></h2>
-      <div class="head-meta" data-src="step-3-build"><span class="cmd">the build command</span><span class="pill"><svg class="os mk" viewBox="0 0 24 24" aria-hidden="true"><rect class="d-owner-mark" x="3" y="3" width="18" height="18" rx="4"/><rect class="d-owner-bar" x="8" y="7.5" width="2.5" height="9"/><rect class="d-owner-bar" x="13.5" y="7.5" width="2.5" height="9"/></svg>13 stops for the owner</span></div>
-      <p>The owner types the build command; words do not build. Then the agent works alone.</p>
+      <div class="head-meta" data-src="step-3-build"><span class="cmd">the build command</span><span class="pill"><svg class="os mk" viewBox="0 0 24 24" aria-hidden="true"><rect class="d-owner-mark" x="3" y="3" width="18" height="18" rx="4"/><rect class="d-owner-bar" x="8" y="7.5" width="2.5" height="9"/><rect class="d-owner-bar" x="13.5" y="7.5" width="2.5" height="9"/></svg>14 stops for the owner</span></div>
+      <p>The owner types the build command, or asks for the build in words and the session loads it. Then the agent works alone.</p>
     </div>
       <article class="card narrow" data-src="step-3-build per-slice">
         <h3>Who is who</h3>
@@ -1071,12 +1078,12 @@ Depends on: S1</pre>
         <ol class="rows">
           <li class="tr" data-src="before-the-first-slice">
             <svg class="tmk mk" viewBox="0 0 24 24" aria-hidden="true"><rect class="d-session" x="6" y="6" width="12" height="12" rx="2"/></svg>
-            <div class="tr-text"><h3>Sets up once</h3><ul><li>from the repo root</li><li><code>git status</code></li><li>the working branch</li><li>the apply guidance</li></ul><p class="hook" data-src="before-the-first-slice many-repos-in-one-workspace owner-gates"><span class="state opt"><svg width="10" height="10" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.8" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6 3.6v4.8M3.6 6h4.8" stroke="currentColor" stroke-width="1.4"/></svg>Optional</span> <a href="#many-repos-in-one-workspace">Many repos</a>, <a href="#owner-gates">owner gates</a></p></div>
+            <div class="tr-text"><h3>Sets up once</h3><ul><li>from the repo root</li><li><code>git status</code></li><li>the default branch</li><li>the working branch</li><li>the apply guidance</li></ul><p class="hook" data-src="before-the-first-slice many-repos-in-one-workspace owner-gates"><span class="state opt"><svg width="10" height="10" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.8" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6 3.6v4.8M3.6 6h4.8" stroke="currentColor" stroke-width="1.4"/></svg>Optional</span> <a href="#many-repos-in-one-workspace">Many repos</a>, <a href="#owner-gates">owner gates</a></p></div>
             <div class="snip cols"><span>branch</span><span><mark class="req">refuse-empty-file-name</mark></span></div>
           </li>
           <li class="tr" data-src="before-the-first-slice">
             <svg class="tmk mk" viewBox="0 0 24 24" role="img" aria-label="Stop for the owner"><rect class="d-owner-mark" x="3" y="3" width="18" height="18" rx="4"/><rect class="d-owner-bar" x="8" y="7.5" width="2.5" height="9"/><rect class="d-owner-bar" x="13.5" y="7.5" width="2.5" height="9"/></svg>
-            <div class="tr-text"><h3>The set-up questions go to the owner</h3><ul><li>an unrelated change in the tree</li><li>whether the first commit carries a term or decision record from explore</li><li>a clash with the apply guidance</li><li>a command the config does not name</li></ul><p data-src="per-slice">The OpenSpec config names the test command, after <code>Tests:</code>.</p></div>
+            <div class="tr-text"><h3>The set-up questions go to the owner</h3><ul><li>the default branch, when none of main, master or the remote's default exists</li><li>an unrelated change in the tree</li><li>whether the first commit carries a term or decision record from explore</li><li>a clash with the apply guidance</li><li>a command the config does not name</li></ul><p data-src="per-slice">The OpenSpec config names the test command, after <code>Tests:</code>.</p></div>
             <pre class="snip prose">No question: the first tests commit carries the change folder.</pre>
           </li>
         </ol>
@@ -1282,7 +1289,7 @@ Depends on: S1</pre>
     <p class="stepmark" aria-hidden="true"><span><svg class="mk" viewBox="0 0 24 24"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">4</text></svg><b>Verify</b></span></p>
     <div class="sec-head">
       <h2 id="h-step-4-verify"><svg class="hnum mk" viewBox="0 0 24 24" aria-hidden="true"><circle class="d-step" cx="12" cy="12" r="10"/><text class="d-num" x="12" y="16.2" text-anchor="middle">4</text></svg><span class="hstep">Verify: </span><span class="hrest">the built change becomes a verified change</span></h2>
-      <div class="head-meta" data-src="step-4-verify"><span class="cmd">the verify command</span><span class="pill"><svg class="os mk" viewBox="0 0 24 24" aria-hidden="true"><rect class="d-owner-mark" x="3" y="3" width="18" height="18" rx="4"/><rect class="d-owner-bar" x="8" y="7.5" width="2.5" height="9"/><rect class="d-owner-bar" x="13.5" y="7.5" width="2.5" height="9"/></svg>11 stops for the owner</span></div>
+      <div class="head-meta" data-src="step-4-verify"><span class="cmd">the verify command</span><span class="pill"><svg class="os mk" viewBox="0 0 24 24" aria-hidden="true"><rect class="d-owner-mark" x="3" y="3" width="18" height="18" rx="4"/><rect class="d-owner-bar" x="8" y="7.5" width="2.5" height="9"/><rect class="d-owner-bar" x="13.5" y="7.5" width="2.5" height="9"/></svg>13 stops for the owner</span></div>
     </div>
     <div class="tr-head"><p class="label">What happens</p><p class="label">In the example</p></div>
     <ol class="trace">
@@ -1294,11 +1301,11 @@ Depends on: S1</pre>
           </li>
           <li class="tr" data-src="step-4-verify">
             <svg class="tmk mk" viewBox="0 0 24 24" aria-hidden="true"><rect class="d-session" x="6" y="6" width="12" height="12" rx="2"/></svg>
-            <div class="tr-text"><h3>The verify command starts verify</h3><p data-src="step-4-verify"><svg class="os mk" viewBox="0 0 24 24" role="img" aria-label="Stop for the owner"><rect class="d-owner-mark" x="3" y="3" width="18" height="18" rx="4"/><rect class="d-owner-bar" x="8" y="7.5" width="2.5" height="9"/><rect class="d-owner-bar" x="13.5" y="7.5" width="2.5" height="9"/></svg> No change named, and several changes active: which change to verify.</p><p data-src="step-4-verify"><svg class="os mk" viewBox="0 0 24 24" role="img" aria-label="Stop for the owner"><rect class="d-owner-mark" x="3" y="3" width="18" height="18" rx="4"/><rect class="d-owner-bar" x="8" y="7.5" width="2.5" height="9"/><rect class="d-owner-bar" x="13.5" y="7.5" width="2.5" height="9"/></svg> A repo with specs whose config names no test command.</p><p data-src="step-4-verify a-repo-without-specs"><svg class="os mk" viewBox="0 0 24 24" role="img" aria-label="Stop for the owner"><rect class="d-owner-mark" x="3" y="3" width="18" height="18" rx="4"/><rect class="d-owner-bar" x="8" y="7.5" width="2.5" height="9"/><rect class="d-owner-bar" x="13.5" y="7.5" width="2.5" height="9"/></svg> A <a href="#a-repo-without-specs">repo without specs</a> whose config names no check command.</p></div>
+            <div class="tr-text"><h3>The verify command starts verify</h3><p data-src="step-4-verify"><svg class="os mk" viewBox="0 0 24 24" role="img" aria-label="Stop for the owner"><rect class="d-owner-mark" x="3" y="3" width="18" height="18" rx="4"/><rect class="d-owner-bar" x="8" y="7.5" width="2.5" height="9"/><rect class="d-owner-bar" x="13.5" y="7.5" width="2.5" height="9"/></svg> No change named, and several changes active: which change to verify.</p><p data-src="step-4-verify before-the-first-slice"><svg class="os mk" viewBox="0 0 24 24" role="img" aria-label="Stop for the owner"><rect class="d-owner-mark" x="3" y="3" width="18" height="18" rx="4"/><rect class="d-owner-bar" x="8" y="7.5" width="2.5" height="9"/><rect class="d-owner-bar" x="13.5" y="7.5" width="2.5" height="9"/></svg> None of the branches that the default branch rule names exists.</p><p data-src="step-4-verify"><svg class="os mk" viewBox="0 0 24 24" role="img" aria-label="Stop for the owner"><rect class="d-owner-mark" x="3" y="3" width="18" height="18" rx="4"/><rect class="d-owner-bar" x="8" y="7.5" width="2.5" height="9"/><rect class="d-owner-bar" x="13.5" y="7.5" width="2.5" height="9"/></svg> A repo with specs whose config names no test command.</p><p data-src="step-4-verify a-repo-without-specs"><svg class="os mk" viewBox="0 0 24 24" role="img" aria-label="Stop for the owner"><rect class="d-owner-mark" x="3" y="3" width="18" height="18" rx="4"/><rect class="d-owner-bar" x="8" y="7.5" width="2.5" height="9"/><rect class="d-owner-bar" x="13.5" y="7.5" width="2.5" height="9"/></svg> A <a href="#a-repo-without-specs">repo without specs</a> whose config names no check command.</p></div>
           </li>
           <li class="tr" data-src="step-4-verify per-slice">
             <svg class="tmk mk" viewBox="0 0 24 24" aria-hidden="true"><polygon class="d-decision" points="12 3 21 12 12 21 3 12"/></svg>
-            <div class="tr-text"><h3>The test command and the check command run once</h3><p data-src="step-4-verify">In a repo with specs, one test-lock check then runs over the working branch, with or without check scripts.</p><p class="hook" data-src="step-4-verify per-slice"><span class="state opt"><svg width="10" height="10" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.8" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6 3.6v4.8M3.6 6h4.8" stroke="currentColor" stroke-width="1.4"/></svg>Optional</span> With <a href="#per-slice">check scripts</a>, the slice check runs again.</p></div>
+            <div class="tr-text"><h3>The test command and the check command run once</h3><p data-src="step-4-verify">In a repo with specs, one test-lock check then runs over the working branch, with or without check scripts. The report names the default branch on a line <code>Base: &lt;branch&gt;</code>, and lists each answered offence.</p><p class="hook" data-src="step-4-verify per-slice"><span class="state opt"><svg width="10" height="10" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.8" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6 3.6v4.8M3.6 6h4.8" stroke="currentColor" stroke-width="1.4"/></svg>Optional</span> With <a href="#per-slice">check scripts</a>, the slice check runs again.</p></div>
             <div class="snip cols tail" data-src="the-fix-round"><span>test command, check command, slice check</span><span class="pass">pass</span><span>test lock</span><span class="pass">holds</span></div>
           </li>
           <li class="tr" id="the-verify-rules-file" data-src="the-verify-rules-file">
@@ -1388,7 +1395,7 @@ Depends on: S1</pre>
                   <figcaption>The fix round sorts each finding into one route, and runs the Fix and Test first findings in its five parts.</figcaption>
                 </figure>
                 <div class="side">
-                  <p data-src="step-4-verify the-fix-round"><svg class="os mk" viewBox="0 0 24 24" role="img" aria-label="Stop for the owner"><rect class="d-owner-mark" x="3" y="3" width="18" height="18" rx="4"/><rect class="d-owner-bar" x="8" y="7.5" width="2.5" height="9"/><rect class="d-owner-bar" x="13.5" y="7.5" width="2.5" height="9"/></svg> One question each: a tests commit of an earlier fix round at the end of the working branch; each test-lock offence that no answer in <code>build-report.md</code> covers (keep the edit, or restore the test); every bug on a Bugs left line; a finding still open after the second verify; every stop of a <a href="#when-a-part-fails">failure default</a>; a failed check command at the commit of <code>build-report.md</code>; every hand-back of an <a href="#p-who">owner decision</a>.</p>
+                  <p data-src="step-4-verify the-fix-round"><svg class="os mk" viewBox="0 0 24 24" role="img" aria-label="Stop for the owner"><rect class="d-owner-mark" x="3" y="3" width="18" height="18" rx="4"/><rect class="d-owner-bar" x="8" y="7.5" width="2.5" height="9"/><rect class="d-owner-bar" x="13.5" y="7.5" width="2.5" height="9"/></svg> One question each: a tests commit of an earlier fix round at the end of the working branch; each test-lock offence that no answer in <code>build-report.md</code> covers (keep the edit, or restore the test); each finding about a past commit that no answer covers (keep the commit, or fix it in a new commit); every bug on a Bugs left line; a finding still open after the second verify; every stop of a <a href="#when-a-part-fails">failure default</a>; a failed check command at the commit of <code>build-report.md</code>; every hand-back of an <a href="#p-who">owner decision</a>.</p>
                   <ul class="tags"><li>no bug becomes a fix slice</li><li>inside a change, refactoring only as a Fix finding that cites a written standard</li></ul>
                   <p class="hook"><span class="state opt"><svg width="10" height="10" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.8" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6 3.6v4.8M3.6 6h4.8" stroke="currentColor" stroke-width="1.4"/></svg>Optional</span> <a href="#a-repo-without-specs">A repo without specs</a></p>
                   <p class="hook"><span class="state def"><svg width="12" height="10" viewBox="0 0 12 10" aria-hidden="true"><rect x="0.8" y="1.8" width="10.4" height="6.4" rx="3.2" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="7.8" cy="5" r="1.9" fill="currentColor"/></svg>Default</span> A listed lead does not keep verify from passing.</p>
@@ -1541,7 +1548,7 @@ Depends on: S1</pre>
       <table class="tbl" id="p-who-may">
         <thead><tr><th scope="col">Action</th><th scope="col">Who</th><th scope="col">When</th><th scope="col">Never</th></tr></thead>
         <tbody>
-          <tr><th scope="row">Commit</th><td data-label="Who"><span>the session</span></td><td data-label="When"><span>only on a branch other than main; after it loads <code>commit</code></span></td><td data-label="Never"><span>amend a commit</span></td></tr>
+          <tr><th scope="row">Commit</th><td data-label="Who"><span>the session</span></td><td data-label="When"><span>only on a branch other than the default branch; after it loads <code>commit</code>, which asks once when the owner staged more than one unrelated concern</span></td><td data-label="Never"><span>amend a commit</span></td></tr>
           <tr><th scope="row">Tick a task box</th><td data-label="Who"><span>the session</span></td><td data-label="When"><span>at the code commit of its slice, or the fix</span></td><td></td></tr>
         </tbody>
       </table>
@@ -1982,7 +1989,7 @@ Depends on: S1</pre>
       </div>
       <div class="cl-group" id="steering-the-build" data-src="steering-the-build">
         <p class="label">Steering the build</p>
-        <ul><li>only the owner starts a build, with the build command</li><li>one line of the repo guide guards the run of OpenSpec's apply skill</li></ul>
+        <ul><li>the owner types the build command, or asks in words and the session loads it</li><li>one line of the repo guide sends a request in words to the build command, never to OpenSpec's apply skill</li></ul>
       </div>
       <div class="cl-group" id="the-repos-own-files" data-src="the-repos-own-files">
         <p class="label">The repo's own files</p>
@@ -2040,7 +2047,7 @@ Depends on: S1</pre>
       <h3>Credit and licence duties</h3>
       <p>Upstream: <a href="https://github.com/mattpocock/skills">github.com/mattpocock/skills</a></p>
       <p>OpenSpec is the npm package <code>@fission-ai/openspec</code></p>
-      <ul><li>The upstream licence is MIT; its full text must stay with any copy.</li><li>The credits file names the upstream source and the upstream commit.</li><li>The credits file records every local change to an upstream skill.</li></ul>
+      <ul><li>The upstream licence is MIT; its full text must stay with any copy.</li><li>The copied part of the <code>pr</code> skill is MIT too, from HumanLayer; its licence text stands beside the upstream licence file.</li><li>The credits file names the upstream source and the upstream commit.</li><li>The credits file records every local change to an upstream skill.</li></ul>
     </article>
   </section>
 
@@ -2126,3 +2133,5 @@ Depends on: S1</pre>
   go();
 })();
 </script>
+</body>
+</html>

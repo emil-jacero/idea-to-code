@@ -113,12 +113,15 @@ rules:
 operations:
   apply:
     guidance:
-      # Flow: the build. Words do not build: only the owner starts it.
+      # Flow: the build. A request in words loads the build command.
       - "The `/idea-to-code:build` command builds the change with the
         `idea-to-code:slice-build` skill: slice by slice, tests first, each slice by fresh
         sub-agents. A slice closes with its code commit."
-      - "A run of OpenSpec's apply skill builds nothing: it names
-        `/idea-to-code:build <change>` for the owner to type, and stops."
+      - "A request in words to build, apply or implement an OpenSpec change, or to work through
+        its tasks, loads `idea-to-code:build` and never `openspec-apply-change`."
+      - "When this guidance is read inside OpenSpec's apply skill, build nothing: load
+        `idea-to-code:build` (or name `/idea-to-code:build <change>`) and stop that skill's task
+        loop."
       - "Commit only on the working branch, never on the default branch. Apply pushes nothing
         and opens no pull request."
   archive:

@@ -76,7 +76,7 @@ The page loads its fonts from Google Fonts, and it falls back to system fonts wh
 4. Add the build line to the repo guide (`AGENTS.md`, else `CLAUDE.md`):
 
    ```text
-   A request in words to build, apply or implement an OpenSpec change, or to work through its tasks, starts no build and loads no `openspec-apply-change` skill: name `/idea-to-code:build <change>` for the owner to type, and stop.
+   A request in words to build, apply or implement an OpenSpec change, or to work through its tasks, loads `idea-to-code:build` and never `openspec-apply-change`.
    ```
 
    Then copy `examples/verify.md` to `openspec/verify.md`, edit it to fit the repo, and delete its
@@ -153,8 +153,10 @@ always written in full, because Claude Code has a command of its own named `veri
 | `/idea-to-code:build` | `[change-name]` | Builds the change slice by slice, tests first. It pushes nothing. |
 | `/idea-to-code:verify` | `[change-name]` | Runs the test command, the check command and the test lock, applies `openspec/verify.md`, runs OpenSpec's comparison and one fix round, and ends with the result gate. |
 
-Type a command to start its step. The build ends by naming `/idea-to-code:verify`: run it in a
-fresh session, so that verify reads the work without the context that wrote it.
+Type a command to start its step. A request in words to build a change, or a yes after the session
+named the build command, also starts the build: it loads the build command. The build ends by naming
+`/idea-to-code:verify`: run it in a fresh session, so that verify reads the work without the context
+that wrote it.
 
 ### Install the plugin
 

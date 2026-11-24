@@ -88,13 +88,15 @@ A sub-agent commits nothing, ticks no task box and starts no other agent.
 These rules hold at every step:
 
 - **Commits.** Before every commit, the agent loads the `commit` skill, which picks the type, the
-  scope and the message. The skill runs the repo's check command before every commit that is not a
-  tests commit, and a failed check command stops the commit
-  ([The repo's own files](#the-repos-own-files)). The agent runs each check alone, reads its exit
-  status, and only then runs `git commit` in a separate call. It never chains a check and a commit
-  in one call. The agent commits a change only on a branch other
-  than main: [Before the first slice](#before-the-first-slice) names it the working branch. The
-  agent never amends a commit. It makes a new commit, because the branch tip may have moved.
+  scope and the message. When the owner staged changes himself and they hold more than one unrelated
+  concern, the skill asks once: A two commits (the skill restages), or B one commit as staged. The
+  owner's index changes only after that answer. The skill runs the repo's check command before every
+  commit that is not a tests commit, and a failed check command stops the commit ([The repo's own
+  files](#the-repos-own-files)). The agent runs each check alone, reads its exit status, and only
+  then runs `git commit` in a separate call. It never chains a check and a commit in one call. The
+  agent commits a change only on a branch other than the default branch: [Before the first
+  slice](#before-the-first-slice) names it the working branch. The agent never amends a commit. It
+  makes a new commit, because the branch tip may have moved.
 - **Text.** Commit, pull request, issue, comment and release note text is permanent. So it never
   carries a session ID, a session link or a "Generated with" footer, and no attribution or signature
   line in it names a model. It never carries a bare `@name`, because the name can be a real account,
@@ -238,9 +240,12 @@ Explore is read-only. It reads and searches, and it never writes code or a chang
 
 `improve-codebase-architecture` is another way into the path. It is an
 [upstream skill](https://github.com/mattpocock/skills/tree/abeeaf95660ba9e8b7c753eb38f441ca707a8823/skills/engineering/improve-codebase-architecture)
-that the plugin does not ship; a reader who wants it installs it from upstream. It grills the owner
-on a module to deepen, and its grill counts as the explore grill. It writes no code and no change,
-and the next step is propose.
+that the plugin does not ship; a reader who wants it installs it from upstream. It scans the code
+for modules to deepen, and writes a report of its candidates to the temporary directory, outside
+the repo. It asks the owner which candidate to explore, and then runs the `grilling` skill on that
+one. It may add or sharpen a term in the glossary as decisions settle. When the owner rejects a
+candidate for a reason that lasts, it offers a decision record. The flow counts that grill as the
+explore grill, and the next step is propose.
 
 > **Optional:** With [tracker issues](#a-tracker-issue-for-several-repos), explore first lists the
 > open ones. With [many repos](#many-repos-in-one-workspace), the session first names the repo it
@@ -491,7 +496,8 @@ the build or of the fix round: the test writer writes only tests, and the code w
 code.
 
 **What happens:** the owner starts the build with the build command, which loads the
-`slice-build` skill. A request in words starts no build
+`slice-build` skill. A request in words, or a yes after the session named the build command,
+starts it too: the session then loads the build command
 ([Steering the build](#steering-the-build)). The build command runs no generated skill of OpenSpec.
 One `slice-build` run builds every slice of the change, not one slice per run. Slices go in
 order, one at a time, never in parallel. Before the first slice, the session sets up
@@ -508,6 +514,7 @@ commit. Nothing is pushed. The owner gets the final report, and the change folde
 **Stops for the owner when:**
 - at the start, when no change is named and several changes are active: which change to build;
 - before the first slice ([Before the first slice](#before-the-first-slice)):
+    - none of the branches that the default branch rule names exists;
     - a change in the tree that is not part of the build;
     - whether the first commit carries a term or decision record from explore;
     - a clash with the repo's apply guidance;
@@ -533,11 +540,16 @@ The session sets up once:
 
 1. It runs every git and file command from the repo's root.
 2. It runs `git status`.
-3. It picks the working branch. The *working branch* is the branch that the build commits to: the
-   branch the run started on, or, when the run started on main, a branch named after the change.
-   The repo's apply guidance may name another form for that branch. The session creates or
-   switches to the branch before the first commit.
-4. It reads the apply guidance: the apply entry under `operations` in `openspec/config.yaml`.
+3. It finds the *default branch*, the branch that the change is compared against: the remote's
+   default branch, else `main` when that branch exists, else `master` when that branch exists. It
+   asks the owner only when none exists. It names the result on a line `Base: <branch>`, in
+   `build-report.md`. `slice-build` holds the shell lines
+   ([`CHECKS.md`, Default branch](skills/slice-build/CHECKS.md#default-branch)).
+4. It picks the working branch. The *working branch* is the branch that the build commits to: the
+   branch the run started on, or, when the run started on the default branch, a branch named after
+   the change. The repo's apply guidance may name another form for that branch. The session
+   creates or switches to the branch before the first commit.
+5. It reads the apply guidance: the apply entry under `operations` in `openspec/config.yaml`.
 
 > **Optional:** With [many repos](#many-repos-in-one-workspace), the session first resolves which
 > repo the work is about.
@@ -547,6 +559,7 @@ The session sets up once:
 
 > **Owner:** The session puts each of these to the owner as one question, in the question form:
 >
+> - the name of the default branch, when none of the branches that the rule names exists;
 > - a change in the tree that is not part of this build;
 > - whether the build's first commit carries a term or decision record that explore wrote, so
 >   that it goes into the change's own pull request. The change folder goes into that commit with
@@ -636,25 +649,25 @@ branch names another slice with an unticked box. `slice-build` holds the exact r
 > `Test check:`. No check script ships with the kit skills: a repo writes its own.
 
 > **Note:** The *test command* is the command after `Tests:` in the `context:` block of the repo's
-> OpenSpec config. The [check command](#the-repos-own-files) is the command after
-> `Checks before a commit:` there. The `commit` skill runs the check command before every commit
-> except a tests commit, so the build does not run it a second time. When the config does not name
-> the test command, the session asks the owner one question before the first slice, with the command
-> it found in the repo's build files as its recommendation. It never guesses. A repo with no `Checks before a commit:` line has no check
-> command. In a repo without specs, the check command takes the place of the test command, and the
-> build asks for it the same way.
+> OpenSpec config. The [check command](#the-repos-own-files) is the command after `Checks before a
+> commit:` there. The `commit` skill runs the check command before every commit except a tests
+> commit, so the build does not run it a second time. When the config does not name the test
+> command, the session asks the owner one question before the first slice, with the command it found
+> in the repo's build files as its recommendation. It never guesses. A repo with no `Checks before a
+> commit:` line has no check command. In a repo without specs, the check command takes the place of
+> the test command, and the build asks for it the same way.
 
-> **Example:** The owner starts the build with the build command. The session works on the branch
-> `refuse-empty-file-name`, named after the change. Before the first slice, it asks no question: the
-> tree holds only the change folder, and the first tests commit carries it. In S1, the gate
-> passes, because S1 depends on none. The test writer writes `test_empty_file_name_is_refused` at
-> the upload API. The red check reads
-> `test_empty_file_name_is_refused FAILED: expected 400, got 201`. That is an assertion on the
-> behaviour, so the reason is right. The session makes tests commit 1, with `tests/test_upload.py`
-> and the change folder. Its message ends with the trailer `Tests-For: S1`. The code writer adds
-> the check in `upload/handler.py`, and the test passes. The test-lock check finds no changed test
-> file. `pytest` passes, the session ticks tasks 1.1 and 1.2, and it makes code commit 2, with
-> `upload/handler.py` and `tasks.md`.
+> **Example:** The owner asks in words for the build, and the session loads the build command. It
+> finds the default branch `main`, and names it on the line `Base: main`. The session works on the
+> branch `refuse-empty-file-name`, named after the change. Before the first slice, it asks no
+> question: the tree holds only the change folder, and the first tests commit carries it. In S1, the
+> gate passes, because S1 depends on none. The test writer writes `test_empty_file_name_is_refused`
+> at the upload API. The red check reads `test_empty_file_name_is_refused FAILED: expected 400, got
+> 201`. That is an assertion on the behaviour, so the reason is right. The session makes tests
+> commit 1, with `tests/test_upload.py` and the change folder. Its message ends with the trailer
+> `Tests-For: S1`. The code writer adds the check in `upload/handler.py`, and the test passes. The
+> test-lock check finds no changed test file. `pytest` passes, the session ticks tasks 1.1 and 1.2,
+> and it makes code commit 2, with `upload/handler.py` and `tasks.md`.
 >
 > S2 runs the same way. Its gate passes, because every box of section 1 is ticked. With one box
 > left open, it would stop with "S2 is blocked by S1". The final report lists four commits and one
@@ -744,6 +757,7 @@ are defaults ([chapter 1](#1-start-here)):
 
 After the last slice, the owner gets one report:
 
+- the default branch of the build, on a line `Base: <branch>`;
 - each slice with its commits (hash and title);
 - every assumption, with the question it answered;
 - every bug fixed, every fix slice and every lead;
@@ -781,14 +795,17 @@ owner starts verify in a fresh session, not in the session that built the change
 **What happens:**
 1. The verify command starts verify. It runs parts 2 and 3 itself, and it runs OpenSpec's
    generated `openspec-verify-change` skill for part 4.
-2. The test command and the check command run once. With check scripts, the slice check runs
+2. Verify finds the default branch by the rule of [Before the first slice](#before-the-first-slice).
+   The test command and the check command run once. With check scripts, the slice check runs
    again (the check-scripts callout in [Per slice](#per-slice)). In a repo with specs, the
    test-lock check then runs once over the working branch (the Note below).
 3. Verify follows the repo's verify rules file: the repo's own rules, and the verify checks
    ([The verify rules file](#the-verify-rules-file)).
 4. OpenSpec's own comparison checks the code against the specs, the design and the tasks.
 5. Verify writes its report as text to the owner, on every pass, the second pass of the fix round
-   included. The fix round and the result gate start only after the report.
+   included. The report names the default branch on a line `Base: <branch>`, and lists each answered
+   offence and each answered finding about a past commit. The fix round and the result gate start
+   only after the report.
 6. With no finding, verify has passed. With findings, one fix round follows
    ([The fix round](#the-fix-round)).
 
@@ -799,10 +816,14 @@ owner starts verify in a fresh session, not in the session that built the change
 
 **Stops for the owner when:**
 - at the start, when no change is named and several changes are active: which change to verify;
+- none of the branches that the default branch rule names exists
+  ([Before the first slice](#before-the-first-slice));
 - in a repo with specs, the config names no test command;
 - in a [repo without specs](#a-repo-without-specs), the config names no check command;
 - in the fix round, for each offending commit that no answer in `build-report.md` covers: keep the
   edit, or restore the test (the Note below);
+- in the fix round, for each finding about a past commit that no answer in `build-report.md`
+  covers: keep the commit, or fix it in a new commit ([The fix round](#the-fix-round));
 - in the fix round (its Owner callout in [The fix round](#the-fix-round)).
 
 > **Optional:** With [owner gates](#owner-gates), the result gate follows a passed verify, and may
@@ -867,6 +888,12 @@ each finding into one route:
 - **Owner.** The finding needs a spec change, or it is unasked behaviour that is worth keeping.
 - **Lead.** A smell with no cited rule. It is a [lead](#a-bug-found-during-the-build), and the
   report only lists it.
+- **Past commit.** A finding about a commit already made, which no code can fix, because the flow
+  never amends: its message breaks a repo rule, it was made without the check command, or the
+  like. It goes to the owner, one question per commit: keep it as it is, or fix it in a new
+  commit where a fix exists (for example, run the check command now, and commit what it fixes).
+  A message has no such fix, so it gets the keep option and a stop option that leaves the
+  finding open.
 
 A failure of the test command or of the check command at verify is a Fix finding. A test-lock
 finding of verify is an Owner finding: its commit stays on the working branch, because the flow
@@ -874,6 +901,13 @@ never amends, so no route of the round removes it. Only the owner's answer clear
 the test lock in [Step 4](#step-4-verify)). The answer to restore the test brings the test back in
 a tests commit with `Tests-For: verify`. The offending commit stays in the history, and its record
 in `build-report.md` answers it.
+
+A finding of the route Past commit works the same way. The answer to keep closes the finding. The
+answer to fix moves it to Fix, and a new commit holds the fix. The session writes each answer into
+`build-report.md` with the commit's full hash, and commits that file. A later verify lists the
+finding as answered, and it is no finding. Both kinds of answer have one record form: one line
+with a kind field (`lock` or `past`), under `### Answers` in the part `## Fix round` of the file
+([`CHECKS.md`, Answers in the build report](skills/slice-build/CHECKS.md#answers-in-the-build-report)).
 
 > **Note:** A lead that the report lists does not keep verify from passing. This is a default
 > ([chapter 1](#1-start-here)): a rule of the repo guide may say that a listed lead is an open
@@ -909,14 +943,14 @@ There is one round only, apart from a round that the owner's answer at the resul
 round's commits, every question put to the owner, every lead, the `Project rules:` line and the
 `Check command:` line ([The final report](#the-final-report)). Before verify runs once more, the
 session appends that report to `build-report.md`, with the record of each owner's answer on a
-test-lock offence, and commits that file alone.
+test-lock offence or on a past commit, and commits that file alone.
 
 > **Owner:** The session puts each of these to the owner as one question:
 >
 > - a tests commit of an earlier fix round at the end of the working branch, before the round
 >   sorts a finding;
-> - each Owner finding other than a test-lock offence (the stop of [Step 4](#step-4-verify)
->   covers that), before the code writer starts;
+> - each Owner finding other than a test-lock offence or a finding about a past commit (the stops
+>   of [Step 4](#step-4-verify) cover those), before the code writer starts;
 > - every bug on a Bugs left line;
 > - a finding still open after the second verify ([The pull request](#the-pull-request) says what
 >   this blocks);
@@ -1184,8 +1218,8 @@ per repo. A proposal names no entry line. A tracker issue has no store correctio
 repo list comes from the project's own list of repos.
 
 The store is one repo, registered as an OpenSpec store on each machine that uses it, and each repo
-lists it under `references:` in its OpenSpec config (checked on OpenSpec 2.1.1). When the store is not
-registered, the agent reports it and goes on. A person registers the store; an agent never does.
+lists it under `references:` in its OpenSpec config (checked on OpenSpec 2.1.1). When the store is
+not registered, the agent reports it and goes on. A person registers the store; an agent never does.
 
 #### An entry
 
@@ -1318,8 +1352,8 @@ There is no shared rules file and no root command.
 Nothing that the flow needs may live only at the workspace root. A project with many repos may
 keep routing commands of its own: such a command picks the repo, and then starts the plugin's step
 command there. Where only a person can start a step command, the routing command names it, and
-the owner types it. Only the build command is such a command
-([Steering the build](#steering-the-build)). A routing command at the workspace root is a *root
+the owner types it. No step command is locked, so a routing command may start the build command
+too ([Steering the build](#steering-the-build)). A routing command at the workspace root is a *root
 command*. Everything else is in the repo, or the repo names where it comes from
 ([The kit in every repo](#the-kit-in-every-repo)). When the target repo is unclear, or the work
 spans repos, the agent asks one question. The agent names the repo before it edits, and commits to
@@ -1437,13 +1471,14 @@ By default, the criteria are these, and a rule of the repo guide may add others:
 | The plan gate | the plan rests on an assumption; or the change touches a public contract or is breaking |
 | The result gate | verify needed a fix round; or the final report names a disputed test, a bug or a stop; or a lead or an Owner finding is still in the report |
 
-The result gate reads the build's final report from `build-report.md` in the change folder
-([The final report](#the-final-report)). Where that file is missing, as after a build by hand,
-the agent asks the owner one question about the report. This is a default: a rule of the repo
-guide may say what holds then. Where another criterion already holds, the agent asks no question
-about the report: the owner looks at the result anyway, and the `reason` in `gates.json` says that
-the report was not checked. At the result gate, the agent also lists each test-lock offence that
-the owner answered, so that the owner sees what the test lock let stand.
+The result gate reads the build's final report from `build-report.md` in the change folder ([The
+final report](#the-final-report)). Where that file is missing, as after a build by hand, the agent
+asks the owner one question about the report. This is a default: a rule of the repo guide may say
+what holds then. Where another criterion already holds, the agent asks no question about the report:
+the owner looks at the result anyway, and the `reason` in `gates.json` says that the report was not
+checked. At the result gate, the agent also lists each answer in the build report (each test-lock
+offence and each finding about a past commit that the owner answered), so that the owner sees what
+the test lock and the flow let stand.
 
 With a *review tool*, the agent opens the real files in the tool and waits: the change folder at the
 plan gate, and the diff of the working branch at the result gate. The tool is optional: the flow
@@ -1578,18 +1613,20 @@ twelve skills, with all the generated skills that this document names (checked o
 
 #### Steering the build
 
-Only the owner starts a build, with the build command, `/idea-to-code:build <change>`. Words do
-not build: a request to build, apply or implement a change, or to work through its tasks, starts
-no build. A yes or a go-ahead in words, after the agent named the build command, is also words,
-and builds nothing. The agent names the build command for the owner to type, and stops. The explore,
-propose and verify commands also start from a request in words.
+The owner starts a build with the build command, `/idea-to-code:build <change>`, typed or loaded
+by the session. A request in words to build, apply or implement a change, or to work through its
+tasks, may start a build. So may a yes or a go-ahead in words, after the agent named the build
+command. The session then loads `idea-to-code:build`, never `slice-build` alone. The build command
+runs its own first steps: it picks the change, then the plan gate, then the branch check. No step
+command is locked. The plan gate, tests first, the test lock and the rule that the build never
+starts verify stay.
 
 OpenSpec's generated apply skill, `openspec-apply-change`, runs a task loop of its own, with no
 tests first. The build command never loads it, and a request in words must not load it either. As
 the guard, the repo guide holds one fixed line:
 
 ```text
-A request in words to build, apply or implement an OpenSpec change, or to work through its tasks, starts no build and loads no `openspec-apply-change` skill: name `/idea-to-code:build <change>` for the owner to type, and stop.
+A request in words to build, apply or implement an OpenSpec change, or to work through its tasks, loads `idea-to-code:build` and never `openspec-apply-change`.
 ```
 
 The apply guidance of the OpenSpec config says the same for a run of the apply skill. It is no
@@ -1647,11 +1684,11 @@ is always written in full, because Claude Code has a command of its own named `v
 ### The skills
 
 The skills hold the exact rules that agents run. This document names each skill, and says what it
-does. A skill holds the method and its defaults. The project's own rules sit in the repo
-([The repo's own files](#the-repos-own-files)). In the Origin column, *adapted* means that the skill
-comes from Matt Pocock's AI Hero skills, with local changes. *Own* means that the skill was written
-for this flow. *OpenSpec* means that OpenSpec generates the skill. *Upstream, not shipped* means that the skill
-is upstream's own, the plugin ships no copy of it, and the reader installs it from
+does. A skill holds the method and its defaults. The project's own rules sit in the repo ([The
+repo's own files](#the-repos-own-files)). In the Origin column, *adapted* means that the skill comes
+from Matt Pocock's AI Hero skills, with local changes. *Own* means that the skill was written for
+this flow. *OpenSpec* means that OpenSpec generates the skill. *Upstream, not shipped* means that
+the skill is upstream's own, the plugin ships no copy of it, and the reader installs it from
 [upstream](https://github.com/mattpocock/skills/tree/abeeaf95660ba9e8b7c753eb38f441ca707a8823/skills/engineering/improve-codebase-architecture).
 
 | Skill | Job | Step | Origin |
@@ -1679,9 +1716,9 @@ OpenSpec's generated skills on the path are `openspec-explore`, `openspec-propos
 The kit skills are `slice-build` and the skills it loads. `slice-build` loads `tdd`, `grilling`,
 `commit`, `diagnosing-bugs`, `codebase-design` and `owner-gate`, and those load `code-review`,
 `domain-modeling`, `pr`, `prototype` and `research`. The kit set does not hold
-`improve-codebase-architecture` ([The explore command](#the-explore-command)), so a repo that
-wants that way into the path installs the skill from upstream and carries it beside the kit. The path needs no other skill. A
-project may keep other skills beside the kit.
+`improve-codebase-architecture` ([The explore command](#the-explore-command)), so a repo that wants
+that way into the path installs the skill from upstream and carries it beside the kit. The path
+needs no other skill. A project may keep other skills beside the kit.
 
 The plugin `idea-to-code` holds twelve method skills and four step commands: the twelve kit
 skills, and the commands of [The kit](#the-kit) ([The kit in every repo](#the-kit-in-every-repo)).
