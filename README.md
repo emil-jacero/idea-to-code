@@ -255,6 +255,7 @@ rules sections.
 **Edit the flow.** Change `WORKFLOW.md` first. Each rule has one home: other sections link to it.
 Never write an em-dash or an en-dash. Then make the same change by hand in `workflow.html`, and
 commit both together.
+The scripts `maintainer/check_tree.py` and `maintainer/check_page.py` check the repo and the page.
 
 The page has five tabs: Flow, Who and how, Roads, Parts, Set up. It orders its
 sections by its tabs; `WORKFLOW.md` keeps its chapter order.
