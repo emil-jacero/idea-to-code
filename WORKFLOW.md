@@ -209,6 +209,9 @@ shows on it. [Chapter 3](#3-other-roads) gives the roads that change it.
    default branch, or says that the checkout is behind (the fresh-base check, in
    [`CHECKS.md`, Fresh base](skills/slice-build/CHECKS.md#fresh-base)). It also searches every spec
    for the behaviour that the idea changes, not only the specs that the idea names.
+   When the idea comes from an issue or a report, it checks each claim in it (the cause, the
+   proposed fix and the result the fix should give) before the first question, and its first
+   answer lists the checked claims as true, false or open.
 3. The grill asks the owner questions, until no open decision is left
    ([The grill](#the-grill)).
 4. When an assumption is open, a side step settles it (the side-step callout in
