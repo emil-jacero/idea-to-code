@@ -4,7 +4,7 @@ A repo can name two check scripts in its config: the slice check script (the com
 
 ## Default branch
 
-`<default branch>` in these texts is the branch that this rule finds. It is the remote's default branch (`git symbolic-ref --short refs/remotes/origin/HEAD` prints it as `origin/<name>`). The lines cut `origin/` off when a local branch of that name exists, and they keep `origin/<name>` when only the remote branch exists (a single-branch clone, or a local branch that was deleted). Else the default branch is `main` when that branch exists, else `master` when that branch exists. The lines test `refs/heads/main` and `refs/heads/master`, so a tag of that name does not count. The owner is asked only when none exists. The rule asks nothing else, and the session never takes a name without testing that it resolves. Run the lines in one shell call, from the repo root:
+`<default branch>` in these texts is the branch that this rule finds. It is the remote's default branch (`git symbolic-ref --short refs/remotes/origin/HEAD` prints it as `origin/<name>`). The lines cut `origin/` off when a local branch of that name exists, and they keep `origin/<name>` when only the remote branch exists (a local branch that was renamed or deleted). A clone made with `--single-branch --branch <name>` has no `origin/HEAD`; there the lines fall back to `main`, `master` or the owner's answer. Else the default branch is `main` when that branch exists, else `master` when that branch exists. The lines test `refs/heads/main` and `refs/heads/master`, so a tag of that name does not count. The owner is asked only when none exists. The rule asks nothing else, and the session never takes a name without testing that it resolves. Run the lines in one shell call, from the repo root:
 
 ```sh
 B=$(git symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null)
@@ -117,7 +117,7 @@ Limits:
 
 ## Answers in the build report
 
-The fix round writes each owner's answer on a commit that the flow cannot change as one record line in `build-report.md`, under the heading `### Answers` in the `## Fix round` section (SKILL.md, After verify, step 6). One form serves both kinds of answer:
+The fix round writes each owner's answer on a commit that the flow cannot change as one record line in `build-report.md`, under the heading `### Answers` in the `## Fix round` section of that round (SKILL.md, After verify, step 6). Each round appends its own section, and the records of every section count. One form serves both kinds of answer:
 
 ```text
 - Answer: <kind> | <full hash> | <choice> | <detail> | <UTC time>
@@ -125,7 +125,7 @@ The fix round writes each owner's answer on a commit that the flow cannot change
 
 - `<kind>` is `lock` for a test-lock offence (above), or `past` for a finding about a past commit (SKILL.md, After verify, step 1). The test-lock block reads only the lines of the kind `lock`.
 - `<full hash>` is the output of `git rev-parse <hash>` for the commit that the question named.
-- `<choice>` is `keep` or `restore` for `lock`, and `keep` or `fix` for `past`.
+- `<choice>` is `keep` or `restore` for `lock`, and `keep` for `past` (the answer Stop writes no record).
 - `<detail>` is the test files that the commit touched, separated by commas, for `lock`. For `past` it is the finding in a few words. It holds no `|`.
 - `<UTC time>` comes from `date -u +%Y-%m-%dT%H:%MZ`.
 

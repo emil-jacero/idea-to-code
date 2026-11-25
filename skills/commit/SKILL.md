@@ -5,7 +5,7 @@ user-invocable: true
 argument-hint: "[message hint or scope]"
 ---
 
-Create a git commit following these rules strictly.
+Create a git commit following these rules strictly. Before you put any question to the owner, load the `idea-to-code:grilling` skill.
 
 ## Project rules
 

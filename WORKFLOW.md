@@ -807,7 +807,8 @@ owner starts verify in a fresh session, not in the session that built the change
    offence and each answered finding about a past commit. The fix round and the result gate start
    only after the report.
 6. With no finding, verify has passed. With findings, one fix round follows
-   ([The fix round](#the-fix-round)).
+   ([The fix round](#the-fix-round)). Each later verify run starts a round of its own, which
+   appends its own `## Fix round` section to `build-report.md`.
 
 **Checks:** parts 2 to 4 above.
 
@@ -823,7 +824,7 @@ owner starts verify in a fresh session, not in the session that built the change
 - in the fix round, for each offending commit that no answer in `build-report.md` covers: keep the
   edit, or restore the test (the Note below);
 - in the fix round, for each finding about a past commit that no answer in `build-report.md`
-  covers: keep the commit, or fix it in a new commit ([The fix round](#the-fix-round));
+  covers: keep the commit, or stop ([The fix round](#the-fix-round));
 - in the fix round (its Owner callout in [The fix round](#the-fix-round)).
 
 > **Optional:** With [owner gates](#owner-gates), the result gate follows a passed verify, and may
@@ -889,11 +890,8 @@ each finding into one route:
 - **Lead.** A smell with no cited rule. It is a [lead](#a-bug-found-during-the-build), and the
   report only lists it.
 - **Past commit.** A finding about a commit already made, which no code can fix, because the flow
-  never amends: its message breaks a repo rule, it was made without the check command, or the
-  like. It goes to the owner, one question per commit: keep it as it is, or fix it in a new
-  commit where a fix exists (for example, run the check command now, and commit what it fixes).
-  A message has no such fix, so it gets the keep option and a stop option that leaves the
-  finding open.
+  never amends: its message breaks a commit rule of the repo. It goes to the owner, one question per commit: keep it as it is, or stop, which leaves
+  the finding open. No option offers a fix.
 
 A failure of the test command or of the check command at verify is a Fix finding. A test-lock
 finding of verify is an Owner finding: its commit stays on the working branch, because the flow
@@ -903,8 +901,8 @@ a tests commit with `Tests-For: verify`. The offending commit stays in the histo
 in `build-report.md` answers it.
 
 A finding of the route Past commit works the same way. The answer to keep closes the finding. The
-answer to fix moves it to Fix, and a new commit holds the fix. The session writes each answer into
-`build-report.md` with the commit's full hash, and commits that file. A later verify lists the
+answer to stop writes no record, and a later verify asks the question again. The session writes
+each keep answer into `build-report.md` with the commit's full hash, and commits that file. A later verify lists the
 finding as answered, and it is no finding. Both kinds of answer have one record form: one line
 with a kind field (`lock` or `past`), under `### Answers` in the part `## Fix round` of the file
 ([`CHECKS.md`, Answers in the build report](skills/slice-build/CHECKS.md#answers-in-the-build-report)).

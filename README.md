@@ -58,8 +58,9 @@ The page loads its fonts from Google Fonts, and it falls back to system fonts wh
 
    The first two lines are needed because OpenSpec's default profile writes only six skills. It
    leaves out `openspec-new-change`, `openspec-continue-change` and `openspec-verify-change`, and
-   verify stops without the last one. The two `config` lines are set once on a machine, and they
-   apply to every repo you init there. The init writes twelve generated skills under
+   verify stops without the last one. The two `config` lines change the global config of OpenSpec on
+   this machine, not only this repo. They are set once, and they apply to every repo you init
+   there. The init writes twelve generated skills under
    `.agents/skills/`, with links under `.claude/skills/`, and a first `openspec/config.yaml`
    (checked on OpenSpec 2.1.1). Everyone who runs `openspec init` or `openspec update` in the repo
    sets the same two `config` lines first: a machine whose profile is `core` deletes the verify
