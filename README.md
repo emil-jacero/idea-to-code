@@ -5,7 +5,8 @@ as one Markdown document, the same flow as a page, the skills and the step comma
 and the template of a project's profile. The skills and the four step commands ship as one Claude
 Code plugin, `idea-to-code`.
 
-> **Status:** version 0.1.0. The flow is new. It was tried only in toy repos: a toy trial ran
+> **Status:** no version number: each commit on `main` is a new version, and an update
+> installs it. The flow is new. It was tried only in toy repos: a toy trial ran
 > explore to verify, end to end, on 2026-11-24. No real change has gone through it yet.
 > [WORKFLOW.md](WORKFLOW.md) has an "as of" line that says how far it was used.
 

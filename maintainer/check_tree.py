@@ -1012,7 +1012,7 @@ def check_b(run):
     """The JSON manifests."""
     wanted = {
         ".claude-plugin/plugin.json": [
-            (("name",), "idea-to-code"), (("version",), "0.1.0"), (("license",), "MIT"),
+            (("name",), "idea-to-code"), (("license",), "MIT"),
             (("author", "name"), None), (("description",), None),
         ],
         ".claude-plugin/marketplace.json": [
@@ -1061,6 +1061,12 @@ def check_b(run):
             if want is not None and value != want:
                 run.fail(doc, line_of(doc, '"%s"' % path[-1]),
                          "the field `%s` is %r, not %r" % (".".join(map(str, path)), value, want))
+        # No `version` field: Claude Code then uses the commit as the version,
+        # so each new commit on main reaches users as an update.
+        entries = [data] + (data.get("plugins") or [] if isinstance(data, dict) else [])
+        if any(isinstance(entry, dict) and "version" in entry for entry in entries):
+            run.fail(doc, line_of(doc, '"version"'), "a `version` field is set: it stops "
+                     "updates until it changes; leave it out so each commit is an update")
     pair = [handles({rel: run.tree[rel]}) for rel in wanted if rel in run.tree]
     if len(pair) == 2 and pair[0] != pair[1]:
         run.fail(".claude-plugin/plugin.json", 1, "the author of plugin.json and the owner of "
