@@ -1,6 +1,6 @@
 # Checks by hand
 
-A repo can name two check scripts in its config: the slice check script (the command after `Slice check:` in the `context:` of `openspec/config.yaml`) for the gate, and the test check script (the command after `Test check:` in the `context:` of `openspec/config.yaml`) for the red check and the test lock. This file holds the same checks, done by hand, for a repo without them, and for the fix round after verify, which runs them by hand in every repo. It also holds the test lock at verify, which verify runs by hand in every repo with specs, and the form of the owner's answers in `build-report.md`.
+A repo can name two check scripts in its config: the slice check script (the command after `Slice check:` in the `context:` of `openspec/config.yaml`) for the gate, and the test check script (the command after `Test check:` in the `context:` of `openspec/config.yaml`) for the red check and the test lock. It also holds the fresh-base check that explore, propose and the build run first. This file holds the same checks, done by hand, for a repo without them, and for the fix round after verify, which runs them by hand in every repo. It also holds the test lock at verify, which verify runs by hand in every repo with specs, and the form of the owner's answers in `build-report.md`.
 
 ## Default branch
 
@@ -16,6 +16,26 @@ B=$(git symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null)
 ```
 
 The last line prints `Base: <branch>`, or `NO DEFAULT BRANCH: ask the owner`. In that case put one question to the owner, in the form of the `idea-to-code:grilling` skill, that asks for the name of the branch the work is compared against, with the branches that `git branch --list` shows as the options. The build names the result in `build-report.md`, and verify names it in its report, each on a line `Base: <branch>`. The fix round uses the branch that the verify report names. In a repo with no remote the lines find a local `main` or `master`. A `main` that is the working branch itself leaves nothing to compare: the check below ends with `SETUP FAILED`.
+
+## Fresh base
+
+Explore, propose and the build read the repo's rules, config and specs from the checkout. A checkout that misses commits of the remote's default branch gives them old rules. Run these lines once, after the lines of Default branch, in the same shell call, so that `B` is set:
+
+```sh
+git fetch -q origin 2>/dev/null || echo 'NO FETCH: the remote was not read'
+case "$B" in origin/*) R=$B ;; *) R=origin/$B ;; esac
+if git rev-parse --verify --quiet "$R^{commit}" >/dev/null; then
+  n=$(git rev-list --count "HEAD..$R")
+  if [ "$n" = 0 ]; then echo 'FRESH'
+  elif [ "$(git branch --show-current)" = "${B#origin/}" ] && [ -z "$(git status --porcelain --untracked-files=no)" ] && git merge --ff-only -q "$R" 2>/dev/null; then echo "UPDATED: $n commits"
+  else echo "BEHIND: $n commits of $R are missing"; fi
+else echo 'NO REMOTE BASE'; fi
+```
+
+- `FRESH` or `NO REMOTE BASE`: go on.
+- `UPDATED: <n> commits`: the checkout was on the default branch with no local change, and it moved forward to the remote. Name the line in your first answer, and go on.
+- `NO FETCH`: name it in your first answer, and go on with what the checkout holds.
+- `BEHIND: <n> commits`: on the default branch, the checkout holds a local change or a local commit, so it cannot move forward. Stop, and ask the owner to bring it up to date. On another branch, name the line in your first answer, and go on: the rules and specs you read may be older than the remote's.
 
 ## Gate
 

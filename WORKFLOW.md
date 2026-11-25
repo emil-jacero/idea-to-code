@@ -205,7 +205,10 @@ shows on it. [Chapter 3](#3-other-roads) gives the roads that change it.
 **What happens:**
 1. The explore command starts explore, with the grill added
    ([The explore command](#the-explore-command)).
-2. The agent looks up the facts itself.
+2. The agent looks up the facts itself. First it brings the checkout up to date with the remote's
+   default branch, or says that the checkout is behind (the fresh-base check, in
+   [`CHECKS.md`, Fresh base](skills/slice-build/CHECKS.md#fresh-base)). It also searches every spec
+   for the behaviour that the idea changes, not only the specs that the idea names.
 3. The grill asks the owner questions, until no open decision is left
    ([The grill](#the-grill)).
 4. When an assumption is open, a side step settles it (the side-step callout in
@@ -263,7 +266,9 @@ Then the `grilling` skill asks the owner questions, in the question form:
 - It asks the *seams* too. A seam is the public interface where a slice's tests go. It asks them
   after the decisions that fix what is built, because a seam depends on them. It asks one question
   per distinct seam, not one per slice, and each option says what the seam catches and what it
-  misses. Every seam is agreed with the owner before the change is written.
+  misses. The heading of a seam question starts with `Test seam`, and its background says that
+  the build writes the tests there first and then locks them. Every seam is agreed with the owner
+  before the change is written.
 - It keeps a running record of each decision, marked as the owner's answer or as the agent's
   assumption. An open assumption is never recorded as settled. "You decide" is an answer: the
   agent decides, and records the decision as delegated.
@@ -366,7 +371,10 @@ instead ([The fast path](#the-fast-path)).
 
 **What happens:** the propose command runs OpenSpec's propose skill. It plans only, and writes no
 code. It writes the change folder ([The change folder](#the-change-folder)). The repo's config
-rules for each artifact apply ([OpenSpec](#openspec)).
+rules for each artifact apply ([OpenSpec](#openspec)). It starts with the fresh-base check, as
+explore does. Before it writes the spec deltas, it searches every spec for the behaviour that the
+change alters. Each requirement or scenario that the change makes false gets a delta, also in a
+spec that the decisions do not name.
 
 **Checks:** the *slice check* checks the Slices section: its form, and that every slice it names
 exists. After propose, it runs only as a script, where the project has check scripts (the
@@ -544,7 +552,10 @@ The session sets up once:
    default branch, else `main` when that branch exists, else `master` when that branch exists. It
    asks the owner only when none exists. It names the result on a line `Base: <branch>`, in
    `build-report.md`. `slice-build` holds the shell lines
-   ([`CHECKS.md`, Default branch](skills/slice-build/CHECKS.md#default-branch)).
+   ([`CHECKS.md`, Default branch](skills/slice-build/CHECKS.md#default-branch)). In the same call
+   it runs the fresh-base check: a clean default branch moves forward to the remote, and a
+   default branch with local work that is behind stops the run
+   ([`CHECKS.md`, Fresh base](skills/slice-build/CHECKS.md#fresh-base)).
 4. It picks the working branch. The *working branch* is the branch that the build commits to: the
    branch the run started on, or, when the run started on the default branch, a branch named after
    the change. The repo's apply guidance may name another form for that branch. The session
