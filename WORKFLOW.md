@@ -618,7 +618,9 @@ and the two commits that close it: tests, then code.](diagrams/per-slice.svg)
   that leaves a scenario or the Done when line without a test. A *guard test* is the one
   exception: it covers a scenario that says a behaviour of the code before the change stays (a
   refusal that still holds), so it passes before the code by design. The test writer marks it,
-  the build report lists it, and the owner gets no question for it. When a stub ends the test run at
+  the build report lists it, and the owner gets no question for it. A *tests-only slice*
+  (its Delivers line starts with `Tests only:`) adds only guard tests. In place of the red check,
+  the *break check* breaks the covered code for one run and shows that each test fails. When a stub ends the test run at
   the first test, each new test runs alone.
 - **(d) Tests commit.** The session commits only the test files, the stubs and the change-folder
   files named here. The title has the repo's tests commit title form, by default

@@ -70,7 +70,7 @@ Done when its report maps each scenario the slice delivers, and the Done when li
 
 When the config names the test check script (the command after `Test check:` in the `context:` of `openspec/config.yaml`), run it as its `--help` says; otherwise check by hand ([CHECKS.md](CHECKS.md), Red check). Before any code for the slice exists, every new test must be **red** for the right reason: it fails on the behaviour its scenario names. A test that passes, or fails on a build error, a syntax error or a missing import, fails the check. A guard test is the one exception ([CHECKS.md](CHECKS.md), Red check): a test that the test writer's report marks as a guard of a behaviour that stays. It passes the check, with no question to the owner.
 
-Done when every new test is red for the right reason or is a guard test, and at least one new test is red.
+Done when every new test is red for the right reason or is a guard test, and at least one new test is red. In a tests-only slice ([CHECKS.md](CHECKS.md), Red check), done when every new test is a guard test that passed the break check.
 
 ### (d) Tests commit
 
@@ -93,7 +93,7 @@ Done when the commit exists, its trailer block passed that check, and no test fi
 
 ### (e) Code writer
 
-Start a fresh sub-agent with the code-writer brief in [BRIEFS.md](BRIEFS.md). It writes code until the slice's tests pass, and leaves every test file as committed.
+Start a fresh sub-agent with the code-writer brief in [BRIEFS.md](BRIEFS.md). It writes code until the slice's tests pass, and leaves every test file as committed. A tests-only slice skips (e) and (f) when each task of its section is done by its tests commit: its code commit (g) then holds `tasks.md` alone.
 
 Done when its report says the tests pass, says where each task of the slice's section is done, and lists what changed and its assumptions.
 
