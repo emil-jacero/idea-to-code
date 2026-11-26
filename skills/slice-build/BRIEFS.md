@@ -28,11 +28,11 @@ Steps:
 2. Write tests at the slice's Seam: one or more for each delivered scenario (in the fix round, for each finding), and for the Done when line where the slice has one. A Done when line that only says that the delivered scenarios pass is covered by their tests: map it to them in your report, and write no extra test. Take expected values from the spec or its worked examples, never from running code.
 3. Where a test needs it to build, add a compile-only stub: a signature that builds. A stub never returns a value: it raises the language's "not implemented" error, so a test that asserts a value cannot pass on a stub. Wiring that a test needs to reach the Seam (an export line, a registration) belongs to the stub. It may stand in the tests commit when it holds no behaviour. Write the least of it. Where the language has no such error, the stub stops the program instead, with the message "not implemented" (a panic, an abort). List each stub and each wiring line. Write no other production code. A test that expects an error names the error of its scenario, by a type or a message that the stub's error does not match. Otherwise that test passes on the stub.
 4. When the slice deepens a module, delete the old tests that the new tests at its interface replace (the `idea-to-code:codebase-design` skill, DEEPENING.md).
-5. Run the new tests with the test command, and keep the red output of each. Every new test must be red. When a stub ends the test run at the first test, run each new test alone and keep the output of each.
+5. Run the new tests with the test command, and keep the red output of each. Every new test must be red, except a guard test: a test of a scenario that says a behaviour of the code before the change stays as it is (a refusal that still holds), which passes before the code by design. Mark each guard test in your report, with the scenario it guards. When a stub ends the test run at the first test, run each new test alone and keep the output of each.
 
 Report:
 
-- A table with one row per scenario, finding or Done when line: the test that covers it, its seam and its red output line.
+- A table with one row per scenario, finding or Done when line: the test that covers it, its seam and its red output line, or the word `guard` with its passing output line.
 - The test files you added, changed or deleted, and the stub files, with each wiring line.
 - Your assumptions, each with the question it answered.
 - Every point where the spec was too vague to test.
@@ -51,14 +51,14 @@ Inputs:
 - The slice's `tasks.md` section `## <n>.`: `<its text>`. Why: the session ticks every box in it at the code commit, so each task must be done.
 - In a repeat round, the finding of the failed check: `<finding>`. Why: the last round changed a test file, which is now restored, left the test command red, or failed the check command.
 - In a repeat round after a failed check command, that command: `<check command>`. Why: the commit runs it, and it failed on the last round's code; run it too before you report.
-- In the fix round after verify, the findings: `<each finding and what it cites>`. Why: each cites a task, a requirement, a scenario or a repo standard the change does not meet yet; fix each one at what it cites, and nothing more.
+- In the fix round after verify, the findings: `<each finding and what it cites>`, and the diff command of the change, `<diff command>`. Why: each cites a task, a requirement, a scenario or a repo standard the change does not meet yet; fix each one at what it cites, and at every other place of the diff that breaks the same rule or holds the same stale text, and nothing more. A review names one place, and the next verify finds the others.
 - After a hand-back or a dispute ruling, the question, the answer (the owner's, or the rulings on the disputed tests) and the files the last writer left in the tree: `<question>`, `<answer>`, `<paths>`. Why: the answer settles what stopped the last writer; build on its files or replace them.
 
 In a repo without specs, no tests are written first: you have no tests commit and no new tests to pass. Your inputs also hold the slice block, `<Delivers and Done when of S<n>>`, where the change has one. Why: its Done when line says what must hold when you finish. Your report says how you showed each Done when line holds.
 
 Steps:
 
-1. Write production code until the repo's test command passes, with the tests of your tests commit in that run. Replace each stub with real code. A task that the wiring of a stub already completes is done at the tests commit: report it so. Do every task and fix every finding in your inputs that is not a test or a commit, and add nothing beyond them: nothing for a later slice.
+1. Write production code until the repo's test command passes, with the tests of your tests commit in that run. Replace each stub with real code. A task that the wiring of a stub already completes is done at the tests commit: report it so. Do every task and fix every finding in your inputs that is not a test or a commit, and add nothing beyond them: nothing for a later slice. Where your code changes a behaviour, correct each comment, help text and usage text in the files you change that still describes the old behaviour.
 2. Leave every test file and test fixture exactly as committed: edit, add, delete or rename none of them.
 3. For a failure you cannot explain, you may load the `idea-to-code:diagnosing-bugs` skill; under this brief it fixes only code. Fix a bug when a failing test of the slice or the repo's test command reaches it, or when it sits in code not yet committed; in a repo without specs, also when it sits in code this change committed. Leave every other bug as it is.
 4. Make the code right for every input the change's spec or design allows. When a test looks wrong, stop and report it as a disputed test, with the evidence: a special case for a test input is never the fix.
@@ -66,7 +66,7 @@ Steps:
 Report:
 
 - What changed.
-- Each task or finding you were given, and where it is done.
+- Each task or finding you were given, and where it is done. In the fix round, each other place of the diff where you fixed the same breach.
 - The test result.
 - Your assumptions, each with the question it answered.
 - Disputed tests: each committed test you believe is wrong, with the evidence: the test, the spec text it contradicts and the test output.

@@ -208,7 +208,8 @@ shows on it. [Chapter 3](#3-other-roads) gives the roads that change it.
 2. The agent looks up the facts itself. First it brings the checkout up to date with the remote's
    default branch, or says that the checkout is behind (the fresh-base check, in
    [`CHECKS.md`, Fresh base](skills/slice-build/CHECKS.md#fresh-base)). It also searches every spec
-   for the behaviour that the idea changes, not only the specs that the idea names.
+   for the behaviour that the idea changes, not only the specs that the idea names. It reads them
+   also for rules on how the work is done (a requirement with never, only, must, always or no).
    When the idea comes from an issue or a report, it checks each claim in it (the cause, the
    proposed fix and the result the fix should give) before the first question, and its first
    answer lists the checked claims as true, false or open.
@@ -377,7 +378,8 @@ code. It writes the change folder ([The change folder](#the-change-folder)). The
 rules for each artifact apply ([OpenSpec](#openspec)). It starts with the fresh-base check, as
 explore does. Before it writes the spec deltas, it searches every spec for the behaviour that the
 change alters. Each requirement or scenario that the change makes false gets a delta, also in a
-spec that the decisions do not name.
+spec that the decisions do not name. So does a rule on how the work is done (a requirement with
+never, only, must, always or no) that a choice of the design breaks.
 
 **Checks:** the *slice check* checks the Slices section: its form, and that every slice it names
 exists. After propose, it runs only as a script, where the project has check scripts (the
@@ -613,7 +615,10 @@ and the two commits that close it: tests, then code.](diagrams/per-slice.svg)
   behaviour that its scenario names. The right reason is an assertion on that behaviour, or a
   stub's "not implemented" error. A wrong reason is a build or syntax error, a missing import
   or symbol, or a missing fixture. A test that passes fails the *red check*, and so does a report
-  that leaves a scenario or the Done when line without a test. When a stub ends the test run at
+  that leaves a scenario or the Done when line without a test. A *guard test* is the one
+  exception: it covers a scenario that says a behaviour of the code before the change stays (a
+  refusal that still holds), so it passes before the code by design. The test writer marks it,
+  the build report lists it, and the owner gets no question for it. When a stub ends the test run at
   the first test, each new test runs alone.
 - **(d) Tests commit.** The session commits only the test files, the stubs and the change-folder
   files named here. The title has the repo's tests commit title form, by default
@@ -706,6 +711,11 @@ These defaults ([chapter 1](#1-start-here)) hold when a part fails:
   output. At most three fresh test writers follow the first.
 - After a failed test-lock check, the session restores the test files from the newest tests
   commit, and removes each test file added after it. Then one fresh code writer gets the finding.
+- When the test command fails at the code commit on a test that the slice did not change, the
+  session first runs that test on a clean checkout of the default branch. When it fails the same
+  way there, it is a *base failure*: the owner answers once, keep it out of the change or fix it
+  here. The answer keep it out is a record in `build-report.md`, and later verify runs read it
+  ([`CHECKS.md`, A failure that the default branch has too](skills/slice-build/CHECKS.md#a-failure-that-the-default-branch-has-too)).
 - When the slice's tests fail after the code writer, or the test command or the check command
   fails at the code commit, one fresh code writer gets the output. After a failed check command,
   the session first unticks the boxes of the slice.
@@ -776,6 +786,7 @@ After the last slice, the owner gets one report:
 - every assumption, with the question it answered;
 - every bug fixed, every fix slice and every lead;
 - every disputed test, with its ruling and its correction commit;
+- every guard test, and every base failure with the owner's answer;
 - every failed check, with its slice, its round and what was restored or retried;
 - every stop of the build, with its cause and the owner's answer. A resume counts as a stop: the
   report names the slice and the part that the run resumed at, and says that it does not hold
@@ -852,7 +863,9 @@ owner starts verify in a fresh session, not in the session that built the change
 > the owner's veto). `slice-build` holds the commands
 > ([`CHECKS.md`, Test lock at verify](skills/slice-build/CHECKS.md#test-lock-at-verify)). Each
 > failure of the test command or the check command, each offending commit that no answer covers
-> and each uncommitted test-file change is a finding for the fix round.
+> and each uncommitted test-file change is a finding for the fix round. A base failure that a
+> record in `build-report.md` answers is no finding, as long as it still fails on the default
+> branch: verify runs that check again on each pass.
 >
 > An offending commit stays on the branch, because the flow never amends. Only the owner's answer
 > clears it. Verify puts one question per offending commit to the owner: keep the edit, or restore
@@ -900,7 +913,8 @@ each finding into one route:
 - **Fix.** The finding cites something written: an unticked task, a requirement or scenario not
   met, a behaviour nobody asked for, or a breach of a written standard.
 - **Test first.** A Fix finding that needs a test changed or added before the code.
-- **Owner.** The finding needs a spec change, or it is unasked behaviour that is worth keeping.
+- **Owner.** The finding needs a spec change, or it is unasked behaviour that is worth keeping,
+  or it is a base failure that no record answers: keep it out of the change, or fix it here.
 - **Lead.** A smell with no cited rule. It is a [lead](#a-bug-found-during-the-build), and the
   report only lists it.
 - **Past commit.** A finding about a commit already made, which no code can fix, because the flow
@@ -918,7 +932,7 @@ A finding of the route Past commit works the same way. The answer to keep closes
 answer to stop writes no record, and a later verify asks the question again. The session writes
 each keep answer into `build-report.md` with the commit's full hash, and commits that file. A later verify lists the
 finding as answered, and it is no finding. Both kinds of answer have one record form: one line
-with a kind field (`lock` or `past`), under `### Answers` in the part `## Fix round` of the file
+with a kind field (`lock`, `past` or `base`), under `### Answers` in the part `## Fix round` of the file
 ([`CHECKS.md`, Answers in the build report](skills/slice-build/CHECKS.md#answers-in-the-build-report)).
 
 > **Note:** A lead that the report lists does not keep verify from passing. This is a default
@@ -938,8 +952,9 @@ The round runs five parts, in this order:
 1. One fresh test writer writes the tests for the Test first findings. The red check runs on
    them, and the session makes a tests commit. That commit belongs to no slice, so its trailer is
    `Tests-For: verify`.
-2. One fresh code writer gets every Fix and Test first finding. The test files are locked at the
-   commit it starts from.
+2. One fresh code writer gets every Fix and Test first finding, and the diff of the change. It
+   fixes each finding at every place of the diff that breaks the same rule, not only at the place
+   that the finding names. The test files are locked at the commit it starts from.
 3. The test-lock check runs against that commit.
 4. The test command passes. The session ticks each task box that the fix completes, and commits
    the fix.

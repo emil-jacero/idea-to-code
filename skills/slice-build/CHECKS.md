@@ -1,6 +1,6 @@
 # Checks by hand
 
-A repo can name two check scripts in its config: the slice check script (the command after `Slice check:` in the `context:` of `openspec/config.yaml`) for the gate, and the test check script (the command after `Test check:` in the `context:` of `openspec/config.yaml`) for the red check and the test lock. It also holds the fresh-base check that explore, propose and the build run first. This file holds the same checks, done by hand, for a repo without them, and for the fix round after verify, which runs them by hand in every repo. It also holds the test lock at verify, which verify runs by hand in every repo with specs, and the form of the owner's answers in `build-report.md`.
+A repo can name two check scripts in its config: the slice check script (the command after `Slice check:` in the `context:` of `openspec/config.yaml`) for the gate, and the test check script (the command after `Test check:` in the `context:` of `openspec/config.yaml`) for the red check and the test lock. It also holds the fresh-base check that explore, propose and the build run first. This file holds the same checks, done by hand, for a repo without them, and for the fix round after verify, which runs them by hand in every repo. It also holds the test lock at verify, which verify runs by hand in every repo with specs, the check for a failure that the default branch has too, and the form of the owner's answers in `build-report.md`.
 
 ## Default branch
 
@@ -51,7 +51,7 @@ Run the test command (the command after `Tests:` in the `context:` of `openspec/
 - Right reason: an assertion on the scenario's behaviour, or a stub's "not implemented" error.
 - Wrong reason: a build or syntax error, a missing import or symbol, a missing fixture.
 
-A new or corrected test that passes, or fails for a wrong reason, fails the check.
+A new or corrected test that passes, or fails for a wrong reason, fails the check. A guard test is the one exception. A *guard test* covers a scenario that says a behaviour of the code before the change stays as it is (a refusal that still holds, an output that does not change), so it passes before any code exists, by design. It passes the check when the test writer's report marks it as a guard and names that scenario, and the code before the change already shows that behaviour. Ask the owner nothing for it. At least one new test of the slice must still be red for the right reason. The build report lists each guard test. When the test check script fails only because guard tests pass, apply this rule to its output by hand.
 
 ## Test lock
 
@@ -100,7 +100,7 @@ case "$R" in openspec/changes/?*/build-report.md) ;; *) echo 'SETUP FAILED: set 
 [ -d "${R%/*}" ] || echo "SETUP FAILED: no change folder: ${R%/*}"
 rec=$(git show "HEAD:$R" 2>/dev/null | grep -E '^[[:space:]]*[-*+][[:space:]]*Answer:')
 ans=$(printf '%s\n' "$rec" | sed -n 's/^- Answer: lock | \([0-9a-f]\{40,64\}\) | .*/\1/p')
-printf '%s\n' "$rec" | grep -v -E '^- Answer: (lock|past) \| [0-9a-f]{40,64} \| ' | grep . | sed 's/^/IGNORED RECORD, bad form: /'
+printf '%s\n' "$rec" | grep -v -E '^- Answer: (lock|past|base) \| [0-9a-f]{40,64} \| ' | grep . | sed 's/^/IGNORED RECORD, bad form: /'
 for h in $ans; do git rev-list --no-merges "$B..HEAD" | grep -qx "$h" || echo "IGNORED RECORD, not on the branch: $h"; done
 {
 for c in $(git rev-list --no-merges $B..HEAD); do
@@ -121,7 +121,7 @@ done
 
 The test lock gives no finding when the commands print no `OFFENCE` line and no `UNCOMMITTED` line: an offence that the owner answered prints as `ANSWERED` (below). An `OFFENCE <hash> <title>` line, with the test files under it, is a commit whose `Tests-For` trailer is missing, or holds a value other than one `S<n>` or `verify`, and that added (A), changed (M), deleted (D) or renamed (R) a test file. An `UNCOMMITTED` line is a test file that is changed, staged or untracked. Each is a finding.
 
-An offence stays on the branch, because the flow never amends. The owner's answer is the only thing that clears it. The block reads the answers from `build-report.md` as committed at `HEAD`: a line of the form that [Answers in the build report](#answers-in-the-build-report) gives, with the kind `lock`. An offence whose full hash has such a line prints as `ANSWERED <full hash> <title>` in place of the `OFFENCE` line and its files, and it is no finding. List each `ANSWERED` line in the verify report. A record line of the kind `past` is no concern of the test lock: the block reads no more of it than its form. A record line that is of neither form prints `IGNORED RECORD, bad form: <line>`. A record whose hash is not a commit of `<default branch>..HEAD` prints `IGNORED RECORD, not on the branch: <hash>`. An `IGNORED RECORD` line is no finding. List it in the verify report. An `UNCOMMITTED` line is never answered: it stays a finding until it is committed in a tests commit with `Tests-For: verify`, or the owner removes it. A record that is written but not yet committed answers nothing.
+An offence stays on the branch, because the flow never amends. The owner's answer is the only thing that clears it. The block reads the answers from `build-report.md` as committed at `HEAD`: a line of the form that [Answers in the build report](#answers-in-the-build-report) gives, with the kind `lock`. An offence whose full hash has such a line prints as `ANSWERED <full hash> <title>` in place of the `OFFENCE` line and its files, and it is no finding. List each `ANSWERED` line in the verify report. A record line of the kind `past` or `base` is no concern of the test lock: the block reads no more of it than its form. A record line that is of neither form prints `IGNORED RECORD, bad form: <line>`. A record whose hash is not a commit of `<default branch>..HEAD` prints `IGNORED RECORD, not on the branch: <hash>`. An `IGNORED RECORD` line is no finding. List it in the verify report. An `UNCOMMITTED` line is never answered: it stays a finding until it is committed in a tests commit with `Tests-For: verify`, or the owner removes it. A record that is written but not yet committed answers nothing.
 
 An `OFFENCE` line that no record answers is an Owner finding of the fix round (SKILL.md, After verify, step 1). There, put one question per offending commit to the owner, in the form of the `idea-to-code:grilling` skill: what the commit changed in which test file, and two options. **Keep the edit** (the commit stays as it is). **Restore the test** (a tests commit with `Tests-For: verify` brings the test files back as SKILL.md, After verify, step 1, says, and then the code goes green again). Recommend one option, and give the basis. When the offending commit carries a `Tests-For` trailer with a wrong value (a tests commit of the build whose trailer check failed), say in the background that its test files are the slice's tests, and recommend Keep the edit. Otherwise recommend Restore the test, because the lock keeps the committed tests. With `OFFENCE` lines from several commits, ask one question after the other, and never in one message. Write each answer as a record line, kind `lock`, as Answers in the build report says. Write a record line only for the owner's answer to that question in this session. Never write one by your own choice, from a repo rule, or from an answer to another question, such as the question on a failed trailer check in the build: the block cannot tell who wrote a record. The record rides the commit of the round's report (After verify, step 6).
 
@@ -135,18 +135,33 @@ Limits:
 - A rename out of the test paths or into them shows as D or A, not as R.
 - The trailer options need git 2.32 or newer.
 
+## A failure that the default branch has too
+
+A failure of the test command can come from the default branch and not from the change: a test or a program that fails the same way on a clean checkout of `<default branch>`. Check that before you treat the failure as the change's. Run the failing test or program alone on a detached worktree of the default branch, in a scratch folder outside the repo, and remove the worktree after the run:
+
+```sh
+W=<scratch folder>/base-check
+git worktree add -q --detach "$W" <default branch>
+( cd "$W" && <the command of the failing test or program> ); echo "exit $?"
+git worktree remove "$W" || { rm -rf "$W"; git worktree prune; }
+```
+
+The failure is the same when the run exits non-zero with the same error line. It is then a *base failure*. When the test command stopped at the failure (a task runner ends at its first failed part), run each part that it did not reach, one by one, and read the result of each, so that a base failure hides no other failure.
+
+A base failure goes to the owner once, as one question in the form of the `idea-to-code:grilling` skill: the test, its error line, and the run on the default branch. Two options: **Keep it out** (the change goes on with this failure, and a separate change fixes it), or **Fix it in this change**. Recommend Keep it out when the diff of the change touches none of the files of the failing test or program. The answer Keep it out is a record line of the kind `base` (below), and it answers that failure in the rest of the build and in every later verify. Each verify runs the check above again: a failure that no longer fails on the default branch is the change's, whatever the records say.
+
 ## Answers in the build report
 
-The fix round writes each owner's answer on a commit that the flow cannot change as one record line in `build-report.md`, under the heading `### Answers` in the `## Fix round` section of that round (SKILL.md, After verify, step 6). Each round appends its own section, and the records of every section count. One form serves both kinds of answer:
+The fix round writes each owner's answer on a commit that the flow cannot change, and on a base failure, as one record line in `build-report.md`, under the heading `### Answers` in the `## Fix round` section of that round (SKILL.md, After verify, step 6). The build writes an answer on a base failure under the heading `### Answers` of the build report itself (SKILL.md, After the last slice). Each round appends its own section, and the records of every section count. One form serves every kind of answer:
 
 ```text
 - Answer: <kind> | <full hash> | <choice> | <detail> | <UTC time>
 ```
 
-- `<kind>` is `lock` for a test-lock offence (above), or `past` for a finding about a past commit (SKILL.md, After verify, step 1). The test-lock block reads only the lines of the kind `lock`.
-- `<full hash>` is the output of `git rev-parse <hash>` for the commit that the question named.
-- `<choice>` is `keep` or `restore` for `lock`, and `keep` for `past` (the answer Stop writes no record).
-- `<detail>` is the test files that the commit touched, separated by commas, for `lock`. For `past` it is the finding in a few words. It holds no `|`.
+- `<kind>` is `lock` for a test-lock offence (above), `past` for a finding about a past commit (SKILL.md, After verify, step 1), or `base` for a base failure (A failure that the default branch has too). The test-lock block reads only the lines of the kind `lock`.
+- `<full hash>` is the output of `git rev-parse <hash>` for the commit that the question named. For `base`, it is the commit of the default branch that the check ran on: `git rev-parse <default branch>`.
+- `<choice>` is `keep` or `restore` for `lock`, and `keep` for `past` and for `base` (the answers Stop and Fix it in this change write no record).
+- `<detail>` is the test files that the commit touched, separated by commas, for `lock`. For `past` it is the finding in a few words. For `base` it is the failing test or program, then its error line in a few words. It holds no `|`.
 - `<UTC time>` comes from `date -u +%Y-%m-%dT%H:%MZ`.
 
-A record holds the owner's answer to the question of this session, and nothing else. The round's report commit carries it (SKILL.md, After verify, step 6). A record that is written but not committed answers nothing. For `past`, the later verify (the verify command, step 4) reads the committed records of the kind `past` with `git show HEAD:openspec/changes/<change>/build-report.md | grep -E '^- Answer: past \| '`, and a finding about the commit of a record, for the breach that its detail names, is listed as answered and is no finding.
+A record holds the owner's answer to the question of this session, and nothing else. The round's report commit carries it (SKILL.md, After verify, step 6), or in the build, the commit of `build-report.md`. A record that is written but not committed answers nothing. For `past`, the later verify (the verify command, step 4) reads the committed records of the kind `past` with `git show HEAD:openspec/changes/<change>/build-report.md | grep -E '^- Answer: past \| '`, and a finding about the commit of a record, for the breach that its detail names, is listed as answered and is no finding. For `base`, it reads the records with `grep -E '^- Answer: base \| '` in place of that pattern. A failure of the test command whose test or program a `base` record names, and that the check of A failure that the default branch has too still shows as a base failure, is listed as answered and is no finding.
