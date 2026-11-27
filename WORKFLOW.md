@@ -339,7 +339,9 @@ nothing settled, the grill stops and says what blocks it:
 
 The *question ledger* is one YAML file per piece of work. It holds every question that explore and
 propose put to the owner, and every choice that the agent made itself and that the change's files
-state. It is the record of decisions: the list at the end of explore is written from it.
+state. It is the record of decisions: the list at the end of explore is written from it. The build
+and the fix round add an entry in one case only: an owner's answer there replaces what an entry
+settled.
 
 - **Where:** explore starts it at `openspec/explore/<name>/questions.yaml`, uncommitted. Propose
   moves it into the change folder, as `questions.yaml`, and it is archived with the change. On
@@ -756,11 +758,22 @@ These defaults ([chapter 1](#1-start-here)) hold when a part fails:
   output. At most three fresh test writers follow the first.
 - After a failed test-lock check, the session restores the test files from the newest tests
   commit, and removes each test file added after it. Then one fresh code writer gets the finding.
-- When the test command fails at the code commit on a test that the slice did not change, the
+- Before the first slice, the session runs the test command and the check command once. No line
+  of the change is in the code yet, so a failure there is not the change's, and it shows before
+  any writer starts.
+- When the test command or the check command fails on a test that the slice did not change, the
   session first runs that test on a clean checkout of the default branch. When it fails the same
   way there, it is a *base failure*: the owner answers once, keep it out of the change or fix it
-  here. The answer keep it out is a record in `build-report.md`, and later verify runs read it
+  here. Where a changed form of the command passes, a third answer runs the command in that
+  form. The answer is a record in `build-report.md`, and later verify runs read it
   ([`CHECKS.md`, A failure that the default branch has too](skills/slice-build/CHECKS.md#a-failure-that-the-default-branch-has-too)).
+- When the command passes on a clean checkout of the same commit, the cause is in the checkout:
+  a file or a folder that git does not track. It is a *checkout failure*. The owner clears the
+  checkout, and the session changes nothing there itself
+  ([`CHECKS.md`, A failure of the checkout](skills/slice-build/CHECKS.md#a-failure-of-the-checkout)).
+- The session runs each configured command as the config gives it. A changed form (a variable
+  set before the command, a part left out) is evidence for the question, and it runs only on the
+  owner's answer.
 - When the slice's tests fail after the code writer, or the test command or the check command
   fails at the code commit, one fresh code writer gets the output. After a failed check command,
   the session first unticks the boxes of the slice.
@@ -831,7 +844,7 @@ After the last slice, the owner gets one report:
 - every assumption, with the question it answered;
 - every bug fixed, every fix slice and every lead;
 - every disputed test, with its ruling and its correction commit;
-- every guard test, and every base failure with the owner's answer;
+- every guard test, and every base failure and checkout failure with the owner's answer;
 - every failed check, with its slice, its round and what was restored or retried;
 - every stop of the build, with its cause and the owner's answer. A resume counts as a stop: the
   report names the slice and the part that the run resumed at, and says that it does not hold

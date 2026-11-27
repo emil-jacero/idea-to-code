@@ -33,6 +33,10 @@ In both sub-shapes the floating bottom bar is identical.
 
 ## Process
 
+### 0. Make the worktree
+
+UI variants live in a detached git worktree of the app inside the scratch folder that the [SKILL](SKILL.md) names (`git worktree add --detach <scratch>/app HEAD`), next to the page they prototype, named so a casual reader sees they are a prototype. The dev server runs from that worktree.
+
 ### 1. State the question and pick N
 
 Default to **3 variants**. More than 5 stops being radically different and starts being noise, so cap there.
@@ -97,7 +101,14 @@ Surface the URL (and the `?variant=` keys). The user will flip through whenever 
 
 ### 6. Capture the answer and clean up
 
-Once a variant has won, capture the answer (which variant, which parts of the others, and why) the way the [SKILL](SKILL.md) describes. If you can drive a browser, take one screenshot of each variant; with no browser, describe each variant in one line in the `README.md`. Before you clean up, write the variants, the switcher and the host-page edits as one patch beside the `README.md` (inside the worktree, `git add --intent-to-add` the new files, then `git diff HEAD > <scratch>/variants.patch`), and write the base commit (`git rev-parse HEAD`) and a Run line (check out that commit, `git apply variants.patch`, start the page) into the `README.md`. Never copy the variant files loose: a source file in the change folder is built and linted by the repo's own checks. Propose moves that evidence into the change. Then delete the worktree folder (`rm -r <scratch>/app`), run `git worktree prune`, and check that `git worktree list` no longer shows it. Never pass `--force`. The change's slice build writes the winning design from the spec.
+Once a variant has won:
+
+1. Capture the answer (which variant, which parts of the others, and why) the way the [SKILL](SKILL.md) describes.
+2. If you can drive a browser, take one screenshot of each variant; with no browser, describe each variant in one line in the `README.md`.
+3. Before you clean up, write the variants, the switcher and the host-page edits as one patch beside the `README.md` (inside the worktree, `git add --intent-to-add` the new files, then `git diff HEAD > <scratch>/variants.patch`), and write the base commit (`git rev-parse HEAD`) and a Run line (check out that commit, `git apply variants.patch`, start the page) into the `README.md`. Never copy the variant files loose: a source file in the change folder is built and linted by the repo's own checks. Propose moves that evidence into the change.
+4. Then delete the worktree folder (`rm -r <scratch>/app`) and run `git worktree prune`. Never pass `--force`.
+
+Done when `git worktree list` no longer shows the worktree. The change's slice build writes the winning design from the spec.
 
 ## Anti-patterns
 

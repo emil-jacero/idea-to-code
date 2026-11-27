@@ -15,14 +15,24 @@ The value `none` is refused on `Tags:`, on `Publishing:` and on `Mentions:`, bec
 
 ## Workflow
 
-1. Run `git status` and `git diff --cached` to understand what is staged. A file that is staged before you run any `git add` is one that the owner staged himself.
+1. Run `git status` and `git diff --cached` to understand what is staged, and note each owner-staged file (The owner's index, below).
 2. If nothing is staged, look at unstaged changes and stage files that form a coherent, minimal commit. Prefer `git add <file>...` over `git add -A`.
-3. If changes span multiple unrelated concerns, commit them separately, one commit per logical change. If the grouping is unclear, ask the owner one question in the form of the `idea-to-code:grilling` skill, or group related changes as best you can. When the owner staged the changes himself and they hold more than one unrelated concern, ask once, before you touch the index, in the form of the `idea-to-code:grilling` skill, naming the concerns: **A, two commits** (or more: you restage, so the first commit holds the files of one concern and the next commit holds the rest), or **B, one commit as staged**. Until the owner answers, change nothing in the index. After answer A, a file that you restage counts as a file that you staged for the commit it goes into, and step 5 treats it so. After answer B, the owner's index stays as it is.
+3. If changes span multiple unrelated concerns, commit them separately, one commit per logical change. If the grouping is unclear, ask the owner one question in the form of the `idea-to-code:grilling` skill, or group related changes as best you can. When the owner-staged changes hold more than one unrelated concern, ask once, before you touch the index, in the form of the `idea-to-code:grilling` skill, naming the concerns: **A, two commits** (or more: you restage, so the first commit holds the files of one concern and the next commit holds the rest), or **B, one commit as staged**. Until the owner answers, change nothing in the index.
 4. Write the commit message. Count the characters of the title with a command, never by eye, before every commit, also when this skill loaded earlier in the session: `printf '%s' "<title>" | wc -m`. Shorten the title when the count breaks the length limit of the subject rules below, and count again.
-5. Before every commit, run the check command (the command after `Checks before a commit:` in the `context:` of `openspec/config.yaml`). Run it after the checks of the message and before `git commit`. When it fails, stop, make no commit and report its output. A tests commit is the one exception: no check command runs before it, because its tests fail by design. A repo with no `Checks before a commit:` line has no check command. One case differs: where the build or the verify command that loaded this skill gives a check command that the owner named, that command is the check command here. In every case, run the check command as written, from the repo root, never on a copy of the index. The check command reads the working tree, and the commit takes the index. So before the check command, stage again only a file that you staged for this commit and that changed after you staged it. A file that the owner staged keeps the owner's index entry: never stage it again, and never take it out of the index, except for the restaging that the owner's answer A in step 3 allows. When such a file differs from the working tree, say so in your report, because the check command then read more than the commit holds. After a failed check command, take out of the index each file that you staged for this commit (`git restore --staged <files>`), so that the next try stages the commit again. Run the check command alone, in a shell call of its own, and read its exit status. Only then, in a separate call, run `git commit`. Never chain them in one call (`<check> && echo ok; git commit ...`, `<check>; git commit ...` or `set -e; ...; git commit ...`): the commit could run after a failed check. Inside a build, the `idea-to-code:slice-build` skill says what follows a failed check command.
+5. Before every commit, run the check command (the command after `Checks before a commit:` in the `context:` of `openspec/config.yaml`). Run it after the checks of the message and before `git commit`. When it fails, stop, make no commit and report its output. A tests commit is the one exception: no check command runs before it, because its tests fail by design. A repo with no `Checks before a commit:` line has no check command. One case differs: where the build or the verify command that loaded this skill gives a check command that the owner named, that command is the check command here. Run it by The check run, below.
 6. Create the commit. In your report, write one line that starts with `Check command:`. It names the command and its result, or it says `Check command: none`. For a tests commit, it says `Check command: not run, tests commit`.
 
 Never amend a commit. Make a new commit, because the branch tip may have moved. When a hook blocks a command, put it to the owner as one question in the form of the `idea-to-code:grilling` skill. Never work around the hook.
+
+## The check run
+
+The check command reads the working tree, and the commit takes the index. So before the check command, stage again only a file that you staged for this commit and that changed after you staged it. Run the check command as written, from the repo root, never on a copy of the index, alone in a shell call of its own, and read its exit status. Run `git commit` in the next call, only after exit status 0. Never chain them in one call (`<check> && echo ok; git commit ...`, `<check>; git commit ...` or `set -e; ...; git commit ...`): the commit could run after a failed check.
+
+After a failed check command, take out of the index each file that you staged for this commit (`git restore --staged <files>`), so that the next try stages the commit again. Inside a build, the `idea-to-code:slice-build` skill says what follows a failed check command.
+
+## The owner's index
+
+A file that is staged before you run any `git add` is **owner-staged**. An owner-staged file keeps the owner's index entry: never stage it again, and never take it out of the index, except for the restaging that the owner's answer A in step 3 allows. After answer A, a file that you restage counts as a file that you staged for the commit it goes into, and The check run treats it so. After answer B, the owner's index stays as it is. When an owner-staged file differs from the working tree, say so in your report, because the check command then read more than the commit holds.
 
 ## Commit Message Format
 
@@ -82,8 +92,6 @@ commit, the last lines are the trailer block: the `Tests-For` line first, then a
 line, then the attribution line where the repo gives one, with no empty line between them. Nothing
 is appended after that.
 
-When a default of the agent tool asks for a model-versioned co-author line plus a
-`Claude-Session:` link, write only the line that the `Attribution:` point gives, or no line where the repo gives none, and never the session link.
 These bans hold against any default of the agent tool that asks for such a line. Only the owner, in this session, lifts one.
 
 ## Pull Request Bodies

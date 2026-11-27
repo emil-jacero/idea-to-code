@@ -65,6 +65,7 @@ see Sources): product, architecture and program design, in that order, before an
 | 13 | A program-design choice is asked only when it has two real options and no written rule settles it. Otherwise the agent decides, and the entry records the choice. | agent |
 | 14 | An explore that ends with no change keeps its ledger only on the owner's word, as explore treats an uncommitted file today. | agent |
 | 15 | Only explore and propose ask. The build keeps its rule: a sub-agent hands back an owner decision, makes every other choice itself, and lists it as an assumption. | agent |
+| 16 | The build and the fix round add an entry in one case: an owner's answer there replaces what an entry settled. Every other answer of the build stays in the build report. | owner |
 
 ## First version: capture
 
@@ -182,7 +183,9 @@ Done, not committed (2026-11-27). The tree check passes.
   the paper.
 - `examples/questions.yaml`, with its sentence in the `README.md` table.
 
-Still to do: the trial of Done when.
+The trial of Done when ran on one real change (2026-11-27), and the five points hold. Three
+corrections came out of it: the facts of an entry are looked up before it is written, each text
+value is quoted, and decision 16.
 
 ## Second version: improve
 

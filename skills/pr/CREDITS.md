@@ -1,20 +1,21 @@
 # Credits
 
-The **Summary** section's menu of visuals (pseudocode, call trees, component trees, file trees, Mermaid, diffs) and its placement guidance come from [Dex Horthy](https://github.com/dexhorthy)'s [`show-me`](https://github.com/humanlayer/skills/blob/main/plugins/show-me/skills/show-me/SKILL.md) skill, reproduced almost word for word and aimed at a diff instead of a live conversation. `idea-to-code:pr` does not depend on `show-me` as a skill (it isn't part of this repo, and a hard dependency would break standalone installs), so the content is copied in rather than pointed at; this file is the attribution a dependency would otherwise have carried.
+The **Summary** section's menu of visuals (pseudocode, call trees, component trees, file trees, Mermaid, diffs) and its placement guidance come from [Dex Horthy](https://github.com/dexhorthy)'s [`show-me`](https://github.com/humanlayer/skills/blob/main/plugins/show-me/skills/show-me/SKILL.md) skill, reproduced almost word for word and aimed at a diff instead of a live conversation. That text is in `VISUALS.md`, and the **Summary** section of `SKILL.md` points to it. `idea-to-code:pr` does not depend on `show-me` as a skill (it isn't part of this repo, and a hard dependency would break standalone installs), so the content is copied in rather than pointed at; this file is the attribution a dependency would otherwise have carried.
 
 ## Licence of the copied text
 
 - Source: `plugins/show-me/skills/show-me/SKILL.md` in `github.com/humanlayer/skills`. Commit: `bba9d13ab34f0a87f1cc33df4dd196372393ddfc` (2026-09-12). The text came to this repo through the upstream `skills/engineering/pr` of Matt Pocock's skills, at `abeeaf95660ba9e8b7c753eb38f441ca707a8823`, which carried it without the HumanLayer licence.
 - Licence: MIT, Copyright (c) 2026 HumanLayer. The full text is in `LICENSE-humanlayer-skills.txt`, in the `skills/` folder, one level up. It must stay with any copy of this part of the skill.
-- This licence covers the show-me part of `SKILL.md` only: the **Summary** section's menu of visuals and its guidance. It is not the licence of the other upstream, Matt Pocock's skills, and it is not the licence of the rest of this skill.
+- This licence covers the show-me text only: the **Summary** section's menu of visuals and its guidance, which `VISUALS.md` holds. The first lines of `VISUALS.md` name this file. It is not the licence of the other upstream, Matt Pocock's skills, and it is not the licence of the rest of this skill.
 
 ## Local changes
 
 | Place | Change |
 | --- | --- |
-| Introduction | The upstream opening, aimed at a live conversation, is replaced by text aimed at a pull request diff. |
+| Introduction | The upstream opening, aimed at a live conversation, is replaced by text aimed at a pull request diff. That text is local, and it stands in the **Summary** section of `SKILL.md`. |
 | Component tree | The code fence is `text`, not `tsx`. |
 | Whole-block example | The two statements end in a semicolon. |
 | HTML file | The upstream bullet that writes and opens an HTML file is removed. |
-| Guidance | The heading is one level lower, with a capital letter. |
-| Front matter | The upstream front matter is replaced by the `credits` block of this skill. Its `url` points to the source file at the head of the upstream default branch. |
+| Guidance | The heading has a capital letter, and its level fits `VISUALS.md`. The last paragraph, on how many of the views to use, is removed. |
+| File | The copied text stands in `VISUALS.md`, a file that the **Summary** section of `SKILL.md` points to, and not in `SKILL.md`. Its first lines carry the credit. |
+| Front matter | The upstream front matter is replaced by the `credits` block of this skill, in the front matter of `SKILL.md`. Its `url` points to the source file at the head of the upstream default branch. |

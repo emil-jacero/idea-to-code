@@ -63,7 +63,7 @@ When the user states how something works, check whether the code agrees. If you 
 
 ### Write a settled term at once
 
-When a term is resolved, put its write to the owner as a capture question. On the owner's yes, write it into the repo's glossary at once, before the change is built, so the test writer, the code writer and the reviewer all read it. When the `Term backing:` of `## Decision records` (default: no backing rule) requires a term to be backed by its spec or code, the term reaches the default branch in the same PR as its backing, and a term whose backing the change dropped is removed before that PR merges. Inside a read-only step such as OpenSpec explore, pause that step for the write and resume it after. Commit nothing there: the file stays uncommitted like the change folder. The build asks the owner whether its first commit carries the file into the change's own pull request. When explore ends with no change, report the uncommitted file, and commit it or open a pull request only when the owner asks. Don't batch these up. Use the format in [GLOSSARY-FORMAT.md](./GLOSSARY-FORMAT.md), or, in a glossary file the repo guide names, that file's own form and the guide's rules for it.
+When a term is resolved, put its write to the owner as a capture question. On the owner's yes, write it into the repo's glossary at once, before the change is built, so the test writer, the code writer and the reviewer all read it. Use the format in [GLOSSARY-FORMAT.md](./GLOSSARY-FORMAT.md), or, in a glossary file the repo guide names, that file's own form and the guide's rules for it. When the `Term backing:` of `## Decision records` (default: no backing rule) requires a term to be backed by its spec or code, the term reaches the default branch in the same PR as its backing, and a term whose backing the change dropped is removed before that PR merges. Then follow After a write.
 
 `GLOSSARY.md` should be totally devoid of implementation details. Do not treat `GLOSSARY.md` as a spec, a scratch pad, or a repository for implementation decisions. It is a glossary and nothing else.
 
@@ -75,10 +75,16 @@ Only put an ADR-sized decision to the owner, as a capture question, when all thr
 2. **Surprising without context**: a future reader will wonder "why did they do it this way?"
 3. **The result of a real trade-off**: there were genuine alternatives and you picked one for specific reasons
 
-If any of the three is missing, skip the ADR.
+If any of the three is missing, skip the ADR. Before you decide, read What qualifies in [ADR-FORMAT.md](./ADR-FORMAT.md): the kinds of decision that usually pass.
 
 A decision that binds more than one repo is not an ADR. Follow the `Cross-repo decisions:` of `## Decision records` (default: the decision is not written into this repo: name it to the owner as an open next step). An ADR may record this repo's own rule that follows from it.
 
-On the owner's yes, write the ADR at once, in the same way as a term, in the form of [ADR-FORMAT.md](./ADR-FORMAT.md), into the ADR folder: the `ADR folder:` of `## Decision records` (default: `adr/` where it exists). Never create the ADR folder, whether `adr/`, `docs/adr/` or the folder that point names. With the value `none`, or with no point and no `adr/` folder, the repo has no ADR folder. A folder of the same name inside a context's folder holds that context's ADRs.
+On the owner's yes, write the ADR at once, in the form of [ADR-FORMAT.md](./ADR-FORMAT.md), into the ADR folder: the `ADR folder:` of `## Decision records` (default: `adr/` where it exists). Then follow After a write. Never create the ADR folder, whether `adr/`, `docs/adr/` or the folder that point names. With the value `none`, or with no point and no `adr/` folder, the repo has no ADR folder. A folder of the same name inside a context's folder holds that context's ADRs.
 
 In a repo with no ADR folder, write the same decision, on the owner's yes and at once, into the decision home: the place that the `Decision home:` of `## Decision records` names for decisions a future maintainer needs (default: no decision home), in that place's form. Never write it only into the change's design: that is archived with the change. With no ADR folder and no decision home, the capture question offers a new reference file of the repo, with one line that names it. On the owner's yes, write both at once. That line is the `Decision home:` point of `## Decision records`, so that the next decision finds the file. Write it in the file that holds that section. Where no such section exists, add the heading to the repo guide and write the line under it. Where the repo has no repo guide, the capture question also offers a new `AGENTS.md` that holds the heading and that line.
+
+### After a write
+
+These rules hold for every file that this skill writes: a term, an ADR, or a decision in the decision home.
+
+Inside a read-only step such as OpenSpec explore, pause that step for the write and resume it after. Commit nothing there: the file stays uncommitted like the change folder. The build asks the owner whether its first commit carries the file into the change's own pull request. When explore ends with no change, report the uncommitted file, and commit it or open a pull request only when the owner asks.
