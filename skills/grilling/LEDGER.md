@@ -9,7 +9,7 @@ A ledger starts at `openspec/explore/<name>/questions.yaml`, where `<name>` is a
 ## The form
 
 ```yaml
-idea: Upload retries are configurable       # the idea, in its current wording
+idea: "Upload retries are configurable"     # the idea, in its current wording
 idea_history: []                            # earlier wordings, oldest first
 entries:
   - id: q3
@@ -20,26 +20,28 @@ entries:
     opened_by: q1               # the entry whose answer opened this one, or null
     replaces: null              # the entry that this one replaces, or null
     asked: 2026-11-27T09:58:00Z
-    question: Where does the retry count of the upload job live?
+    question: "Where does the retry count of the upload job live?"
     options:
-      a: A key in the service config, `upload.retries`
-      b: A constant in the code
+      a: "A key in the service config, `upload.retries`"
+      b: "A constant in the code"
     recommended: a
-    reason: The count is expected to change. My judgement, not researched.
+    reason: "The count is expected to change. My judgement, not researched."
     predicted_answer: a         # only for kind: question
-    predicted_outcome: One slice, and no change to the public config schema
+    predicted_outcome: "One slice, and no change to the public config schema"
     answer:
       choice: b                 # a letter, or other
       text: null                # the owner's words, when the answer is not a plain letter
       by: owner                 # owner | delegated | agent | rule
       rule: null                # for by: rule, the file that holds the rule
       at: 2026-11-27T10:00:00Z
-    thoughts: The owner wants no new config key before the service has users.
+    thoughts: "The owner wants no new config key before the service has users."
     leads_to: none              # adr | glossary | guide | idea | none
     observed: null              # leave null: a later review of the change fills it
 ```
 
 Take each time from `date -u +%Y-%m-%dT%H:%M:%SZ`.
+
+Write each text value in double quotes: `idea`, `question`, each option, `reason`, `predicted_outcome`, `text` and `thoughts`. Write a `"` inside a value as `\"`. A bare value that holds `: ` or ` #`, or that starts with a backtick, breaks the file. After each write, parse the file with a YAML parser that the machine has, for example `python3 -c 'import sys, yaml; yaml.safe_load(open(sys.argv[1]))' <file>`. Done when the file parses.
 
 ## The scopes
 
