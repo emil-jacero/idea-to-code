@@ -2,8 +2,9 @@
 
 A review of every skill of the plugin against one reference on how to write a document that an
 agent reads. The reference is the skill `writing-for-agents` of Matt Pocock's skills
-(`skills/productivity/`). The plugin does not ship it, and no text of it is copied. This file holds what the review found, the
-four changes that follow from it, and one prediction per change. A trial checks each prediction.
+(`skills/productivity/`). The plugin does not ship it, and no text of it is copied. This file
+holds what the review found, the four changes that follow from it, and one prediction per
+change. A trial checks each prediction.
 
 ## Why
 
@@ -23,8 +24,7 @@ No skill of the plugin was written with that reference. The review read all of t
 1. `skills/slice-build/SKILL.md` served four callers from one file of about 5,000 words: the
    build, the fix round, propose (for the form of a slice) and verify (for the test lock). Its
    steps (a) to (g) stood under four paragraphs of reference.
-2. The form of a seam question stood in full in two commands. The words "as one question in the
-   form of the grilling skill" stood at about 25 places of the build skill.
+2. The form of a seam question stood in full in two commands.
 3. The description of the `pr` skill named only the body of a pull request, and the skill also
    holds the push rule and the merge rule.
 4. The description of the build skill named the trigger words that it then refused. Four other
@@ -36,6 +36,9 @@ No skill of the plugin was written with that reference. The review read all of t
 - The fixed phrases of `check_tree.py`. A phrase that names a command of the config stands word
   for word at each place, and a short back-reference to it is a retired string. The review first
   read this as duplication. It is a recorded choice, so it stays.
+- The words "as one question in the form of the grilling skill". They stand at 16 places of the
+  build skill and at one to four places of 14 other files, and six fixed phrases hold them. A
+  cut saves about 150 words in the build skill, so they stay.
 - The paragraph of Project rules in the four skills that carry it. The check holds its one text.
 - A long sentence that an earlier trial added. No record says which trial added which sentence,
   so the pass moves such a sentence and does not cut it.
@@ -46,9 +49,9 @@ Each change is one commit, and each has its own prediction.
 
 | Change | What | Prediction |
 | --- | --- | --- |
-| 1. Descriptions | Nine descriptions name the skill and its cases only. The build skill is described as reference of the step commands. The `pr` skill names the push and the merge. | A request in words to build loads the build command first, as before. A push or a merge with no new body loads the `pr` skill. |
-| 2. One home | The seam question has one home, a sibling file of the grilling skill. The build skill states once how a question to the owner is put. | Every seam question keeps its `Test seam` heading and its `Catches:` and `Misses:` lines. Every question of a build keeps the form of the grill. |
-| 3. The split | The fix round, the failure rules and the rules of a repo without specs move to sibling files of the build skill. The read for a resume becomes a numbered step. | A build with no failure never reads the fix-round file. After a failed check, the session reads the failure rules before its next action. A resume is found before the first slice, as before. |
+| 1. Descriptions | Nine descriptions name the skill and its cases only (737 to 580 words that are always loaded). The build skill is described as reference of the step commands. The `pr` skill names the push and the merge. | A request in words to build loads the build command first, as before. A push or a merge with no new body loads the `pr` skill. |
+| 2. One home | The seam question has one home, a sibling file of the grilling skill. | Every seam question keeps its `Test seam` heading and its `Catches:` and `Misses:` lines. |
+| 3. The split | The fix round, the failure rules and the rules of a repo without specs move to sibling files of the build skill. The read for a resume becomes a numbered step. The file that a build loads falls from 5,940 to 3,096 words. | A build with no failure never reads the fix-round file. After a failed check, the session reads the failure rules before its next action. A resume is found before the first slice, as before. |
 | 4. Criteria | Explore and propose end their steps on a completion criterion. The support skills get the smaller corrections of the review. | Explore ends with one ledger entry per question and per choice, and with no open entry. Propose reports the result of the validation. |
 
 ## How a prediction is checked
