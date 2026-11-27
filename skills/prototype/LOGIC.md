@@ -30,7 +30,7 @@ The right shape depends on the question:
 - **A small set of pure functions** over a plain data type. Good when there's no implicit current state, just transformations.
 - **A class or module with a clear method surface** when the logic genuinely owns ongoing internal state.
 
-Pick whichever shape best fits the question being asked, *not* whichever is easiest to wire to a page. Keep it pure: no DOM, no `document`, no button handlers reaching inside it. The page calls into it; nothing flows the other direction. Once the question is answered, the validated states, transitions and rules go into the design in words, and the slice build writes the real code from the spec.
+Pick whichever shape best fits the question being asked, *not* whichever is easiest to wire to a page. Keep it pure: no DOM, no `document`, no button handlers reaching inside it. The page calls into it; nothing flows the other direction. Once the question is answered, the validated states, transitions and rules go into the design in words, and the slice build writes the real code from the spec. The prototype answers one question: add no option for a later need.
 
 ### 3. Build the shareable HTML file
 
@@ -56,12 +56,3 @@ Send them the file, or open it for them. They'll click through the walkthroughs 
 ### 5. Capture the answer and the prototype
 
 Once the prototype has answered its question, capture the answer the way the [SKILL](SKILL.md) describes. The validated states and rules go into the design in words. The HTML file is the evidence: it stays in the scratch folder beside its `README.md` until propose moves both into the change's evidence folder. Being one self-contained file, it stays easy to re-run there.
-
-## Anti-patterns
-
-- **Don't add tests.** A prototype that needs tests is no longer a prototype.
-- **Don't wire it to the real database.** Use in-memory state unless the question is specifically about persistence.
-- **Don't generalise.** No "what if we wanted to support X later." The prototype answers one question.
-- **Don't blur the logic and the page together.** If the pure module references the DOM, `document`, or button handlers, its rules are hard to read and check. Keep the page as a thin shell over a pure module.
-- **Don't reach for a framework, bundler, or server.** One file the recipient double-clicks; a React app or a dev server defeats "shareable".
-- **Don't ship any of it into production.** The page is made for clicking through by hand, and the slice build writes the logic from the spec.

@@ -21,7 +21,7 @@ Whatever the user said is the fixed point (a commit SHA, branch name, tag, the d
 
 Capture the diff command once: `git diff <fixed-point>...HEAD` (three-dot, so the comparison is against the merge-base). Also note the list of commits via `git log <fixed-point>..HEAD --oneline`.
 
-Before going further, confirm the fixed point resolves (`git rev-parse <fixed-point>`) and the diff is non-empty. A bad ref or empty diff should fail here, not inside the sub-agent.
+Before going further, confirm the fixed point resolves (`git rev-parse <fixed-point>`) and the diff is non-empty. When the fixed point does not resolve or the diff is empty, stop here: report it, start no sub-agent, and when verify called you, hand that back as the result.
 
 ### 3. Identify the standards sources
 

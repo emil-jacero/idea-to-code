@@ -13,6 +13,16 @@ metadata:
 
 Before you write a pull request body, read these sections of the repo's rules: `## Pull request rules`, `## Text rules`, `## Release rules` and `## Merge rule`. A section is a heading of that exact name in the repo guide (`AGENTS.md`, else `CLAUDE.md`), or in the file that the guide names on its `Rules file:` line. A heading that differs only in letter case is the section: report it. Where a section is absent, the defaults of this skill hold. A point in a section replaces only the default of the same label, and the value `none` switches that default off. An absent label keeps its default. Every other line of a section is an added rule. It wins over a default of this skill that has no label. A default that has a label changes only through its point. The flow rules of this skill hold in every repo: a section adds to them and never removes one. When the rules file that the guide names is missing, one section is in both files, or a line of a section names a path that is not in the repo, stop and put it to the owner as one question in the form of the `idea-to-code:grilling` skill. For a path that is missing, the question offers three options: correct the line (fix or remove the path), create the file, or stop. The recommended option is to correct the line. It never offers to go on without the file. In your report, write one line that starts with `Project rules:` and names each section you read, or write `Project rules: defaults`.
 
+## Steps
+
+1. Load the `idea-to-code:commit` skill.
+2. Write the title, then the body.
+3. Check the text, by the **Done when** line of Sections.
+4. Run the push check, then push.
+5. Create the pull request, then apply Merge.
+
+Sections holds the rule of each step.
+
 ## The body
 
 The prose of the body has at most as many words as the `Word cap:` of `## Pull request rules` (default: 250). What does not count is the `Not counted:` of `## Pull request rules` (default: fenced code, URLs, trailer lines and the breaking footer block). Write the body in the `Style:` of `## Pull request rules` (default: short sentences, one idea each, active voice, no hedging). The `Exempt:` of `## Pull request rules` names the bodies that its points do not bind (default: no exempt body). Write only what the diff and the title cannot tell the reviewer: why, when the reason is not visible; where to look first, when the diff is large; the risk; what the reviewer must do (a migration, a dependency bump, a manual check). Add every line a repo rule puts in the body: the `Required lines:` of `## Pull request rules` (default: no required line), and each line that `openspec/config.yaml` asks for in the body. Link the OpenSpec change (after the archive commit, its folder under `openspec/changes/archive/`) instead of restating it. Never write a list of the commits, a "Not in this change" section unless someone asked, a list of tests or gates (name a test only when the reviewer must act on it), a file-by-file walkthrough, a restatement of the title, a summary of what the code plainly does or a generated checklist.
@@ -45,7 +55,7 @@ Use this template. Every section is optional, except the squash footer under a `
 
 ## Sections
 
-Skip all preambles and keep prose brief. Use the user's domain language from the repo's glossary (`GLOSSARY.md`, or the glossary file the repo guide names).
+Use the user's domain language from the repo's glossary (`GLOSSARY.md`, or the glossary file the repo guide names).
 
 The title of the pull request takes the title form of the repo's `## Commit rules`. The `idea-to-code:commit` skill holds that form: load it, and write the title by its rules for the title of a commit. Load that skill before you write the title or the body. A stop that the `idea-to-code:commit` skill puts on the repo's rules (the value `none` on a ban label, a rules file that is missing, a section that is in both files, or a path that is missing) stops this skill too, before you write the title and the body.
 
@@ -57,122 +67,7 @@ Before you create the PR, count the prose words and search the title and body fo
 
 ### Summary
 
-Add a visual only when the diff is large or the load-bearing part is buried, to show the reviewer where to look first. Never repeat what the diff view shows. For a visual change, a screenshot can be that view. Pick the smallest view that makes the key point clear.
-
-- Show logic or an algorithm as pseudocode:
-
-```text
-on(save)
-  if content is unchanged
-    return cached result
-  write new content
-  return fresh result
-```
-
-- Show runtime control flow as a call tree:
-
-```text
-submitForm
-  createSession
-    persistPrompt
-    launchAgent
-  navigateToSession
-```
-
-- Show UI structure as a component tree, including state and module boundaries that matter:
-
-```text
-<SessionPage> (apps/example/src/routes/session.tsx)
-  useSessionEvents()
-  <SessionToolbar>
-    <RunSkillButton> (packages/ui)
-```
-
-- Show file responsibility or a broad refactor as a shallow file tree:
-
-```text
-src/
-├── commands/       # parses user actions
-├── sessions/       # owns session state
-└── transport/      # sends API requests
-```
-
-- Show component interaction, control flow, or data flow with Mermaid:
-
-```mermaid
-sequenceDiagram
-    participant User
-    participant UI
-    participant Daemon
-    User->>UI: choose command
-    UI->>Daemon: send expanded prompt
-    Daemon-->>UI: stream result
-```
-
-- Use `diff` when the point is what changes and the surrounding shape already exists. Match the diff shape to the topic.
-
-For a component change:
-
-```diff
- <SessionPage>
-   useSessionEvents()
-   <SessionToolbar>
-+    <RunSkillButton />
-   <SessionTimeline>
-+    <SkillResultCard />
-```
-
-For a file-layout change:
-
-```diff
- src/
- ├── commands/
-+│   └── show-me.ts       # expands the slash command
- ├── sessions/
--└── transport.ts
-+└── transport/
-+    ├── client.ts
-+    └── stream.ts
-```
-
-For a call-tree or call-stack change:
-
-```diff
- submitForm
-   createSession
-     persistPrompt
-+    expandSkillMention
-     launchAgent
--  navigateToSession
-+  navigateToSession
-+    subscribeToEvents
-```
-
-For a state or control-flow change:
-
-```diff
- on(save)
--  write content
-+  if content is unchanged
-+    return cached result
-+  write new content
-+  invalidate cache
-```
-
-- Show the whole block when most of it is new, when omitted context would hide ownership or order, or when the user needs a copyable target shape:
-
-```ts
-function expandSkill(command: string): string {
-  const skillName = command.slice(1);
-  return `use the ${skillName} skill`;
-}
-```
-
-#### Guidance
-
-Place each visual next to the short text it supports. Keep only the calls, files, props, states, and boundaries needed to answer the user's current question or the options to resolve the current discussion point.
-
-You may use one of these, you may use several, it is unlikely you will use all of them. Use your judgement and don't overwhelm the user.
+Add a visual only when the diff is large or the load-bearing part is buried. Then read [VISUALS.md](VISUALS.md) and pick the smallest view that shows the reviewer where to look first. Never repeat what the diff view shows. For a visual change, a screenshot can be that view.
 
 ### Risk
 
