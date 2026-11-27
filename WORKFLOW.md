@@ -134,7 +134,8 @@ a field or a command only when the owner will touch it. The owner answers by let
 An offer to write files is a question in this form too, and so is a pick among review findings.
 The agent offers findings as classes of fixes, described in words. A request for an input that is
 missing, such as the idea or what to build, is not a decision: the agent asks it in one
-plain sentence. The `grilling` skill holds the exact form.
+plain sentence. The `grilling` skill holds the exact form. In explore and propose, the agent
+writes each question to the *question ledger* before it asks it ([The ledger](#the-ledger)).
 
 > **Example:** The running example is a made-up change in a small web service that stores
 > uploaded files. Its first question, in the question form:
@@ -214,7 +215,8 @@ shows on it. [Chapter 3](#3-other-roads) gives the roads that change it.
    proposed fix and the result the fix should give) before the first question, and its first
    answer lists the checked claims as true, false or open.
 3. The grill asks the owner questions, until no open decision is left
-   ([The grill](#the-grill)).
+   ([The grill](#the-grill)). It writes each question, and each choice that the agent makes
+   itself, to the question ledger ([The ledger](#the-ledger)).
 4. When an assumption is open, a side step settles it (the side-step callout in
    [The grill](#the-grill)).
 5. Where an optional part adds tracks, the agent asks the track question
@@ -222,8 +224,8 @@ shows on it. [Chapter 3](#3-other-roads) gives the roads that change it.
 
 **Checks:** no script check. The grill's stop rule ends the questions ([The grill](#the-grill)).
 
-**Comes out:** decisions, and the work on a track. The only files so far are a new term or
-decision record, and what a side step left as evidence.
+**Comes out:** decisions, in the question ledger, and the work on a track. The only other files
+so far are a new term or decision record, and what a side step left as evidence.
 
 **Stops for the owner when:**
 - the grill asks a question;
@@ -236,11 +238,12 @@ decision record, and what a side step left as evidence.
 #### The explore command
 
 The explore command runs OpenSpec's explore skill, a *generated skill*: a skill that OpenSpec
-writes into the repo. The command adds the grill, the question form, the record of decisions, and
+writes into the repo. The command adds the grill, the question form, the question ledger, and
 the hand-offs to the side step and to the record files. It also states that explore writes no
 change folder. It does this from outside the generated skill ([OpenSpec](#openspec) says why).
 
-Explore is read-only. It reads and searches, and it never writes code or a change folder.
+Explore is read-only. It reads and searches, and it never writes code or a change folder. The
+one file that it writes itself is the question ledger.
 
 > **Note:** OpenSpec's generated explore skill lets explore write change files when the owner
 > confirms (checked on OpenSpec 2.1.1). The flow does not use that permission.
@@ -267,14 +270,22 @@ Then the `grilling` skill asks the owner questions, in the question form:
   most other questions. After each answer, it works out again which questions it can ask next.
 - It asks one decision per question. Two decisions joined by "and" are two questions.
 - It asks no question whose answer would not change the outcome.
+- Among the questions that it can ask next, it asks in the order of three *scopes*: product (what
+  the work does for its user), then architecture (the parts and how they talk), then program
+  design (how the code is laid out).
+- It asks a point of program design (the file or package that holds a part, a type and its
+  fields, a function signature, the call path) only when the point has two real options and no
+  written rule settles it: the repo guide, a decision record, the glossary or a spec. Otherwise
+  the agent decides the point itself, and the ledger records the choice. Each of the five kinds
+  of owner decision is still always asked.
 - It asks the *seams* too. A seam is the public interface where a slice's tests go. It asks them
   after the decisions that fix what is built, because a seam depends on them. It asks one question
   per distinct seam, not one per slice, and each option says what the seam catches and what it
   misses. The heading of a seam question starts with `Test seam`, and its background says that
   the build writes the tests there first and then locks them. Every seam is agreed with the owner
   before the change is written.
-- It keeps a running record of each decision, marked as the owner's answer or as the agent's
-  assumption. An open assumption is never recorded as settled. "You decide" is an answer: the
+- It keeps a running record of each decision in the question ledger, marked as the owner's answer
+  or as the agent's assumption. An open assumption is never recorded as settled. "You decide" is an answer: the
   agent decides, and records the decision as delegated.
 - When an answer contradicts an earlier one, the agent says so, and the owner says which one
   stands.
@@ -324,6 +335,32 @@ nothing settled, the grill stops and says what blocks it:
 > ([Before the first slice](#before-the-first-slice)). When explore ends with no change, the agent
 > reports the file, and commits it only when the owner asks.
 
+#### The ledger
+
+The *question ledger* is one YAML file per piece of work. It holds every question that explore and
+propose put to the owner, and every choice that the agent made itself and that the change's files
+state. It is the record of decisions: the list at the end of explore is written from it.
+
+- **Where:** explore starts it at `openspec/explore/<name>/questions.yaml`, uncommitted. Propose
+  moves it into the change folder, as `questions.yaml`, and it is archived with the change. On
+  the fast path, with no explore, propose starts it.
+- **Before the question:** the agent writes the entry first, with the options, its
+  recommendation, the answer that it predicts, and the outcome that it predicts for the choice it
+  recommends. Then it asks the question from the entry, so the two never differ. A prediction
+  counts only when it is written before the answer.
+- **After the answer:** the agent adds the owner's answer and what the answer taught it. It adds
+  one open entry for each question that the answer opens.
+- **A choice of the agent:** the entry holds the options that the agent weighed. When a written
+  rule settled the choice, the entry names the file that holds the rule.
+- **Nothing is deleted:** an answer that replaces an earlier one is a new entry, and the old entry
+  stays.
+
+A predicted outcome names something that a test, a check, verify or a later change can see. The
+flow checks no prediction itself: the `observed` field of an entry stays empty, for a later review
+of the change. A choice that is kept with its options, its reason and its prediction can be judged
+later. A decision alone cannot: nobody can tell whether it did what it was meant to do. The
+`grilling` skill holds the exact form of an entry, in [`LEDGER.md`](skills/grilling/LEDGER.md).
+
 #### The track question
 
 The *track question* ends explore: it puts the work on a *track*. Without an optional part that
@@ -363,18 +400,23 @@ does not ask the track question, because its answer would not change the outcome
 > upload API, `POST /files` (recommended): its tests catch the 400 answer and whether a file is
 > stored. Option B, the name check inside the handler: its tests run faster, and miss the 400
 > answer and the stored file. The owner answers A. No optional part adds tracks, so the agent asks
-> no track question: the work is one change in one repo, `upload-service`. Explore writes no file.
+> no track question: the work is one change in one repo, `upload-service`. Explore writes one file,
+> the question ledger. It holds the three questions, each with the answer that the agent predicted
+> and the answer that the owner gave.
 
 ### Step 2: Propose
 
-**Goes in:** the decisions from step 1. The owner starts propose in the session that ran explore,
-because the record of decisions lives only in that conversation. A small change may start here
-instead ([The fast path](#the-fast-path)).
+**Goes in:** the decisions from step 1, in the question ledger ([The ledger](#the-ledger)). The
+owner starts propose in the session that ran explore, because the facts that explore looked up
+live only in that conversation. A small change may start here instead
+([The fast path](#the-fast-path)).
 
 **Who acts:** the agent alone.
 
 **What happens:** the propose command runs OpenSpec's propose skill. It plans only, and writes no
-code. It writes the change folder ([The change folder](#the-change-folder)). The repo's config
+code. It writes the change folder ([The change folder](#the-change-folder)). It reads the
+decisions from the ledger, writes its own questions and choices there, and moves the ledger into
+the change folder. The repo's config
 rules for each artifact apply ([OpenSpec](#openspec)). It starts with the fresh-base check, as
 explore does. Before it writes the spec deltas, it searches every spec for the behaviour that the
 change alters. Each requirement or scenario that the change makes false gets a delta, also in a
@@ -415,6 +457,7 @@ build uses later is met here first.
 - `design.md`: the design, with the `## Slices` section ([The Slices section](#the-slices-section)).
 - `tasks.md`: one task section per slice ([The task sections](#the-task-sections)).
 - The evidence folder, when a side step ran (the side-step callout in [The grill](#the-grill)).
+- `questions.yaml`: the question ledger ([The ledger](#the-ledger)).
 
 OpenSpec's new, continue and update skills (`openspec-new-change`, `openspec-continue-change`,
 `openspec-update-change`) start a change part by part, or revise its planning files.

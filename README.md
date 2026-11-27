@@ -34,7 +34,7 @@ The page loads its fonts from Google Fonts, and it falls back to system fonts wh
 | `workflow.html` | The page: the same flow as a picture, written by hand. |
 | `diagrams/` | The figures of the flow, one hand-written SVG file each. |
 | `skills/` | The skills and the four step commands that run the flow, with their credits and licence. |
-| `examples/` | Example files for a new repo. `openspec-config.yaml` is an OpenSpec config with the flow's lines marked. `project-rules.md` is the template of a repo's rules sections. `verify.md` is an example of a repo's verify rules file. |
+| `examples/` | Example files for a new repo. `openspec-config.yaml` is an OpenSpec config with the flow's lines marked. `project-rules.md` is the template of a repo's rules sections. `verify.md` is an example of a repo's verify rules file. `questions.yaml` is an example of a question ledger, the file that the agent writes in explore and propose: a repo copies nothing from it. |
 | `profiles/TEMPLATE.md` | The questions that a project answers to adopt the flow. |
 | `.claude-plugin/` | The plugin manifest and the marketplace file. |
 | `LICENSE` | The MIT licence. The adapted skills keep their upstream MIT licence, in `skills/LICENSE-mattpocock-skills.txt`. The show-me part of the `pr` skill keeps its own MIT licence, in `skills/LICENSE-humanlayer-skills.txt`. |

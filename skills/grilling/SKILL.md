@@ -90,6 +90,8 @@ Next: answer A or B.
 
 Keep a running list of decisions: the question, the answer, the reason. Mark each as the owner's answer or your assumption. When the calling command or skill names a file for decisions, write each decision there as it settles. Otherwise keep the running list in the chat.
 
+When the calling command or skill names a ledger, read [LEDGER.md](LEDGER.md) and follow it. A ledger is a YAML file of every question and every choice. Each question is written there before it is asked, with a prediction, and the running list is written from it.
+
 - "You decide" is an answer: decide, record it as delegated, and go on.
 - An answer that contradicts an earlier one: say so, ask which stands, and record the one that replaces the other.
 - A requirement that the owner states outright is the owner's answer: record it, and put the decisions that it opens on the frontier.

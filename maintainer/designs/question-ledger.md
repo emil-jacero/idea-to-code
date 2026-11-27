@@ -70,9 +70,12 @@ see Sources): product, architecture and program design, in that order, before an
 
 ### The ledger file
 
-- **Home:** during explore, a scratch file outside the repo. Explore's record names its full path,
-  as it does for the scratch folder of a side step. Propose moves it into the change folder,
+- **Home:** during explore, an uncommitted file inside the repo,
+  `openspec/explore/<name>/questions.yaml`, so that it survives the end of a session. Explore's
+  record names it. Propose moves it into the change folder,
   `openspec/changes/<change>/questions.yaml`. It is archived with the change.
+- **The form** has one home, `skills/grilling/LEDGER.md`. The example below shows the idea; that
+  file holds the exact fields, with `asked` and `replaces` added.
 - **Write order:** the agent writes an entry with its options, its recommendation and both
   predictions before it shows the question. It fills the answer and its thoughts after the owner
   answers. Then it adds each question that the answer opens, with the status `open`.
@@ -158,6 +161,29 @@ These are written before the first trial, and checked after it and by the first 
 - Per scope, the share of asked entries (asked, against asked plus settled by a rule) falls from
   change to change, once an improve run has written rules.
 
+### Build state
+
+Done, not committed (2026-11-27). The tree check passes.
+
+- `skills/grilling/LEDGER.md` is new, and the Record section of `skills/grilling/SKILL.md` points
+  at it.
+- `skills/explore/SKILL.md`: the ledger, the scope order and the program-design rule in step 5, the
+  record in steps 8 and 9.
+- `skills/propose/SKILL.md`: reads the ledger, writes its questions and choices to it, and moves it
+  into the change folder in step 6.
+
+- `WORKFLOW.md`: the question form in chapter 1, Step 1 (what happens, comes out, the explore
+  command, the grill, a new section The ledger, the example), Step 2 (goes in, what happens, the
+  change folder). Propose still runs in the session of explore: the ledger holds the decisions,
+  and the looked-up facts live in the conversation.
+- `workflow.html`: a ledger item after the grill, and the scope order in the grill item. The page
+  check passes.
+- `skills/CREDITS.md`: the Local changes row of `grilling`, and an idea credit for the playbook and
+  the paper.
+- `examples/questions.yaml`, with its sentence in the `README.md` table.
+
+Still to do: the trial of Done when.
+
 ## Second version: improve
 
 A command, for example `/idea-to-code:improve`, with a skill. It runs only when the owner starts it.
@@ -210,12 +236,18 @@ problems of the flow, the fixes to the skills, and what each fix was predicted t
 
 ## Open points
 
-Before the first version:
+Before the first version, both settled on 2026-11-27 by a prototype on OpenSpec 2.1.1:
 
-- The name of the ledger file, and whether a scratch file outside the repo is safe enough between
-  explore and propose.
-- Check that `openspec validate --strict` and the archive accept a YAML file in the change folder.
-  They accept `gates.json` and the evidence folder today.
+- `openspec validate <change> --strict` accepts a change folder that holds `questions.yaml`, and the
+  archive keeps the file.
+- A folder `openspec/explore/` breaks neither `openspec validate --all --strict` nor
+  `openspec list`. So the ledger starts inside the repo, not in a scratch folder.
+
+Left open by the first version:
+
+- A ledger of an explore that ends with no change stays in the tree, uncommitted. The next build
+  reports it as an unrelated change.
+- The ledger and the program-design questions are on in every repo. No line switches them off.
 
 Before the second version:
 
