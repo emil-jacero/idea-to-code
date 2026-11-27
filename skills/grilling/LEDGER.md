@@ -50,7 +50,7 @@ Take each time from `date -u +%Y-%m-%dT%H:%M:%SZ`.
 
 ## A question
 
-1. Write the entry before you show the question: `status: open`, `asked`, the options, `recommended`, `reason` and both predictions. A prediction counts only when it is written before the answer.
+1. Check the facts of the entry first (SKILL.md, Facts are yours, decisions are the owner's): each fact that an option, the reason or a prediction rests on has a source that you read. Then write the entry before you show the question: `status: open`, `asked`, the options, `recommended`, `reason` and both predictions. A prediction counts only when it is written before the answer.
 2. Ask the question in the form of The question (SKILL.md), from the entry: the same options in the same order, and the same recommendation. The entry and the question never differ.
 3. After the owner answers, fill `answer` and `thoughts`, and set `status: settled`. "You decide" gives `by: delegated`, with your choice. An answer in words that picks no letter gives `choice: other`, with the owner's words in `text`.
 4. Add one entry with `status: open` for each question that the answer opens, with `opened_by`. Set `status: dropped` on each open entry that the answer makes pointless.
@@ -67,6 +67,7 @@ A choice that you make yourself gets an entry when the files of the change will 
 - `kind: choice`, with the options you weighed under `options`, your pick as `recommended` and as `answer.choice`, and `by: agent`.
 - When a written rule settles the choice (a rules file of the repo, a decision record, the glossary, a spec), write `by: rule`, and the file that holds the rule in `rule`. One option is then enough.
 - No `predicted_answer`. Write `predicted_outcome` as for a question.
+- A choice rests on facts as a question does: look them up before you write the entry (A question, step 1). When a fact has no source, the choice is an assumption: say so in `reason`, with what settles it.
 
 ## Nothing is deleted
 
