@@ -32,8 +32,9 @@ A repo without specs builds without the test steps. When the schema named in `op
 4. Read that apply guidance. When it contradicts these steps (for example "Section 1 is a spike" or "one commit per section"), put the clash to the owner as one question in the form of the `idea-to-code:grilling` skill, naming it, before the first slice.
 5. Load the `idea-to-code:owner-gate` skill and run its build check. A `gates.json` that this check writes goes into the first commit that this build makes, with no question ((d)).
 6. Read the tests commits of the working branch, with the command of [CHECKS.md](CHECKS.md), Resume. Act as that section says: build from (a), resume one slice at (e), or stop.
+7. When the build starts at the first slice, run the test command and the check command once, each one that the config names, before the first writer starts. No line of the change is in the code yet, so a failure here is not the change's: it goes down A failure that the default branch has too, then A failure of the checkout ([CHECKS.md](CHECKS.md)), and the owner answers it before the first writer starts. A resume skips this step.
 
-Done when you work from the repo root on the working branch, the tree holds no unrelated change, every question above has the owner's answer, the plan gate has an outcome, and the read of step 6 says where the build starts.
+Done when you work from the repo root on the working branch, the tree holds no unrelated change, every question above has the owner's answer, the plan gate has an outcome, the read of step 6 says where the build starts, and on a start at the first slice both commands of step 7 pass or each failure has the owner's answer.
 
 ## Per slice
 
@@ -130,13 +131,13 @@ Report to the owner:
 - every bug fixed, every fix slice and every lead;
 - every disputed test, with its ruling (by the spec or by the owner) and its correction commit, if any;
 - every guard test, with the scenario that it guards;
-- every base failure, with the owner's answer;
+- every base failure and every checkout failure, with the owner's answer, and each changed form that a command ran in;
 - every check that failed (red check, test lock, test command, check command), with its slice, its round and what was restored or retried;
 - every stop of the build, with its cause and the owner's answer. A resume counts as a stop: name the slice and the step that this run resumed at, take the earlier slices and their commits from git, and say that this report does not hold the assumptions, bugs and failed checks of the earlier run;
 - the `Project rules:` line that the `idea-to-code:commit` skill gave, once for the build;
 - the `Check command:` line that the `idea-to-code:commit` skill gave at the code commits, once for the build.
 
-Write the same report to `build-report.md` in the change folder, and commit that file alone, after the last code commit. Put the record line of each answer Keep it out on a base failure under the heading `### Answers` at the end of the report, in the form that [CHECKS.md](CHECKS.md) gives under Answers in the build report. The path is `openspec/changes/<change>/build-report.md`. Load the `idea-to-code:commit` skill for that commit. The report gets a commit of its own because it names every commit of the build, and a commit cannot hold its own hash. When the check command fails at that commit, change no code and untick no box: the `idea-to-code:commit` skill has taken the file out of the index, and the file stays in the change folder. Put the failure to the owner as one question in the form of the `idea-to-code:grilling` skill, with the output of the check command. The question offers two options: correct the report so that the check command passes, and commit it again (recommended), or stop.
+Write the same report to `build-report.md` in the change folder, and commit that file alone, after the last code commit. Put the record line of each answer Keep it out or Run it changed on a base failure under the heading `### Answers` at the end of the report, in the form that [CHECKS.md](CHECKS.md) gives under Answers in the build report. The path is `openspec/changes/<change>/build-report.md`. Load the `idea-to-code:commit` skill for that commit. The report gets a commit of its own because it names every commit of the build, and a commit cannot hold its own hash. When the check command fails at that commit, change no code and untick no box: the `idea-to-code:commit` skill has taken the file out of the index, and the file stays in the change folder. Put the failure to the owner as one question in the form of the `idea-to-code:grilling` skill, with the output of the check command. The question offers two options: correct the report so that the check command passes, and commit it again (recommended), or stop.
 
 A run that ends at a stop before the last slice is closed writes no `build-report.md` and makes no commit for it: give the owner the report items so far in the chat. The run that resumes the build writes the file, and counts the resume as a stop.
 

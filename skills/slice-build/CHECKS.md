@@ -1,6 +1,6 @@
 # Checks by hand
 
-A repo can name two check scripts in its config: the slice check script (the command after `Slice check:` in the `context:` of `openspec/config.yaml`) for the gate, and the test check script (the command after `Test check:` in the `context:` of `openspec/config.yaml`) for the red check and the test lock. It also holds the fresh-base check that explore, propose and the build run first. This file holds the same checks, done by hand, for a repo without them, and for the fix round after verify, which runs them by hand in every repo. It also holds the test lock at verify, which verify runs by hand in every repo with specs, the check for a failure that the default branch has too, and the form of the owner's answers in `build-report.md`.
+A repo can name two check scripts in its config: the slice check script (the command after `Slice check:` in the `context:` of `openspec/config.yaml`) for the gate, and the test check script (the command after `Test check:` in the `context:` of `openspec/config.yaml`) for the red check and the test lock. It also holds the fresh-base check that explore, propose and the build run first. This file holds the same checks, done by hand, for a repo without them, and for the fix round after verify, which runs them by hand in every repo. It also holds the test lock at verify, which verify runs by hand in every repo with specs, the check for a failure that the default branch has too, the check for a failure of the checkout, the rule that the commands run as written, and the form of the owner's answers in `build-report.md`.
 
 ## Default branch
 
@@ -151,7 +151,7 @@ Limits:
 
 ## A failure that the default branch has too
 
-A failure of the test command can come from the default branch and not from the change: a test or a program that fails the same way on a clean checkout of `<default branch>`. Check that before you treat the failure as the change's. Run the failing test or program alone on a detached worktree of the default branch, in a scratch folder outside the repo, and remove the worktree after the run:
+A failure of the test command or of the check command can come from the default branch and not from the change: a test or a program that fails the same way on a clean checkout of `<default branch>`. Check that before you treat the failure as the change's. Run the failing test or program alone on a detached worktree of the default branch, in a scratch folder outside the repo, and remove the worktree after the run:
 
 ```sh
 W=<scratch folder>/base-check
@@ -160,9 +160,21 @@ git worktree add -q --detach "$W" <default branch>
 git worktree remove "$W" || { rm -rf "$W"; git worktree prune; }
 ```
 
-The failure is the same when the run exits non-zero with the same error line. It is then a *base failure*. When the test command stopped at the failure (a task runner ends at its first failed part), run each part that it did not reach, one by one, and read the result of each, so that a base failure hides no other failure.
+The failure is the same when the run exits non-zero with the same error line. It is then a *base failure*. When the command stopped at the failure (a task runner ends at its first failed part), run each part that it did not reach, one by one, and read the result of each, so that a base failure hides no other failure.
 
-A base failure goes to the owner once, as one question in the form of the `idea-to-code:grilling` skill: the test, its error line, and the run on the default branch. Two options: **Keep it out** (the change goes on with this failure, and a separate change fixes it), or **Fix it in this change**. Recommend Keep it out when the diff of the change touches none of the files of the failing test or program. The answer Keep it out is a record line of the kind `base` (below), and it answers that failure in the rest of the build and in every later verify. Each verify runs the check above again: a failure that no longer fails on the default branch is the change's, whatever the records say.
+A base failure goes to the owner once, as one question in the form of the `idea-to-code:grilling` skill: the test, its error line, and the run on the default branch. Two options: **Keep it out** (the change goes on with this failure, and a separate change fixes it), or **Fix it in this change**. When a changed form of the command passes (The commands run as written, below), add a third option, **Run it changed**: the failure stays out of the change, and the build and every later verify run the command in that form. Recommend Keep it out, or Run it changed where that option exists, when the diff of the change touches none of the files of the failing test or program. Each of the answers Keep it out and Run it changed is a record line of the kind `base` (below), and it answers that failure in the rest of the build and in every later verify. Each verify runs the check above again: a failure that no longer fails on the default branch is the change's, whatever the records say.
+
+## A failure of the checkout
+
+A command can fail in this checkout and pass on the same commit in a clean worktree. The cause is then outside the commits: a file or a folder that git does not track (a second worktree inside the repo, a build output, a local config file). It is a *checkout failure*: neither the change nor the default branch has it.
+
+Run this check when the check above shows no base failure, and only while the work tree holds no uncommitted work of a writer: before the first slice, after a code commit, and in verify. Run the failing command on a detached worktree of `HEAD`, by the lines above with `HEAD` in place of `<default branch>`. When `HEAD` is the commit of the default branch, the run of the check above serves. A clean run that fails the same way is the change's failure. When the clean run passes, find the cause in the checkout. Done when you can name the path that makes the command fail.
+
+A checkout failure goes to the owner once, as one question in the form of the `idea-to-code:grilling` skill: the command, its error line, the clean run and the path. Two options: **Clear the checkout** (the owner moves or removes that path, and you run the command again), or **Stop**. Recommend Clear the checkout. What git does not track in the checkout is the owner's: move, remove or replace none of it yourself. A checkout failure writes no record line, because it is gone when the work goes on.
+
+## The commands run as written
+
+Run the test command and the check command as the config gives them, at every step. A changed form (a variable set before the command, a part left out, a tool that you build by hand) is evidence about a failure, and no way past it: name it in the background of the question, with its result. Run a command in a changed form only after the owner answered Run it changed (A failure that the default branch has too), and name that form in the report at each run.
 
 ## Answers in the build report
 
@@ -174,8 +186,8 @@ The fix round writes each owner's answer on a commit that the flow cannot change
 
 - `<kind>` is `lock` for a test-lock offence (above), `past` for a finding about a past commit (SKILL.md, After verify, step 1), or `base` for a base failure (A failure that the default branch has too). The test-lock block reads only the lines of the kind `lock`.
 - `<full hash>` is the output of `git rev-parse <hash>` for the commit that the question named. For `base`, it is the commit of the default branch that the check ran on: `git rev-parse <default branch>`.
-- `<choice>` is `keep` or `restore` for `lock`, and `keep` for `past` and for `base` (the answers Stop and Fix it in this change write no record).
-- `<detail>` is the test files that the commit touched, separated by commas, for `lock`. For `past` it is the finding in a few words. For `base` it is the failing test or program, then its error line in a few words. It holds no `|`.
+- `<choice>` is `keep` or `restore` for `lock`, `keep` for `past`, and `keep` or `changed` for `base` (the answers Stop and Fix it in this change write no record).
+- `<detail>` is the test files that the commit touched, separated by commas, for `lock`. For `past` it is the finding in a few words. For `base` it is the failing test or program, then its error line in a few words. After the choice `changed`, the changed form of the command follows, after the words `run as`. It holds no `|`.
 - `<UTC time>` comes from `date -u +%Y-%m-%dT%H:%MZ`.
 
-A record holds the owner's answer to the question of this session, and nothing else. The round's report commit carries it (SKILL.md, After verify, step 6), or in the build, the commit of `build-report.md`. A record that is written but not committed answers nothing. For `past`, the later verify (the verify command, step 4) reads the committed records of the kind `past` with `git show HEAD:openspec/changes/<change>/build-report.md | grep -E '^- Answer: past \| '`, and a finding about the commit of a record, for the breach that its detail names, is listed as answered and is no finding. For `base`, it reads the records with `grep -E '^- Answer: base \| '` in place of that pattern. A failure of the test command whose test or program a `base` record names, and that the check of A failure that the default branch has too still shows as a base failure, is listed as answered and is no finding.
+A record holds the owner's answer to the question of this session, and nothing else. The round's report commit carries it (SKILL.md, After verify, step 6), or in the build, the commit of `build-report.md`. A record that is written but not committed answers nothing. For `past`, the later verify (the verify command, step 4) reads the committed records of the kind `past` with `git show HEAD:openspec/changes/<change>/build-report.md | grep -E '^- Answer: past \| '`, and a finding about the commit of a record, for the breach that its detail names, is listed as answered and is no finding. For `base`, it reads the records with `grep -E '^- Answer: base \| '` in place of that pattern. A failure of the test command or of the check command whose test or program a `base` record names, and that the check of A failure that the default branch has too still shows as a base failure, is listed as answered and is no finding. After a record with the choice `changed`, run the command once more in the form that the record holds: the result of that run is the result of the command.
