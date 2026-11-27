@@ -14,6 +14,8 @@ Pure computation, in-memory state, no I/O. Always deepenable: merge the modules 
 
 Dependencies that have local test stand-ins (PGLite for Postgres, in-memory filesystem). Deepenable if the stand-in exists. The deepened module is tested with the stand-in running in the test suite. The seam is internal; no port at the module's external interface.
 
+A real server that runs in a container in the test suite counts here too, when it behaves as the production one does: PostgreSQL itself, or Vault in dev mode. Run it; do not mock it, even when the production service is run by another team.
+
 ### 3. Remote but owned (Ports & Adapters)
 
 Your own services across a network boundary (microservices, internal APIs). Define a **port** (interface) at the seam. The deep module owns the logic; the transport is injected as an **adapter**. Tests use an in-memory adapter. Production uses an HTTP/gRPC/queue adapter.
