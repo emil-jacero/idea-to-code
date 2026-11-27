@@ -37,6 +37,18 @@ else echo 'NO REMOTE BASE'; fi
 - `NO FETCH`: name it in your first answer, and go on with what the checkout holds.
 - `BEHIND: <n> commits`: on the default branch, the checkout holds a local change or a local commit, so it cannot move forward. Stop, and ask the owner to bring it up to date. On another branch, name the line in your first answer, and go on: the rules and specs you read may be older than the remote's.
 
+## Resume
+
+A build can resume an earlier build. So before the first slice, whether you build it or skip it, read only the commits that are on the working branch and not on the default branch, with git's trailer format and never with a search of the message text:
+
+```bash
+git log --format='%h %(trailers:key=Tests-For,valueonly,separator=%x2C)' <default branch>..HEAD
+```
+
+Each line is one commit, newest first: its hash and its trailer value, or the hash alone for a commit that is not a tests commit. The tests commits that the working branch ends in are the lines above the first line with a hash alone. When the working branch ends in one or more tests commits, their trailer value names the slice that resumes at (e). The newest of them is the slice's newest tests commit. The test paths are the files that match the repo's test-file patterns in every tests commit of that slice: every commit on the working branch whose `Tests-For` value is the slice name (a stub is not a test file). Build that slice first, from (e), then go on with the other slices in order.
+
+When the tests commits that the working branch ends in carry different values, or their value is not the name of a slice of `tasks.md` whose boxes are not all ticked, stop and put it to the owner as one question in the form of the `idea-to-code:grilling` skill. The value `verify` names no slice, so it stops the build the same way: the findings of the fix round are not in the repo. A tests commit can also stand lower on the working branch, below a commit without the trailer (a merge of the default branch, or a commit made by hand). When such a tests commit names a slice whose boxes are not all ticked, and that slice is not the one the branch ends in, stop and put it to the owner the same way. A start at (a) would run a second test writer over red tests that are already committed.
+
 ## Gate
 
 1. In `design.md`, find the block `### S<n>:` and read its Depends on line: "none", or slice names such as "S1, S2".
