@@ -45,6 +45,7 @@ Every other upstream skill is left out of this plugin. Notes for a later upstrea
 - `triage` (`skills/engineering/`): it moved tracker issues through triage labels. The work record is an OpenSpec change.
 - `setup-matt-pocock-skills`: it configures an issue tracker for the skills, and no skill here reads or writes issues.
 - `improve-codebase-architecture` (`skills/engineering/`): the plugin does not ship it. The flow names it as another way into explore. A reader who wants it installs it from [upstream](https://github.com/mattpocock/skills/tree/abeeaf95660ba9e8b7c753eb38f441ca707a8823/skills/engineering/improve-codebase-architecture), and it is not under this plugin's licence or credits.
+- `writing-for-agents` (`skills/productivity/`): the plugin does not ship it. The skills of the plugin were reviewed against it, and no text of it is copied.
 - Everything under `skills/misc/` and `skills/in-progress/`: upstream does not ship these.
 
 ## Local changes
