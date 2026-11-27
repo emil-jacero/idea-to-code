@@ -339,7 +339,9 @@ nothing settled, the grill stops and says what blocks it:
 
 The *question ledger* is one YAML file per piece of work. It holds every question that explore and
 propose put to the owner, and every choice that the agent made itself and that the change's files
-state. It is the record of decisions: the list at the end of explore is written from it.
+state. It is the record of decisions: the list at the end of explore is written from it. The build
+and the fix round add an entry in one case only: an owner's answer there replaces what an entry
+settled.
 
 - **Where:** explore starts it at `openspec/explore/<name>/questions.yaml`, uncommitted. Propose
   moves it into the change folder, as `questions.yaml`, and it is archived with the change. On

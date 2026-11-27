@@ -13,7 +13,7 @@ idea: "Upload retries are configurable"     # the idea, in its current wording
 idea_history: []                            # earlier wordings, oldest first
 entries:
   - id: q3
-    phase: explore              # explore | propose
+    phase: explore              # explore | propose | build | verify
     scope: program-design       # product | architecture | program-design | flow
     kind: question              # question (put to the owner) | choice (your own)
     status: settled             # open | settled | dropped | replaced
@@ -74,3 +74,9 @@ A choice that you make yourself gets an entry when the files of the change will 
 ## Nothing is deleted
 
 No entry is deleted, and no answer is overwritten. When an answer replaces an earlier one, write a new entry with `replaces`, and set `status: replaced` on the old entry. A question that is asked again with a new option is a new entry too.
+
+## After the plan
+
+The build and the fix round write to the ledger in one case: an answer of the owner there changes what an entry settled. The owner picks another option than the entry holds, or overrules a choice of yours. An answer that makes you edit the spec, the design or the tasks of the change is the sign: read the ledger then, at `openspec/changes/<change>/questions.yaml`. A change with no ledger gets none.
+
+Write one new entry, as Nothing is deleted says: `phase: build` or `phase: verify`, `replaces`, the question as you asked it, with its options and your recommendation, and the owner's answer. Both predictions are `null`, because neither was written before the answer. Put what the earlier entry rested on, and what proved it wrong, in `thoughts`. The commit that carries the edit of the change's files carries the ledger too. Every other answer of the build and of the fix round stays in `build-report.md`.
