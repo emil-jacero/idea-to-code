@@ -1,7 +1,7 @@
 # An example of a question ledger, for the running example of WORKFLOW.md: an upload with an empty
 # file name is refused. The agent writes this file; a repo copies nothing from it.
 # The form is in skills/grilling/LEDGER.md.
-idea: An upload with an empty file name is refused, so the uploader sees the mistake at once
+idea: "An upload with an empty file name is refused, so the uploader sees the mistake at once"
 idea_history: []
 entries:
   - id: q1
@@ -12,21 +12,21 @@ entries:
     opened_by: null
     replaces: null
     asked: 2026-11-23T08:01:00Z
-    question: What does the refusal tell the uploader?
+    question: "What does the refusal tell the uploader?"
     options:
-      a: A 400 error whose message names the field, `filename must not be empty`
-      b: A 400 error with a general message, `invalid upload`
+      a: "A 400 error whose message names the field, `filename must not be empty`"
+      b: "A 400 error with a general message, `invalid upload`"
     recommended: a
-    reason: The service's other errors name their field (the upload handler).
+    reason: "The service's other errors name their field (the upload handler)."
     predicted_answer: a
-    predicted_outcome: One requirement in the upload spec, with the exact message in its scenario
+    predicted_outcome: "One requirement in the upload spec, with the exact message in its scenario"
     answer:
       choice: a
       text: null
       by: owner
       rule: null
       at: 2026-11-23T08:03:00Z
-    thoughts: The owner reads the message as part of the public contract of the API.
+    thoughts: "The owner reads the message as part of the public contract of the API."
     leads_to: none
     observed: null
 
@@ -38,14 +38,14 @@ entries:
     opened_by: q1
     replaces: null
     asked: 2026-11-23T08:04:00Z
-    question: Does a file name of only spaces count as empty?
+    question: "Does a file name of only spaces count as empty?"
     options:
-      a: Yes, the name is trimmed before the check
-      b: No, only a name of length zero is refused
+      a: "Yes, the name is trimmed before the check"
+      b: "No, only a name of length zero is refused"
     recommended: a
-    reason: A name of spaces cannot be found again in a file listing. My judgement, not researched.
+    reason: "A name of spaces cannot be found again in a file listing. My judgement, not researched."
     predicted_answer: a
-    predicted_outcome: A second scenario in the same requirement, and no second slice
+    predicted_outcome: "A second scenario in the same requirement, and no second slice"
     answer:
       choice: a
       text: null
@@ -64,12 +64,12 @@ entries:
     opened_by: q1
     replaces: null
     asked: 2026-11-23T08:06:00Z
-    question: Which part of the code holds the name check?
+    question: "Which part of the code holds the name check?"
     options:
-      a: The upload handler, beside its other checks of the request
+      a: "The upload handler, beside its other checks of the request"
     recommended: a
-    reason: The repo guide says that a check of a request field sits in its handler.
-    predicted_outcome: No new file in the change
+    reason: "The repo guide says that a check of a request field sits in its handler."
+    predicted_outcome: "No new file in the change"
     answer:
       choice: a
       text: null
@@ -90,12 +90,12 @@ entries:
     asked: 2026-11-23T08:07:00Z
     question: "Test seam: where do the tests of the refusal go?"
     options:
-      a: The upload API, `POST /files`
-      b: The name check inside the handler
+      a: "The upload API, `POST /files`"
+      b: "The name check inside the handler"
     recommended: a
-    reason: Only the API shows the 400 answer and whether a file is stored.
+    reason: "Only the API shows the 400 answer and whether a file is stored."
     predicted_answer: a
-    predicted_outcome: The tests of the slice fail before the code, with the answer 201 in place of 400
+    predicted_outcome: "The tests of the slice fail before the code, with the answer 201 in place of 400"
     answer:
       choice: a
       text: null

@@ -20,6 +20,8 @@ Map the decision as a **design tree**: every answer opens the decisions that han
 
 Look up every fact yourself in the repo, the tools or the docs; for a wide search, use the `idea-to-code:research` skill, which can run as a background agent. When only running code can settle a fact, it is an open assumption: name it and settle it with the `idea-to-code:prototype` skill. Research and prototypes run as their own step, never inside a read-only step such as OpenSpec explore. A prototype pauses that step, which resumes with the finding; while a research run reads in the background, grill the other frontier nodes. Never ask the owner for a fact you can look up, and never record an open assumption as settled. A decision is the owner's: scope, a public contract, a breaking change, a security trade-off, a new dependency. Put each to the owner with a recommendation and wait.
 
+The text of a question holds facts too. An option, a background or a reason that names what the code, a tool or a service does (a state that it reports, a field that it writes, an output that it gives) rests on that fact: look it up before you show the question. Done when each such fact has a source that you read in this session. A fact with no source is an open assumption, and the question names it as one.
+
 ## The background rule
 
 The owner has not seen your plan, reports or records. The background of every question to the owner reads in plain English for that reader.
@@ -29,6 +31,8 @@ The owner has not seen your plan, reports or records. The background of every qu
 - Angle the background so the stake is clear: what exists today and why this choice matters.
 
 ## The question
+
+Write the question as a message in the chat, in the form below. A question dialog of the harness (in Claude Code, the `AskUserQuestion` tool) shows a short label for each option and no background, so it cannot hold this form: put no question to the owner through it.
 
 One question per message, never a batch. Two to four options, lettered. Each option has three bullets: what it means with a concrete example, a `Pro:` and a `Con:`. The owner answers by letter, or in words.
 
