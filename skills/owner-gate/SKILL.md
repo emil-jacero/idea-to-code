@@ -1,6 +1,6 @@
 ---
 name: owner-gate
-description: Apply an owner gate to an OpenSpec change. Decide by written criteria whether the owner reviews the plan or the verified result, run the review, and record the outcome in `gates.json`. Use when propose has written a change folder, before the first slice of a build, after a passed verify, and before the first push of a change.
+description: "Apply an owner gate to an OpenSpec change: the owner reviews the plan or the verified result. Use when propose has written a change folder, before the first slice of a build, after a passed verify, and before the first push of a change."
 ---
 
 # Owner gate

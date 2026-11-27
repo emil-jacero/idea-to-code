@@ -1,5 +1,5 @@
 ---
-description: "Write the OpenSpec change folder for work that is decided, in the current repo. Use it after an explore in the same session, or on its own for a small change with no open owner decision or assumption, in place of the repo's openspec-propose skill. It plans only, and it ends with the owner gate for the plan."
+description: "Write the OpenSpec change folder for work that is decided, in the current repo. Use it after an explore in the same session, or on its own for a small change with no open owner decision or assumption, in place of the repo's openspec-propose skill."
 argument-hint: "[change-name or description]"
 ---
 

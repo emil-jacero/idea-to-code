@@ -1,6 +1,6 @@
 ---
 name: slice-build
-description: "Build an OpenSpec change slice by slice, tests first, each slice by fresh sub-agents, then run its one fix round after verify. Use when the `/idea-to-code:build` command builds a change (typed by the owner, or loaded on a request in words), or when verify reported findings on a change. Never load this skill directly on a request in words to build, apply or implement a change, or to work through its tasks: load `idea-to-code:build` first, and it loads this skill. A yes in words after you named the build command is such a request."
+description: "Reference for the `idea-to-code:build` and `idea-to-code:verify` commands: the steps of a slice, its checks and the fix round after verify. The step commands load it. A request of the user for a build goes to `idea-to-code:build`."
 ---
 
 # Slice Build

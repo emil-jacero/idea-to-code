@@ -1,5 +1,5 @@
 ---
-description: "Verify a built OpenSpec change in the current repo. Use it whenever the user asks to verify a change, in place of the repo's openspec-verify-change skill. It runs the repo's test command, check command and test lock, applies the repo's openspec/verify.md where that file exists, runs OpenSpec's comparison, fixes the findings in one fix round, and ends with the owner gate for the result."
+description: "Verify a built OpenSpec change in the current repo. Use it whenever the user asks to verify a change, in place of the repo's openspec-verify-change skill."
 argument-hint: "[change-name]"
 ---
 

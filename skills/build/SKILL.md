@@ -1,5 +1,5 @@
 ---
-description: "Build an OpenSpec change slice by slice, tests first, in the current repo. Use it when propose has written the change folder, or to resume a build that stopped. It commits on the working branch and pushes nothing. Load it also when the user asks in words to build, apply or implement an OpenSpec change, or to work through its tasks, or says yes after you named this command."
+description: "Build an OpenSpec change slice by slice, tests first, in the current repo. Use it when propose has written the change folder, or to resume a build that stopped. Load it also when the user asks in words to build, apply or implement an OpenSpec change, or to work through its tasks, or says yes after you named this command."
 argument-hint: "[change-name]"
 ---
 

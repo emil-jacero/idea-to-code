@@ -1,6 +1,6 @@
 ---
 name: pr
-description: "Use when writing a PR body."
+description: "Pull request rules: the title, the body, the push of the working branch and the merge. Use before you push a working branch, open or edit a pull request, or merge one."
 metadata:
   credits:
     skill: show-me

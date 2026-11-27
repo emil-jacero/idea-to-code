@@ -1,6 +1,6 @@
 ---
 name: research
-description: Investigate a question against high-trust primary sources and capture the findings as a cited Markdown note. Use when the user wants a topic researched, docs or API facts gathered, a fact a design rests on settled from a source, or reading legwork delegated to a background agent.
+description: "Research a question against primary sources and write a cited Markdown note. Use when the user asks for research, or when a fact that a design rests on needs a source."
 ---
 
 Spin up a **background agent** to do the research, so you keep working while it reads. Start it with a fresh context window. Brief it with the question, the repo it serves, and the change name or "no change yet". If you are already a sub-agent, do the research yourself and start no other agent.

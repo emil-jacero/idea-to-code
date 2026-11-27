@@ -1,6 +1,6 @@
 ---
 name: code-review
-description: "Review the changes since a fixed point (commit, branch, tag or merge-base) against this repo's written standards and a code-smell baseline, in a fresh sub-agent. Use once in each verify run, when the user wants a branch, a PR or work in progress reviewed, or asks to \"review since X\"."
+description: "Review a diff against this repo's written standards and a code-smell baseline. Use once in each verify run, or when the user asks for a review of a branch, a PR or the changes since a fixed point."
 ---
 
 One-axis review of the diff between `HEAD` and a fixed point: does the code follow this repo's written standards? It runs in one sub-agent with a fresh context window, so the diff is read without the context that wrote it. During verify it runs once in each verify run: the repo's `openspec/verify.md` calls it, and in a repo without that file the verify command, `/idea-to-code:verify`, loads it. Outside verify, it runs on any branch. Whether the code matches its spec, and whether it adds behaviour the spec and tasks did not ask for, is verify's check, not this skill's.

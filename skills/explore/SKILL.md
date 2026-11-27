@@ -1,5 +1,5 @@
 ---
-description: "Explore an idea in the current repo before any change is written. Use it to start work on an idea, a topic or an existing change, in place of the repo's openspec-explore skill. The session looks up the facts, then asks the owner one question per message until no decision is open. It writes no change."
+description: "Explore an idea in the current repo before any change is written. Use it to start work on an idea, a topic or an existing change, in place of the repo's openspec-explore skill."
 argument-hint: "[idea]"
 ---
 
