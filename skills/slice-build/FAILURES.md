@@ -2,7 +2,7 @@
 
 The default for each failure of a build and of a fix round. The steps (a) to (g) and After the last slice are in [SKILL.md](SKILL.md), and After verify is in [FIX-ROUND.md](FIX-ROUND.md).
 
-These defaults hold until the owner sets others. When a default below says stop, put it to the owner as one question in the form of the `idea-to-code:grilling` skill, with the evidence.
+These defaults hold until the owner sets others. When a default below says stop, put it to the owner as one question in the form of the `idea-to-code:grilling` skill, with the evidence. Load that skill before the first question (SKILL.md, Owner decisions in a build).
 
 - **Red check fails:** start a fresh test writer with the evidence (each failing test and its output), at most three fresh test writers after the first. When the third still fails the check, stop. A test-writer report that leaves a scenario or the Done when line without a test fails the check too, with each item left without a test as the evidence.
 - **Test-lock check fails:** restore the test files from the newest tests commit. A tests commit can delete a test file, so the commit does not hold every test path, and `git checkout` fails as a whole on a path that its commit does not hold. So `git ls-tree -r --name-only <tests-commit> -- <paths>` lists the test paths that the commit holds: restore those with `git checkout <tests-commit> -- <those paths>`, and remove each test file that the commit does not hold (one added after it, or a deleted one that came back). When the list is empty, run no checkout: with no path, that command leaves the working branch. Then start one fresh code writer with the finding. A second failure stops the build.

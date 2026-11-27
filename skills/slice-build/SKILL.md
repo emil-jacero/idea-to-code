@@ -114,6 +114,8 @@ Then act as the point for that case says.
 
 ## Owner decisions in a build
 
+Before the first question of a build or of a fix round, call the Skill tool with `idea-to-code:grilling`, also when a text of this skill already named its form. Every question to the owner is then one chat message in that form.
+
 Apart from a disputed test (When a step fails), a writer stops and hands back only for a decision of the five owner kinds ([BRIEFS.md](BRIEFS.md), Rules for both writers). You then put that one question to the owner in the form of the `idea-to-code:grilling` skill, and a fresh sub-agent of the same role continues with the answer. A writer never asks the owner anything itself: it decides every other open choice and lists it as an assumption in its report. Collect all assumptions for the final report.
 
 When an owner's answer makes you edit the spec, the design or the tasks of the change, read After the plan in the `LEDGER.md` of the `idea-to-code:grilling` skill, and write the entry that it asks for.

@@ -32,6 +32,8 @@ The owner has not seen your plan, reports or records. The background of every qu
 
 ## The question
 
+Write the question as a message in the chat, in the form below. A question dialog of the harness (in Claude Code, the `AskUserQuestion` tool) shows a short label for each option and no background, so it cannot hold this form: put no question to the owner through it.
+
 One question per message, never a batch. Two to four options, lettered. Each option has three bullets: what it means with a concrete example, a `Pro:` and a `Con:`. The owner answers by letter, or in words.
 
 An offer to write files (a "capture" offer) and a pick among review findings are grill questions too, with lettered options. Offer review findings as classes of fixes, each described in words, never by an id.
